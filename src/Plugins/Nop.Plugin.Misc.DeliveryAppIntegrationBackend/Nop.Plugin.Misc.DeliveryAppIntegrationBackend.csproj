@@ -1,0 +1,356 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Misc.DeliveryAppIntegrationBackend</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <!--Set this parameter to true to get the dlls copied from the NuGet cache to the output of your project.
+    You need to set this parameter to true if your plugin has a nuget package 
+    to ensure that the dlls copied from the NuGet cache to the output of your project-->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\AddProductToOrder.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\AddProductToOrderDetails.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\AddressEdit.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\AddShipment.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\Edit.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\EditOrderTracing.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\List.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\OrderTracingList.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\PartiallyRefundOrderPopup.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\ShipmentDetails.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\ShipmentList.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\UploadLicenseFilePopup.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\VendorOrdersEarningList.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_CreateOrUpdateAddress.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.BillingShipping.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.DeliveryInfo.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.Info.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.Notes.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.Products.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_ProductAddAttributes.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_ProductAddGiftCardInfo.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppApiAdmin\_ProductAddRentalInfo.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\Index.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_BestsellersBriefReportByAmount.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_BestsellersBriefReportByQuantity.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_CustomerStatistics.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_LatestOrders.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_OrderAverageReport.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_OrderIncompleteReport.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_OrderStatistics.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDashboardReports\_PopularSearchTermsReport.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\CategoryAddPopup.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\Create.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\Edit.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\List.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\ManufacturerAddPopup.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\ProductAddPopup.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToCategories.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToCustomer.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToManufacturers.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToProducts.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.History.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.Info.cshtml" />
+    <None Remove="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.Requirements.cshtml" />
+    <None Remove="Areas\Admin\Views\_ViewImports.cshtml" />
+    <None Remove="Services\CustomerFavoriteMappingService.cs~RF14e2ec.TMP" />
+    <None Remove="Views\_ViewImports.cshtml" />
+    <None Remove="logo.jpg" />
+    <None Remove="plugin.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\AddProductToOrder.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\AddProductToOrderDetails.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\AddressEdit.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\AddShipment.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\EditOrderTracing.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\Edit.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\OrderTracingList.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\VendorOrdersEarningList.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\List.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\PartiallyRefundOrderPopup.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\ShipmentDetails.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\ShipmentList.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\UploadLicenseFilePopup.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_CreateOrUpdateAddress.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.DeliveryInfo.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.BillingShipping.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.Info.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.Notes.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.Products.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_ProductAddAttributes.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_ProductAddGiftCardInfo.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppApiAdmin\_ProductAddRentalInfo.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\Index.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_BestsellersBriefReportByAmount.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_BestsellersBriefReportByQuantity.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_CustomerStatistics.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_LatestOrders.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_OrderAverageReport.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_OrderIncompleteReport.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_OrderStatistics.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDashboardReports\_PopularSearchTermsReport.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\CategoryAddPopup.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\Create.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\Edit.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\List.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\ManufacturerAddPopup.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\ProductAddPopup.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToCustomer.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToCategories.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToManufacturers.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.AppliedToProducts.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.History.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.Info.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\DeliveryAppDiscount\_CreateOrUpdate.Requirements.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\_ViewImports.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="logo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Api\Nop.Plugin.Api.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Payments.CyberSource\Nop.Plugin.Payments.CyberSource.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Shipping.FixedByWeightByTotal\Nop.Plugin.Shipping.FixedByWeightByTotal.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Tax.FixedOrByCountryStateZip\Nop.Plugin.Tax.FixedOrByCountryStateZip.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Widgets.GoogleMapsIntegration\Nop.Plugin.Widgets.GoogleMapsIntegration.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Widgets.NivoSlider\Nop.Plugin.Widgets.NivoSlider.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Widgets.WarehouseSchedule\Nop.Plugin.Widgets.WarehouseSchedule.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.5" />
+    <PackageReference Include="System.Device.Location.Portable" Version="1.0.0" />
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Areas\Admin\Views\DeliveryAppDashboardReports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\Admin\Views\DeliveryAppDashboardReports\_CustomerReviewValoration.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\Admin\Views\DeliveryAppDashboardReports\_VendorsReviewValorations.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\Admin\Views\DeliveryAppDiscount.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\Admin\Views\DeliveryAppApiAdmin\_OrderDetails.PaymentCollection.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\Admin\Views\DeliveryAppDiscount\CustomerAddPopUp.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\Admin\Views\Shipping\Warehouses.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Scripts\VendorWarehouse.Admin.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Scripts\VendorWarehouse.Vendor.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Configure.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\VendorWarehouse.Admin.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\VendorWarehouse.Vendor.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+  </Target>
+</Project>

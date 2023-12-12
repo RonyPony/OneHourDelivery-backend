@@ -1,0 +1,20 @@
+﻿@model SearchInventoryModel
+@{
+    Layout = "_ColumnsOne";
+    Html.AddCssFileParts(ResourceLocation.Head, $"~/{ProductAvailabilityDefault.OutputDir}/Content/Style.css");
+    Html.AddScriptParts(ResourceLocation.Footer, $"~/{ProductAvailabilityDefault.OutputDir}/Scripts/Main.js");
+}
+
+<h1 class="inventory-search-title">@Html.Raw(T($"{ProductAvailabilityDefault.LocaleResourcesPrefix}.Topic.InventorySearch.Title"))</h1>
+<form asp-controller="ProductAvailability" asp-action="SearchInventory" method="post">
+    <div class="inputs flex-wrapper">
+        <div class="inventory-search-input">
+            <input id="inventorySearch" type="text" placeholder="@T($"{ProductAvailabilityDefault.LocaleResourcesPrefix}.SearchInventory.SearchBox.Placeholder")" asp-for="ProductSku" />
+        </div>
+        <div class="inventory-search-bottom">
+            <input type="submit" class="button-1 search-button" value="@T("Search.Button")" />
+        </div>
+        <span asp-validation-for="ProductSku"></span>
+    </div>
+    @await Html.PartialAsync($"~/{ProductAvailabilityDefault.OutputDir}/Views/_InventorySearchResult.cshtml", Model.RequestResponseModel)
+</form>

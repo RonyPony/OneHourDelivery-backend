@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Warehouse Schedule",
+  "SystemName": "Widgets.WarehouseSchedule",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.WarehouseSchedule.dll",
+  "Description": "This plugin allows to add a schedule to a warehouse."
+}

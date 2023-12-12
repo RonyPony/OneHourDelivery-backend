@@ -1,0 +1,14 @@
+﻿{
+  "Group": "Synchronizers",
+  "FriendlyName": "Delivery ASAP",
+  "SystemName": "Synchronizers.ASAP",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Synchronizers.ASAP.dll",
+  "Description": "This plug-in establishes the integration of nop comerce with delivery ASAP",
+  "DependsOnSystemNames": [
+    "Widgets.GoogleMapsIntegrationMultientrega"
+  ]
+}

@@ -1,0 +1,65 @@
+﻿@model OrderPaymentCollectionModel
+@inject ILocalizationService localizationService
+
+<div class="panel-body">
+    <div class="panel panel-default sub-panel">
+        <div class="panel-body">
+            @Html.HiddenFor(model => model.OrderId)
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="PaymentCollectionStatus" />
+                </div>
+                <div class="col-md-9">
+                    <div class="input-group input-group-short" style="display:flex !important; align-items:center !important">
+                        <div class="input-group-text">
+                            @{
+                                string color = Model.PaymentCollectionStatus switch
+                                {
+                                    PaymentCollectionStatus.Collected => "green",
+                                    PaymentCollectionStatus.NotCollected => "red",
+                                    _ => "yellow"
+                                };
+                                <span class="grid-report-item @color">@localizationService.GetLocalizedEnum(Model.PaymentCollectionStatus)</span>
+                            }
+                        </div>
+                        @if (Model.PaymentCollectionStatus == PaymentCollectionStatus.NotCollected)
+                        {
+                            <div class="input-group-btn">
+                                <button type="submit" name="markorderascollected" id="markorderascollected" class="btn btn-primary">
+                                    @T("Admin.Orders.Fields.MarkAsCollected")
+                                </button>
+                                <text>&nbsp;</text>
+                                <nop-action-confirmation asp-button-id="markorderascollected" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.PaymentCollectionStatus == PaymentCollectionStatus.Collected)
+            {
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CollectedByCustomerId" />
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">
+                            <a href="~/Admin/Customer/Edit/@Model.CollectedByCustomerId">@Model.CollectedByCustomerName</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CollectedOnUtc" />
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">@Model.CollectedOnUtc</div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,50 @@
+﻿@model Nop.Core.Domain.Catalog.Product
+@{
+    var instructors = TempData["Instructor"] as List<ManufacturerBriefInfoModel>;
+    var seName = TempData["SeName"] as string;
+    var Logo = TempData["Logo"] as Nop.Web.Models.Common.LogoModel;
+}
+<div class="header-logo">
+    <a>
+        <img title="" alt="@Logo.StoreName" src="@Logo.LogoPath" style="background-color:white;">
+    </a>
+</div>
+<div class="overview" style="float: left !important;     width: 100% !important;">
+    <div class="product-name" style="border-bottom:none;">
+        <h2 class="Color-White"><a href="@Url.RouteUrl("Product", new { SeName = seName })">@Html.DisplayFor(model => model.Name)</a></h2>
+    </div>
+    <h3 class="Color-White">@Html.DisplayFor(model => model.ShortDescription)</h3>
+    @if (instructors.Count > 0)
+    {
+        <br />
+        <div class="manufacturers">
+            <h3 class="Color-White">
+                @if (instructors.Count == 1)
+                {
+                    <span>@T("Products.Manufacturer"):</span>
+                }
+                else
+                {
+                    <span>@T("Products.Manufacturers"):</span>
+                }
+            </h3>
+            <h3 class="Color-White">
+                @for (var i = 0; i < instructors.Count; i++)
+                {
+                    var item = instructors[i];
+                    <a href="@Url.RouteUrl("Manufacturer", new { SeName = item.SeName })">@item.Name</a>
+                    if (i != instructors.Count - 1)
+                    {
+                        <span>,</span>
+                    }
+                }
+            </h3>
+        </div>
+    }
+</div>
+<style>
+    .Color-White {
+        color: white !important;
+    }
+</style>
+

@@ -1,0 +1,108 @@
+﻿@model Nop.Plugin.Payments.Banrural.Models.TransactionResult
+
+@{
+    Layout = "_ColumnsOne";
+}
+<style>
+    .transaction-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+    }
+
+    .transaction-alert {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        border-radius: 20px;
+        color: #0c5460;
+        width: 400px;
+        height: 500px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 20px 20px
+    }
+
+    .transaction-title {
+        width: 100%;
+        text-align: center;
+        height: 10%;
+    }
+
+        .transaction-title h2 {
+            font-weight: bold;
+        }
+
+    .transaction-content {
+        height: 30%;
+        width: 100%;
+        font-size: medium;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-weight: 400;
+        text-align: justify;
+        padding: 5px
+    }
+
+    .transaction-table {
+        height: 60%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+        .transaction-table table {
+            border-top: 1px solid #646464;
+            padding-top: 25px;
+            ;
+            width: 80%;
+        }
+
+        .transaction-table tr {
+            display: flex;
+            justify-content: space-between;
+            margin: 23px 0;
+        }
+</style>
+<section class="transaction-container">
+    <div class="transaction-alert">
+        <div class="transaction-title">
+            <h2>@Html.Raw(T("Plugins.Payments.Banrural.TransactionResultTitle"))</h2>
+        </div>
+        <div class="transaction-content">
+            <p>
+                @if (string.IsNullOrWhiteSpace(Model.ResponseCode))
+                {
+                    @Html.Raw(T("Plugins.Payments.Banrural.TransactionCanceledMessage"))
+                }
+                else
+                {
+                    @Html.Raw(T("Plugins.Payments.Banrural.TransactionDeclinedMessage"))
+                }
+            </p>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.ResponseCode))
+        {
+            <div class="transaction-table">
+                <table>
+                    <tr>
+                        <td>@Html.Raw(T("Plugins.Payments.Banrural.OrderNumber"))</td>
+                        <td>@Model.OrderNumber</td>
+                    </tr>
+                    <tr>
+                        <td>@Html.Raw(T("Plugins.Payments.Banrural.TotalAmount"))</td>
+                        <td>@Model.Amount</td>
+                    </tr>
+                    <tr>
+                        <td>@Html.Raw(T("Plugins.Payments.Banrural.Result"))</td>
+                        <td>@Model.ResponseMessage</td>
+                    </tr>
+                    <tr>
+                        <td>@Html.Raw(T("Plugins.Payments.Banrural.AdditionalInformation"))</td>
+                        <td>@Model.ErrorDescription</td>
+                    </tr>
+                </table>
+            </div>
+        }
+    </div>
+</section>

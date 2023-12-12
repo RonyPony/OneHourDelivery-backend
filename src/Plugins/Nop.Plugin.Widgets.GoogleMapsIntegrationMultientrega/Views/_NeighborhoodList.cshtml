@@ -1,0 +1,67 @@
+﻿@model MultientregaSearchModel
+
+@await Html.PartialAsync("Table", new DataTablesModel
+{
+    Name = "multientrega-neighborhood-grid",
+    UrlRead = new DataUrl("/Multientrega/NeighborhoodList"),
+    Length = 10,
+    LengthMenu = "10, 50, 100",
+    ColumnCollection = new List<ColumnProperty>
+    {
+        new ColumnProperty(nameof(NeighborhoodMappingModel.MultientregaId))
+        {
+            Title = $"{T($"{Defaults.ResourcesNamePrefix}.Fields.NeighborhoodId").Text}Id",
+            Width = "100"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.MultientregaTownshipId))
+        {
+            Title = $"{T($"{Defaults.ResourcesNamePrefix}.Fields.TownshipId").Text}Id",
+            Width = "100"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.Name))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.NeighborhoodId").Text,
+            Width = "250"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.FullName))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.Fullname").Text,
+            Width = "500"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.Status))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.Status").Text,
+            Width = "50"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.LocXLon))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.LocXLon").Text,
+            Width = "50"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.LocYLat))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.LocYLat").Text,
+            Width = "50"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.DateCrea))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.DateCrea").Text,
+            Width = "250"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.UsrCrea))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.UsrCrea").Text,
+            Width = "250"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.DateModifica))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.DateModifica").Text,
+            Width = "250"
+        },
+        new ColumnProperty(nameof(NeighborhoodMappingModel.UsrModifica))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.Neighborhood.UsrModifica").Text,
+            Width = "250"
+        }
+    }
+})

@@ -1,0 +1,71 @@
+﻿@model Nop.Plugin.Synchronizers.SAPCustomers.Models.SapCustomersSynchronizerConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+@await Component.InvokeAsync("SettingMode")
+
+<form asp-controller="SapCustomerSynchronizer" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Synchronizers.SAPCustomers.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="SapCustomerUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="SapCustomerUrl" asp-required="true" asp-value="@Model.SapCustomerUrl" />
+                        <span asp-validation-for="SapCustomerUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="SapCustomerRolesUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="SapCustomerRolesUrl" asp-required="true" asp-value="@Model.SapCustomerRolesUrl" />
+                        <span asp-validation-for="SapCustomerRolesUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="SapCustomerAddressUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="SapCustomerAddressUrl" asp-required="true" asp-value="@Model.SapCustomerAddressUrl" />
+                        <span asp-validation-for="SapCustomerAddressUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AuthenticationHeaderScheme" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AuthenticationHeaderScheme" asp-required="true" asp-value="@Model.AuthenticationHeaderScheme" />
+                        <span asp-validation-for="AuthenticationHeaderScheme"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AuthenticationHeaderParameter" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AuthenticationHeaderParameter" asp-required="true" asp-value="@Model.AuthenticationHeaderParameter" />
+                        <span asp-validation-for="AuthenticationHeaderParameter"></span>
+                    </div>
+                </div>
+                <div class="form-group"></div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

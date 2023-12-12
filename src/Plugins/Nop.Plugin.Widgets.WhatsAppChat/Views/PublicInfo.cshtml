@@ -1,0 +1,29 @@
+﻿@model Nop.Plugin.Widgets.WhatsAppChat.Models.PublicInfoModel
+@{
+    Layout = "";
+    Html.AddScriptParts(ResourceLocation.Footer, "~/Plugins/Widgets.WhatsAppChat/Content/floating-wpp.min.js");
+    Html.AddCssFileParts("~/Plugins/Widgets.WhatsAppChat/Content/floating-wpp.min.css");
+}
+<div class="theme-custom">
+    <div class="WhatsAppChat">
+        <div id="WAButton"></div>
+    </div>
+</div>
+<script asp-location="Footer">
+    $(window).on('load', function () {
+        $('#WAButton').floatingWhatsApp({
+            phone: '@WhatsAppChatSettings.Phone', //WhatsApp Business phone number International format-
+            //Get it with Toky at https://toky.co/en/features/whatsapp.
+            headerTitle: '@WhatsAppChatSettings.HeaderTitle', //Popup Title
+            popupMessage: '@WhatsAppChatSettings.PopupMessage', //Popup Message
+            showPopup: true, //Enables popup display
+            message: '@WhatsAppChatSettings.Message',//Message
+            buttonImage: '<img src="https://rawcdn.githack.com/rafaelbotazini/floating-whatsapp/3d18b26d5c7d430a1ab0b664f8ca6b69014aed68/whatsapp.svg" />', //Button Image
+            // z-index property
+            zIndex: 11,
+            //headerColor: 'crimson', //Custom header color
+            //backgroundColor: 'crimson', //Custom background button color
+            position: "right"
+        });
+    });
+    </script>

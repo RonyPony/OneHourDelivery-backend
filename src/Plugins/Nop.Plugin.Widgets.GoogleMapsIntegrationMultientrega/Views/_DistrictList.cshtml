@@ -1,0 +1,26 @@
+﻿@model MultientregaSearchModel
+
+@await Html.PartialAsync("Table", new DataTablesModel
+{
+    Name = "multientrega-district-grid",
+    UrlRead = new DataUrl("/Multientrega/DistrictList"),
+    Length = 10,
+    ColumnCollection = new List<ColumnProperty>
+    {
+        new ColumnProperty(nameof(DistrictMappingModel.MultientregaId))
+        {
+            Title = $"{T($"{Defaults.ResourcesNamePrefix}.Fields.DistrictId").Text}Id",
+            Width = "100"
+        },
+        new ColumnProperty(nameof(DistrictMappingModel.MultientregaProvinceId))
+        {
+            Title = $"{T($"{Defaults.ResourcesNamePrefix}.Fields.ProvinceId").Text}Id",
+            Width = "100"
+        },
+        new ColumnProperty(nameof(DistrictMappingModel.Name))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.DistrictId").Text,
+            Width = "250"
+        }
+    }
+})

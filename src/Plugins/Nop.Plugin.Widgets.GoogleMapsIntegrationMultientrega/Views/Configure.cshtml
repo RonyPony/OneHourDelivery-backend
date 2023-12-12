@@ -1,0 +1,305 @@
+﻿@model PluginConfiguration
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+<form asp-controller="GoogleMapsIntegration" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <nop-panel asp-name="google-maps-integration" asp-icon="fa fa-map-marker" asp-title="@T($"{Defaults.ResourcesNamePrefix}.GoogleMaps.Panel.Title")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+                <div class="panel-body">
+                    <p>
+                        @Html.Raw(T($"{Defaults.ResourcesNamePrefix}.GoogleMaps.Instructions"))
+                    </p>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ApiKey" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ApiKey" asp-required="true" asp-value="@Model.ApiKey" />
+                            <span asp-validation-for="ApiKey"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddressAutocompleteEnabled" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AddressAutocompleteEnabled" />
+                            <span asp-validation-for="AddressAutocompleteEnabled"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="GetAddressFromCoordinatesEnabled" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="GetAddressFromCoordinatesEnabled" />
+                            <span asp-validation-for="GetAddressFromCoordinatesEnabled"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="SelectAddresFromMapEnabled" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="SelectAddresFromMapEnabled" />
+                            <span asp-validation-for="SelectAddresFromMapEnabled"></span>
+                        </div>
+                    </div>
+                    <div class="advanced-setting">
+                        <script>
+                        $(document).ready(function () {
+                            $("#@Html.IdFor(model => model.MapBoundariesEnabled)").click(toggleDisplayAdvanceConfig);
+                            $("#@Html.IdFor(model => model.DefaultLatLngEnabled)").click(toggleDisplayAdvanceConfig);
+                            $("#@Html.IdFor(model => model.DisplayLatLngFields)").click(toggleDisplayAdvanceConfig);
+
+                            toggleDisplayAdvanceConfig();
+                        });
+
+                        function toggleDisplayAdvanceConfig() {
+                            if ($('#@Html.IdFor(model => model.MapBoundariesEnabled)').is(':checked')) {
+                                $('#dvMapBoundariesEnabled').show();
+                            }
+                            else {
+                                $('#dvMapBoundariesEnabled').hide();
+                            }
+
+                            if ($('#@Html.IdFor(model => model.DefaultLatLngEnabled)').is(':checked')) {
+                                $('#dvDefaultLatLngEnabled').show();
+                            }
+                            else {
+                                $('#dvDefaultLatLngEnabled').hide();
+                            }
+
+                            if ($('#@Html.IdFor(model => model.DisplayLatLngFields)').is(':checked')) {
+                                $('#dvDisplayLatLngFields').show();
+                            }
+                            else {
+                                $('#dvDisplayLatLngFields').hide();
+                            }
+                        }
+                        </script>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                <nop-label asp-for="DisplayLatLngFields" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="DisplayLatLngFields" />
+                                <span asp-validation-for="DisplayLatLngFields"></span>
+                            </div>
+                        </div>
+                        <nop-nested-setting asp-for="DisplayLatLngFields">
+                            <div id="dvDisplayLatLngFields">
+                                <div class="form-group advanced-setting">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="LatLngFieldsRequired" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="LatLngFieldsRequired" asp-required="true" asp-value="@Model.LatLngFieldsRequired" />
+                                        <span asp-validation-for="LatLngFieldsRequired"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </nop-nested-setting>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                <nop-label asp-for="MapBoundariesEnabled" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="MapBoundariesEnabled" />
+                                <span asp-validation-for="MapBoundariesEnabled"></span>
+                            </div>
+                        </div>
+                        <nop-nested-setting asp-for="MapBoundariesEnabled">
+                            <div id="dvMapBoundariesEnabled">
+                                <div class="form-group advanced-setting">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="NorthBound" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="NorthBound" asp-required="true" asp-value="@Model.NorthBound" />
+                                        <span asp-validation-for="NorthBound"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group advanced-setting">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="SouthBound" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="SouthBound" asp-required="true" asp-value="@Model.SouthBound" />
+                                        <span asp-validation-for="SouthBound"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group advanced-setting">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="WestBound" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="WestBound" asp-required="true" asp-value="@Model.WestBound" />
+                                        <span asp-validation-for="WestBound"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group advanced-setting">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="EastBound" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="EastBound" asp-required="true" asp-value="@Model.EastBound" />
+                                        <span asp-validation-for="EastBound"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </nop-nested-setting>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                <nop-label asp-for="DefaultLatLngEnabled" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="DefaultLatLngEnabled" />
+                                <span asp-validation-for="DefaultLatLngEnabled"></span>
+                            </div>
+                        </div>
+                        <nop-nested-setting asp-for="DefaultLatLngEnabled">
+                            <div id="dvDefaultLatLngEnabled">
+                                <div class="form-group advanced-setting">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="DefaultLatitude" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="DefaultLatitude" asp-required="true" asp-value="@Model.DefaultLatitude" />
+                                        <span asp-validation-for="DefaultLatitude"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group advanced-setting">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="DefaultLongitude" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="DefaultLongitude" asp-required="true" asp-value="@Model.DefaultLongitude" />
+                                        <span asp-validation-for="DefaultLongitude"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </nop-nested-setting>
+                    </div>
+                </div>
+            </nop-panel>
+            <nop-panel asp-name="multientrega-manual" asp-icon="fa fa-truck" asp-title="@T($"{Defaults.ResourcesNamePrefix}.Multientrega.Panel.Title")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+                <div class="panel-body">
+                    <p>
+                        @Html.Raw(T($"{Defaults.ResourcesNamePrefix}.Multientrega.Instructions"))
+                    </p>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Email" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Email" asp-required="true" asp-value="@Model.Email" />
+                            <span asp-validation-for="Email"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Password" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Password" asp-required="true" asp-value="@Model.Password" />
+                            <span asp-validation-for="Password"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="BaseUrl" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="BaseUrl" asp-required="true" asp-value="@Model.BaseUrl" />
+                            <span asp-validation-for="BaseUrl"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="BranchOffice" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="BranchOffice" asp-required="true" asp-value="@Model.BranchOffice" />
+                            <span asp-validation-for="BranchOffice"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Nit" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Nit" asp-required="true" asp-value="@Model.Nit" />
+                            <span asp-validation-for="Nit"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ShippingOptionDescription" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ShippingOptionDescription" asp-value="@Model.ShippingOptionDescription" />
+                            <span asp-validation-for="ShippingOptionDescription"></span>
+                        </div>
+                    </div>
+                </div>
+            </nop-panel>
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3">
+                    <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- TABLES -->
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        <b><i class="fa fa-info-circle" aria-hidden="true"></i>Tip:</b>
+                        Refresh this data by running schedule task with name <strong>@Defaults.ScheduleTaskName</strong> at <i>System >> Scheduled Tasks</i>.
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <nop-panel asp-name="multiebntrega-provinces" asp-icon="fa fa-map-signs" asp-title="@T($"{Defaults.ResourcesNamePrefix}.Multientrega.Provinces.Panel.Title")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+                        <div class="panel-body">
+                            @await Html.PartialAsync($"~/{Defaults.PluginOutputDir}/Views/_ProvinceList.cshtml", Model.SearchModel)
+                        </div>
+                    </nop-panel>
+                </div>
+                <div class="col-md-4">
+                    <nop-panel asp-name="multiebntrega-districts" asp-icon="fa fa-map-signs" asp-title="@T($"{Defaults.ResourcesNamePrefix}.Multientrega.Districts.Panel.Title")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+                        <div class="panel-body">
+                            @await Html.PartialAsync($"~/{Defaults.PluginOutputDir}/Views/_DistrictList.cshtml", Model.SearchModel)
+                        </div>
+                    </nop-panel>
+                </div>
+                <div class="col-md-4">
+                    <nop-panel asp-name="multiebntrega-townships" asp-icon="fa fa-map-signs" asp-title="@T($"{Defaults.ResourcesNamePrefix}.Multientrega.Townships.Panel.Title")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+                        <div class="panel-body">
+                            @await Html.PartialAsync($"~/{Defaults.PluginOutputDir}/Views/_TownshipList.cshtml", Model.SearchModel)
+                        </div>
+                    </nop-panel>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <nop-panel asp-name="multiebntrega-provinces" asp-icon="fa fa-map-signs" asp-title="@T($"{Defaults.ResourcesNamePrefix}.Multientrega.Neighborhoods.Panel.Title")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+                        <div class="panel-body">
+                            @await Html.PartialAsync($"~/{Defaults.PluginOutputDir}/Views/_NeighborhoodList.cshtml", Model.SearchModel)
+                        </div>
+                    </nop-panel>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

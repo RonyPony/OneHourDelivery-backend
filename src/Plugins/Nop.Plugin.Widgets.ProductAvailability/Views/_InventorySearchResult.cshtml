@@ -1,0 +1,44 @@
+﻿@model InventoryRequestResponseModel
+@{
+    Html.AddCssFileParts(ResourceLocation.Head, $"~/{ProductAvailabilityDefault.OutputDir}/Content/Style.css");
+}
+
+<div class="tbl-wrap">
+    @{
+        if (Model != null)
+        {
+            <div class="title">@Html.Raw(T($"{ProductAvailabilityDefault.LocaleResourcesPrefix}.Table.Title"))</div>
+
+            <table class="tbl-custom">
+                <thead>
+                    <tr>
+                        <th class="borderless"></th>
+                        <th class="borderless"></th>
+                        <th colspan="@Model.Tallas.Count" class="text-center">@Html.Raw(T($"{ProductAvailabilityDefault.LocaleResourcesPrefix}.Sizes"))</th>
+                    </tr>
+                    <tr>
+                        <th>@Html.Raw(T($"{ProductAvailabilityDefault.LocaleResourcesPrefix}.branch_offices"))</th>
+                        <th>@T("products.price")</th>
+                        @foreach (string size in Model.Tallas)
+                        {
+                            <th>@size</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (StoreModel store in Model.Sucursales)
+                    {
+                        <tr>
+                            <td>@store.Nombre</td>
+                            <td>$@store.Precio.ToString("0.##")</td>
+                            @foreach (string availableQuantity in store.Existencia)
+                            {
+                                <td>@availableQuantity</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+</div>

@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Tarjeta de Crédito / Débito",
+  "SystemName": "Payments.BAC",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.BAC.dll",
+  "Description": "This plug-in allows paying with the Banco Américal Central (BAC) through its payment page."
+}

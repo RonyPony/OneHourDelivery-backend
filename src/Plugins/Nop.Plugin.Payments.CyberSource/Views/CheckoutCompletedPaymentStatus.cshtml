@@ -1,0 +1,15 @@
+﻿@model Order
+@inject ILocalizationService localizationService
+<link asp-location="Head" href="~/@CyberSourceDefaults.OutPutDir/Content/Css/Styles.css" rel="stylesheet">
+@{
+    string title = localizationService.GetResource("Plugins.Payments.CyberSource.CheckoutCompletedPaymentDeclinedTitle");
+    string message = string.Format(localizationService.GetResource("Plugins.Payments.CyberSource.CheckoutCompletedPaymentDeclinedMessage"), Model.Id);
+
+    <script asp-location="Footer">
+        $(document).ready(function () {
+            $('.page.checkout-page.order-completed-page .page-title h1').html(`@title`);
+            $('.section.order-completed .title').html(`<strong>@message</strong>`);
+            $('.section.order-completed .buttons').hide();
+    });
+    </script>
+}

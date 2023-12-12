@@ -1,0 +1,23 @@
+﻿@inherits Nop.Web.Framework.Mvc.Razor.NopRazorPage<TModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@*we remove the default InputTagHelper to prevent the checkbox duplicating: https://stackoverflow.com/questions/42544961/asp-net-core-custom-input-tag-helper-rendering-duplicate-checkboxes*@
+@removeTagHelper Microsoft.AspNetCore.Mvc.TagHelpers.InputTagHelper, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Nop.Web.Framework
+@addTagHelper *, MiniProfiler.AspNetCore.Mvc
+
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@using Nop.Web.Framework.UI
+@using Nop.Web.Framework.Extensions
+@using System.Text.Encodings.Web
+@using Nop.Services.Events
+@using Nop.Web.Framework
+@using Nop.Web.Framework.Events
+@using Nop.Web.Framework.Infrastructure
+@using Nop.Web.Models.Common
+@using Nop.Web.Models.Customer
+@using Nop.Plugin.Widgets.GoogleMapsIntegrationMultientrega.Infrastructure
+@using Nop.Plugin.Widgets.GoogleMapsIntegrationMultientrega.Domains
+@using Nop.Plugin.Widgets.GoogleMapsIntegrationMultientrega.Models
+@using Nop.Plugin.Widgets.GoogleMapsIntegrationMultientrega.Helpers
+@using Nop.Web.Models.Checkout
+@using Nop.Web.Framework.Models.DataTables

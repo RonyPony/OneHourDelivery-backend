@@ -1,0 +1,11 @@
+{
+  "Group": "Widgets",
+  "FriendlyName": "Calendar",
+  "SystemName": "Widgets.Calendar",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30", "4.20" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.Calendar.dll",
+  "Description": "This plugin allows contents of main page calendar"
+}

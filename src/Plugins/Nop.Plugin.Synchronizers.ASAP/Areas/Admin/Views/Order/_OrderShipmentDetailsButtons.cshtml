@@ -1,0 +1,23 @@
+﻿@model ShipmentModel
+@using Nop.Plugin.Synchronizers.ASAP
+
+<a asp-controller="AsapDelivery" asp-action="GetShipmentData" asp-route-orderId="@Model.OrderId" asp-route-shipmentId="@Model.Id" class="btn bg-green">
+   @Html.Raw(T($"{AsapDeliveryDefaults.AsapConfigurationResources}.Fields.AsapSearchButton"))
+</a>
+
+<script>
+    $(window).load(function () {
+        if ($(document).has('[id=btnEditShippedDate]')) {
+            $('button#btnEditShippedDate').hide();
+        }
+        if ($(document).has('[id=btnEditDeliveredDate]')) {
+            $('button#btnEditDeliveredDate').hide();
+        }
+        if ($(document).has('[id=setasshipped]')) {
+            $('button#setasshipped').hide();
+        }
+        if ($(document).has('[id=setasdelivered]')) {
+            $('button#setasdelivered').hide();
+        }
+    });
+</script>

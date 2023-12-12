@@ -1,0 +1,59 @@
+﻿@model ConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+<form asp-controller="WapiOrders" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T($"{Defaults.LocaleResorcesPrefix}.Configuration.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AuthKeyName" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AuthKeyName" asp-required="true" asp-value="@Model.AuthKeyName" />
+                        <span asp-validation-for="AuthKeyName"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AuthKeyValue" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AuthKeyValue" asp-required="true" asp-value="@Model.AuthKeyValue" />
+                        <span asp-validation-for="AuthKeyValue"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ApiPostUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ApiPostUrl" asp-required="true" asp-value="@Model.ApiPostUrl" />
+                        <span asp-validation-for="ApiPostUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DefaultStorePickupCode" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DefaultStorePickupCode" asp-required="true" asp-value="@Model.DefaultStorePickupCode" />
+                        <span asp-validation-for="DefaultStorePickupCode"></span>
+                    </div>
+                </div>
+                <div class="form-group"></div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

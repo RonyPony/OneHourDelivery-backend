@@ -1,0 +1,138 @@
+﻿@model OrderDeliveryInfoModel
+@inject ILocalizationService localizationService 
+
+<div class="panel-body">
+    <div class="panel panel-default sub-panel">
+        <div class="panel-body">
+            @Html.HiddenFor(model => model.OrderId)
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DeliveryStatusId" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">
+                        @{
+                            string color = Model.DeliveryStatus switch
+                            {
+                                DeliveryStatus.Delivered => "green",
+                                DeliveryStatus.DeliveryInProgress => "blue",
+                                DeliveryStatus.DeclinedByStore => "red",
+                                _ => "yellow"
+                            };
+                            <span class="grid-report-item @color">@localizationService.GetLocalizedEnum(Model.DeliveryStatus)</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DriverId" />
+                </div>
+                <div class="col-md-9">
+                    @if (Model.DeliveryStatus == DeliveryStatus.Delivered || Model.DeliveryStatus == DeliveryStatus.DeclinedByStore)
+                    {
+                        SelectListItem selectItem = Model.AvailableDrivers.FirstOrDefault(item => item.Value == Model.DriverId.ToString());
+                        string assignedDriver = selectItem?.Text ?? "";
+                        string editDriverUrl = Model.DriverId == 0 ? "#" : $"~/Admin/Customer/Edit/{Model.DriverId}";
+                        <div class="form-text-row"><a href="@editDriverUrl">@assignedDriver</a></div>
+                    }
+                    else
+                    {
+                        <nop-select asp-for="DriverId" asp-items="@Model.AvailableDrivers" />
+                        <span asp-validation-for="DriverId"></span>
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AwaitingForMessengerDate" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.AwaitingForMessengerDate</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AcceptedByMessengerDate" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.AcceptedByMessengerDate</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DeliveryInProgressDate" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.DeliveryInProgressDate</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DeliveredDate" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.DeliveredDate</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DeclinedByStoreDate" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.DeclinedByStoreDate</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="MessageToDeclinedOrder" />
+                </div>
+                <div class="col-md-9">
+                    <nop-textarea asp-for="MessageToDeclinedOrder" />
+                </div>
+            </div>
+            @if (Model.DeliveryStatus != DeliveryStatus.Delivered
+                && Model.DeliveryStatus != DeliveryStatus.DeclinedByStore)
+            {
+                <div class="form-group">
+                    <div class="col-md-3">
+                        &nbsp;
+                    </div>
+                    <div class="col-md-9">
+                        <input type="button" name="save-order-driver" class="btn bg-blue" value="@T("Admin.Common.Save")" onclick="postSaveOrderDriver()" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script>
+    const base10Number = 10;
+
+    function postSaveOrderDriver() {
+        var postData = getPostData();
+        $.ajax({
+            url: "/Admin/DeliveryAppApiAdmin/SaveOrderDriver",
+            type: 'POST',
+            dataType: "json",
+            data: postData,
+            success: function (response) {
+                alert(response.Message);
+            },
+            error: function (response) {
+                alert(response.Message);
+            }
+        });
+    }
+
+    function getPostData() {
+        const data = {
+            OrderId: parseInt($("#OrderId").val(), base10Number),
+            DriverId: parseInt($("#DriverId").val(), base10Number),
+            __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+        };
+        addAntiForgeryToken(data);
+
+        return data;
+    }
+</script>

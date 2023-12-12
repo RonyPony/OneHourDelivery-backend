@@ -1,0 +1,118 @@
+﻿@model ProductDetailsModel
+@inject ZoomPluginSettings _zoomPluginSettings
+
+@{
+
+    if (_zoomPluginSettings.ZoomEnabled)
+    {
+        <style>
+            .gallery > .picture {
+                background-image: url(@Model.DefaultPictureModel.FullSizeImageUrl);
+            }
+        </style>
+
+        <script asp-location="Footer">
+            $(document).ready(function () {
+                if ($(window).width() > 1000) {
+                    $('.thumb-item > img').on('click', function () {
+                        $('.gallery > .picture').css("background-image", `url(${$(this).attr('data-fullsize')})`);
+                    });
+
+                    @{
+                        Html.AddCssFileParts(ResourceLocation.Head, $"~/{ZoomDefaults.PluginOutputDir}/Content/css/styles.css");
+                        Html.AddScriptParts(ResourceLocation.Footer, $"~/{ZoomDefaults.PluginOutputDir}/Content/js/product-details-picture-zoom.js");
+                    }
+                }
+            });
+        </script>
+    }
+
+    if (_zoomPluginSettings.PicturesMobileCarouselEnabled)
+    {
+        Html.AddCssFileParts(ResourceLocation.Head, $"~/{ZoomDefaults.PluginOutputDir}/Content/css/bootstrap.min.css");
+        Html.AddCssFileParts(ResourceLocation.Head, $"~/{ZoomDefaults.PluginOutputDir}/Content/css/carousel.css");
+        Html.AddScriptParts(ResourceLocation.Footer, $"~/{ZoomDefaults.PluginOutputDir}/Content/js/bootstrap.bundle.min.js");
+        Html.AddScriptParts(ResourceLocation.Footer, $"~/{ZoomDefaults.PluginOutputDir}/Content/js/product-details-gallery-carousel.js");
+
+        <div id="picture-carousel" class="carousel carousel-dark slide" data-bs-ride="carousel" style="display: none;">
+            <div class="carousel-indicators">
+                @for (int index = 0; index < Model.PictureModels.Count; index++)
+                {
+                    int baseOneIndex = index + 1;
+
+                    if (index == 0)
+                    {
+                        <button type="button" data-bs-target="#picture-carousel" data-bs-slide-to="@index" class="active" aria-current="true" aria-label="Slide @baseOneIndex"></button>
+                    }
+                    else
+                    {
+                        <button type="button" data-bs-target="#picture-carousel" data-bs-slide-to="@index" aria-label="Slide @baseOneIndex"></button>
+                    }
+                }
+            </div>
+            <div class="carousel-inner">
+                @for (int index = 0; index < Model.PictureModels.Count; index++)
+                {
+                    if (index == 0)
+                    {
+                        <div class="carousel-item active">
+                            <img src="@Model.PictureModels[index].ImageUrl" title="@Model.PictureModels[index].Title" id="main-product-img-@Model.Id" class="d-block w-100" alt="@Model.PictureModels[index].AlternateText">
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="carousel-item">
+                            <img src="@Model.PictureModels[index].ImageUrl" title="@Model.PictureModels[index].Title" id="main-product-img-@Model.Id" class="d-block w-100" alt="@Model.PictureModels[index].AlternateText">
+                        </div>
+                    }
+                }
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#picture-carousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#picture-carousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    }
+
+    if (_zoomPluginSettings.PictureThumbsLocation == PictureThumbsLocation.Left)
+    {
+        <script asp-location="Footer">
+            $(document).ready(function () {
+                $('.gallery > .picture-thumbs').insertBefore('.gallery > .picture');
+            });
+        </script>
+    }
+    else
+    {
+        <script asp-location="Footer">
+            $(document).ready(function () {
+                $('.gallery > .picture-thumbs').insertAfter('.gallery > .picture');
+            });
+        </script>
+    }
+
+    if (_zoomPluginSettings.ChangeMainPictureOnThumbsHoverEnabled)
+    {
+        <script asp-location="Footer">
+                    $(document).ready(function () {
+                        $('.thumb-item > img').on('mouseover',
+                            function() {
+                                $('#main-product-img-@Model.Id').attr('src', $(this).attr('data-defaultsize'));
+                                $('#main-product-img-@Model.Id').attr('title', $(this).attr('title'));
+                                $('#main-product-img-@Model.Id').attr('alt', $(this).attr('alt'));
+                                $('#main-product-img-lightbox-anchor-@Model.Id').attr('href', $(this).attr('data-fullsize'));
+                                $('#main-product-img-lightbox-anchor-@Model.Id').attr('title', $(this).attr('title'));
+
+                                @if (_zoomPluginSettings.ZoomEnabled)
+                                {
+                                    @:$('.gallery > .picture').css("background-image", `url(${$(this).attr('data-fullsize')})`);
+                                }
+                            });
+                    });
+        </script>
+    }
+}

@@ -1,0 +1,240 @@
+﻿@model Nop.Plugin.Payments.AzulPaymentPage.Models.AzulConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+@await Component.InvokeAsync("SettingMode")
+
+<form asp-controller="AzulPayment" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Payments.AzulPaymentPage.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Url" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Url" asp-required="true" asp-value="@Model.Url" />
+                        <span asp-validation-for="Url"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AlternativeUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AlternativeUrl" asp-required="true" asp-value="@Model.AlternativeUrl" />
+                        <span asp-validation-for="AlternativeUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MerchantId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MerchantId" asp-required="true" asp-value="@Model.MerchantId" />
+                        <span asp-validation-for="MerchantId"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MerchantName" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MerchantName" asp-required="true" asp-value="@Model.MerchantName" />
+                        <span asp-validation-for="MerchantName"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MerchantType" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MerchantType" asp-required="true" asp-value="@Model.MerchantType" />
+                        <span asp-validation-for="MerchantType"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AuthKey" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AuthKey" asp-required="true" asp-value="@Model.AuthKey" />
+                        <span asp-validation-for="AuthKey"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CurrencyCode" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CurrencyCode" asp-required="true" asp-value="@Model.CurrencyCode" />
+                        <span asp-validation-for="CurrencyCode"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ApprovedUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ApprovedUrl" asp-required="true" asp-value="@Model.ApprovedUrl" />
+                        <span asp-validation-for="ApprovedUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DeclinedUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DeclinedUrl" asp-required="true" asp-value="@Model.DeclinedUrl" />
+                        <span asp-validation-for="DeclinedUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CancelUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CancelUrl" asp-required="true" asp-value="@Model.CancelUrl" />
+                        <span asp-validation-for="CancelUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="LocaleId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="LocaleId" asp-items="@Model.Locale" />
+                        <span asp-validation-for="LocaleId"></span>
+                    </div>
+                </div>
+                <div class="advanced-setting">
+                    <script>
+                        $(document).ready(function () {
+                            $("#@Html.IdFor(model => model.UseCustomField1)").click(toggleDisplayLogo);
+                            $("#@Html.IdFor(model => model.UseCustomField2)").click(toggleDisplayLogo);
+
+                            toggleDisplayLogo();
+                        });
+
+                        function toggleDisplayLogo() {
+                            console.log('toggled!');
+                            if ($('#@Html.IdFor(model => model.UseCustomField1)').is(':checked')) {
+                                $('#dvCustomField1').show();
+                            }
+                            else {
+                                $('#dvCustomField1').hide();
+                            }
+                            if ($('#@Html.IdFor(model => model.UseCustomField2)').is(':checked')) {
+                                $('#dvCustomField2').show();
+                            }
+                            else {
+                                $('#dvCustomField2').hide();
+                            }
+                        }
+                    </script>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="UseCustomField1" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="UseCustomField1" />
+                            <span asp-validation-for="UseCustomField1"></span>
+                        </div>
+                    </div>
+                    <nop-nested-setting asp-for="UseCustomField1">
+                        <div id="dvCustomField1">
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="CustomField1Label" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="CustomField1Label" asp-required="true" asp-value="@Model.CustomField1Label" />
+                                    <span asp-validation-for="CustomField1Label"></span>
+                                </div>
+                            </div>
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="CustomField1Value" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="CustomField1Value" asp-required="true" asp-value="@Model.CustomField1Value" />
+                                    <span asp-validation-for="CustomField1Value"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-nested-setting>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="UseCustomField2" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="UseCustomField2" />
+                            <span asp-validation-for="UseCustomField2"></span>
+                        </div>
+                    </div>
+                    <nop-nested-setting asp-for="UseCustomField2">
+                        <div id="dvCustomField2">
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="CustomField2Label" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="CustomField2Label" asp-required="true" asp-value="@Model.CustomField2Label" />
+                                    <span asp-validation-for="CustomField2Label"></span>
+                                </div>
+                            </div>
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="CustomField2Value" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="CustomField2Value" asp-required="true" asp-value="@Model.CustomField2Value" />
+                                    <span asp-validation-for="CustomField2Value"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-nested-setting>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ShowTransactionResult" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ShowTransactionResult" />
+                            <span asp-validation-for="ShowTransactionResult"></span>
+                        </div>
+                    </div>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="OrderStatusId" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="OrderStatusId" asp-items="@Model.OrderStatus" />
+                            <span asp-validation-for="OrderStatusId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="MarkAsPaid" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="MarkAsPaid" />
+                            <span asp-validation-for="MarkAsPaid"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group"></div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

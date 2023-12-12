@@ -1,0 +1,97 @@
+﻿@model Nop.Plugin.Payments.CardNet.Models.CardNetPaymentInfoModel
+
+<div>
+    @Html.Raw(T("Plugins.Payments.CardNet.PaymentInstructions"))
+
+    @if (WorkContext.WorkingCurrency.CurrencyCode != CardNetDefaults.DefaultCurrencyCode)
+    {
+        @Html.Raw(T("Plugins.Payments.CardNet.CurrencyConversionDisclaimer"))
+    }
+    <div class="checkout-buttons">
+        <input value="@T("Plugins.Payments.CardNet.PaymentButtonText")" type="button" id="btnCheckout"/>
+    </div>
+</div>
+
+<style>
+    #btnCheckout {
+        width: 80%;
+        margin: auto;
+        height: 3em;
+        border-radius: 5px;
+        border: 1px solid #949fb4;
+        background-color: #2f2f2f;
+        color: #e0e0e0;
+        font: caption;
+        font-weight: bold;
+    }
+
+    .checkout-buttons {
+        padding-top: 1em;
+        display: flex;
+    }
+</style>
+
+<script asp-location="Footer">
+    $(document).ready(function() {
+        $('.payment-info-next-step-button').hide();
+
+        var checkoutFormId = "co-payment-info-form";
+
+        @if (!OrderSettings.OnePageCheckoutEnabled)
+        {
+            // CardNet's PWCheckout library needs the id of the form that's supposed to be used above,
+            // but NopCommerce automatically generates a form just outside this component
+            // and HTML does not allow a form inside of another form,
+            // so we had to set the id of the form that NopCommerce generates to the id that we send to CardNet's library
+            @:$("form")[1].id = checkoutFormId;
+        }
+                
+        PWCheckout.Bind("tokenCreated", onTokenReceived);
+
+        PWCheckout.SetProperties({
+            "name": "CardNet",
+            "email": "@WorkContext.CurrentCustomer.Email",
+            "image": "@CardNetSettings.CardNetImageUrl",
+            "button_label": "Pagar #monto#",
+            "description": "Consorcio de Tarjetas Dominicanas",
+            "currency": "$@CardNetDefaults.DefaultCurrencyCode",
+            "form_id": checkoutFormId,
+            "amount": "@Model.OrderTotal",
+            "checkout_card": 1,
+            "autoSubmit": "false",
+            "empty": "false"
+        });
+
+        function onTokenReceived(token) {
+            $.ajax({
+                type: "POST",
+                url: "/CardNet/AddTokenToCache",
+                data: JSON.stringify({
+                    token: token.TokenId
+                }),
+                contentType: "application/json"
+            });
+
+            $('input.payment-info-next-step-button').trigger("click");
+        }
+
+        @if (OrderSettings.OnePageCheckoutEnabled)
+        {
+            <text>
+                document.getElementById("btnCheckout").addEventListener("click",
+                    function() {
+                        PWCheckout.OpenIframeNormal();
+                    });
+            </text>
+        }
+        else
+        {
+            @:PWCheckout.AddActionButton("btnCheckout");
+        }
+    });
+</script>
+
+@if (OrderSettings.OnePageCheckoutEnabled)
+{
+    @Html.NopInlineScripts(ResourceLocation.Footer)
+}

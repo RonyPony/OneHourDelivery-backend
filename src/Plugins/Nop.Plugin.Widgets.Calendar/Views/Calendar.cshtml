@@ -1,0 +1,24 @@
+﻿
+@{
+
+
+    //Loading CSS file
+    Html.AddCssFileParts(ResourceLocation.Footer, "~/Plugins/WidgetsCalendar/Content/evo-calendar/evo-calendar.css");
+    Html.AddCssFileParts(ResourceLocation.Footer, "~/Plugins/WidgetsCalendar/Content/evo-calendar/evo-calendar.royal-navy.css");
+    //Loading js file
+
+    //Third parameter value indicating whether to exclude this script from bundling
+    Html.AddScriptParts(ResourceLocation.Footer, "~/Plugins/WidgetsCalendar/Scripts/evo-calendar/evo-calendar.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "~/Plugins/WidgetsCalendar/Scripts/CalendarPage.js");
+}
+
+
+
+@*El Calendario*@
+<div id="calendarAloesContainer">
+    <div id="calendar"></div>
+</div>
+<br />
+<br />
+<br />
+

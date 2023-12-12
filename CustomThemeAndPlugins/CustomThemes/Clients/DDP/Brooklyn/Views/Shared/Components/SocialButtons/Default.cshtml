@@ -1,0 +1,24 @@
+﻿@model SocialModel
+@using Nop.Services.Configuration
+@using Nop.Core
+
+@inject IStoreContext storeContext
+@inject ISettingService settingService
+
+@{
+    var storeId = storeContext.CurrentStore.Id;
+    var pinterestUrl = settingService.GetSettingByKey("brooklynthemesettings.pinteresturl", String.Empty, storeId, true);
+    var vimeoUrl = settingService.GetSettingByKey("brooklynthemesettings.vimeourl", String.Empty, storeId, true);
+    var instagramUrl = settingService.GetSettingByKey("brooklynthemesettings.instagramurl", String.Empty, storeId, true);
+}
+
+    <ul class="social-sharing">
+        @if (!String.IsNullOrEmpty(instagramUrl))
+        {
+            <li><a target="_blank" class="instagram" href="@instagramUrl" aria-label="@T("SevenSpikes.Themes.Common.Footer.FollowUs.Instagram")"></a></li>
+        }
+        @if (!String.IsNullOrEmpty(Model.FacebookLink))
+        {
+            <li><a target="_blank" class="facebook" href="@Model.FacebookLink" aria-label="@T("Footer.FollowUs.Facebook")"></a></li>
+        }
+    </ul>

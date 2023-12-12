@@ -1,0 +1,134 @@
+﻿@model Nop.Plugin.Payments.BAC.Models.BacConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+@await Component.InvokeAsync("SettingMode")
+
+<form asp-controller="BacPayment" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Payments.BAC.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="GatewayUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="GatewayUrl" asp-required="true" asp-value="@Model.GatewayUrl" />
+                        <span asp-validation-for="GatewayUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="TokenRequestUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="TokenRequestUrl" asp-required="true" asp-value="@Model.TokenRequestUrl" />
+                        <span asp-validation-for="TokenRequestUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="HostedPageUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="HostedPageUrl" asp-required="true" asp-value="@Model.HostedPageUrl" />
+                        <span asp-validation-for="HostedPageUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CardHolderResponseUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CardHolderResponseUrl" asp-required="true" asp-value="@Model.CardHolderResponseUrl" />
+                        <span asp-validation-for="CardHolderResponseUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AcquirerId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AcquirerId" asp-required="true" asp-value="@Model.AcquirerId" />
+                        <span asp-validation-for="AcquirerId"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MerchantId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MerchantId" asp-required="true" asp-value="@Model.MerchantId" />
+                        <span asp-validation-for="MerchantId"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MerchantPassword" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MerchantPassword" asp-required="true" asp-value="@Model.MerchantPassword" />
+                        <span asp-validation-for="MerchantPassword"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Currency" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Currency" asp-required="true" asp-value="@Model.Currency" />
+                        <span asp-validation-for="Currency"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CurrencyExponent" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CurrencyExponent" asp-required="true" asp-value="@Model.CurrencyExponent" />
+                        <span asp-validation-for="CurrencyExponent"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="SignatureMethod" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="SignatureMethod" asp-required="true" asp-value="@Model.SignatureMethod" />
+                        <span asp-validation-for="SignatureMethod"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="OrderStatusId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="OrderStatusId" asp-items="@Model.OrderStatus" />
+                        <span asp-validation-for="OrderStatusId"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MarkAsPaid" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MarkAsPaid" />
+                        <span asp-validation-for="MarkAsPaid"></span>
+                    </div>
+                </div>
+                <div class="form-group"></div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

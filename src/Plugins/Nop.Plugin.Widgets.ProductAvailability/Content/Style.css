@@ -1,0 +1,86 @@
+.inventory-search-title {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.flex-wrapper {
+    flex-flow: row wrap;
+    display: flex;
+    justify-content: center;
+}
+
+.inventory-search-input {
+
+}
+
+.inventory-search-bottom {
+    align-self: flex-end;
+    margin: 10px;
+}
+
+.tbl-wrap {
+    margin-bottom: 3rem;
+}
+
+.tbl-wrap > div.title {
+    text-align: center;
+    margin: 0px 0px 2rem 0px;
+}
+
+.tbl-custom {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tbl-custom td {
+    border: 1px solid #000000;
+    font-size: 16px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+    text-align: center;
+}
+
+.tbl-custom th {
+    border: 1px solid #000000;
+    font-size: 19px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+    text-transform: uppercase;
+    font-weight: bold;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.borderless {
+    border: 0px !important;
+    background-color: #fff !important;
+}
+
+@media (min-width: 1001px) {
+    .inputs.d-flex.align-items-center {
+        text-align: center !important;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .tbl-custom {
+        width: auto !important;
+    }
+
+    .tbl-custom col {
+        width: auto !important;
+    }
+
+    .tbl-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}

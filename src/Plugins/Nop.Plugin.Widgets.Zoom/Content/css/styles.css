@@ -1,0 +1,17 @@
+﻿.gallery > .picture {
+    background-position: 50% 50%;
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+    background-size: 200%;
+}
+
+.gallery > .picture img:hover {
+    opacity: 0;
+}
+
+.gallery > .picture img {
+    transition: opacity 0.5s;
+    display: block;
+    width: 100%;
+}

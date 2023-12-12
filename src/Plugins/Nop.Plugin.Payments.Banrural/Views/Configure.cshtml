@@ -1,0 +1,99 @@
+﻿@model Nop.Plugin.Payments.Banrural.Models.BanruralConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+@await Component.InvokeAsync("SettingMode")
+
+<form asp-controller="Banrural" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Payments.Banrural.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="KeyID" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="KeyID" asp-required="true" asp-value="@Model.KeyID" />
+                        <span asp-validation-for="KeyID"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Url" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Url" asp-required="true" asp-value="@Model.Url" />
+                        <span asp-validation-for="Url"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CancelUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CancelUrl" asp-required="true" asp-value="@Model.CancelUrl" />
+                        <span asp-validation-for="CancelUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CompleteUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CompleteUrl" asp-required="true" asp-value="@Model.CompleteUrl" />
+                        <span asp-validation-for="CompleteUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CallbackUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CallbackUrl" asp-required="true" asp-value="@Model.CallbackUrl" />
+                        <span asp-validation-for="CallbackUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="LocaleId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="LocaleId" asp-items="@Model.Locale" />
+                        <span asp-validation-for="LocaleId"></span>
+                    </div>
+                </div>
+                <div class="advanced-setting">
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="OrderStatusId" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="OrderStatusId" asp-items="@Model.OrderStatus" />
+                            <span asp-validation-for="OrderStatusId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="MarkAsPaid" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="MarkAsPaid" />
+                            <span asp-validation-for="MarkAsPaid"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

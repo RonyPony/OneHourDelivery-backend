@@ -1,0 +1,21 @@
+﻿@model MultientregaSearchModel
+
+@await Html.PartialAsync("Table", new DataTablesModel
+{
+    Name = "multientrega-provinces-grid",
+    UrlRead = new DataUrl("/Multientrega/ProvinceList"),
+    Length = Model.PageSize,
+    ColumnCollection = new List<ColumnProperty>
+    {
+        new ColumnProperty(nameof(ProvinceMappingModel.MultientregaId))
+        {
+            Title = $"{T($"{Defaults.ResourcesNamePrefix}.Fields.ProvinceId").Text}Id",
+            Width = "100"
+        },
+        new ColumnProperty(nameof(ProvinceMappingModel.Name))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.ProvinceId").Text,
+            Width = "250"
+        }
+    }
+})

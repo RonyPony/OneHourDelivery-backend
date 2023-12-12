@@ -1,0 +1,136 @@
+﻿@model Nop.Plugin.Synchronizers.SAPProducts.Models.ConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+<form asp-controller="SapProductSynchronizer" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Synchronizers.SAPProducts.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="SapProductUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="SapProductUrl" asp-required="true" asp-value="@Model.SapProductUrl" />
+                        <span asp-validation-for="SapProductUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AuthenticationHeaderScheme" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AuthenticationHeaderScheme" asp-required="true" asp-value="@Model.AuthenticationHeaderScheme" />
+                        <span asp-validation-for="AuthenticationHeaderScheme"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AuthenticationHeaderParameter" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AuthenticationHeaderParameter" asp-required="true" asp-value="@Model.AuthenticationHeaderParameter" />
+                        <span asp-validation-for="AuthenticationHeaderParameter"></span>
+                    </div>
+                </div>
+                <div class="advanced-setting">
+                    <script>
+                        $(document).ready(function () {
+                            $("#@Html.IdFor(model => model.SyncCategories)").click(toggleDisplayAdvanceConfig);
+                            $("#@Html.IdFor(model => model.SyncManufacturers)").click(toggleDisplayAdvanceConfig);
+
+                            toggleDisplayAdvanceConfig();
+                        });
+
+                        function toggleDisplayAdvanceConfig() {
+                            if ($('#@Html.IdFor(model => model.SyncCategories)').is(':checked')) {
+                                $('#dvSyncCategories').show();
+                            }
+                            else {
+                                $('#dvSyncCategories').hide();
+                            }
+                            if ($('#@Html.IdFor(model => model.SyncManufacturers)').is(':checked')) {
+                                $('#dvSyncManufacturers').show();
+                            }
+                            else {
+                                $('#dvSyncManufacturers').hide();
+                            }
+                        }
+                    </script>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="SyncCategories" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="SyncCategories" />
+                            <span asp-validation-for="SyncCategories"></span>
+                        </div>
+                    </div>
+                    <nop-nested-setting asp-for="SyncCategories">
+                        <div id="dvSyncCategories">
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="SapCategoryUrl" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="SapCategoryUrl" asp-required="true" asp-value="@Model.SapCategoryUrl" />
+                                    <span asp-validation-for="SapCategoryUrl"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-nested-setting>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="SyncManufacturers" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="SyncManufacturers" />
+                            <span asp-validation-for="SyncManufacturers"></span>
+                        </div>
+                    </div>
+                    <nop-nested-setting asp-for="SyncManufacturers">
+                        <div id="dvSyncManufacturers">
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="SapManufacturerUrl" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="SapManufacturerUrl" asp-required="true" asp-value="@Model.SapManufacturerUrl" />
+                                    <span asp-validation-for="SapManufacturerUrl"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-nested-setting>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AssignItemCodeFieldAsSku" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AssignItemCodeFieldAsSku" />
+                            <span asp-validation-for="AssignItemCodeFieldAsSku"></span>
+                        </div>
+                    </div>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="UpdateProductInformation" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="UpdateProductInformation" />
+                            <span asp-validation-for="UpdateProductInformation"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

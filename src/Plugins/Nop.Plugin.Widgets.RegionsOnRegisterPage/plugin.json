@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Regions on Register Page",
+  "SystemName": "Widgets.RegionsOnRegisterPage",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.RegionsOnRegisterPage.dll",
+  "Description": "This plug-in enables a dropdown where the customer can choose a region."
+}

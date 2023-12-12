@@ -1,0 +1,14 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Product Availability",
+  "SystemName": "Widgets.ProductAvailability",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.ProductAvailability.dll",
+  "Description": "This plugin allows the visualization of inventory availability for DDP's products.",
+  "DependsOnSystemNames": [
+    "Pickup.PickupInStore"
+  ]
+}

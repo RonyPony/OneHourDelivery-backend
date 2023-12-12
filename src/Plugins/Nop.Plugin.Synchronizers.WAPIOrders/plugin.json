@@ -1,0 +1,17 @@
+﻿{
+  "Group": "Synchronizers",
+  "FriendlyName": "WAPI Orders Synchronizer",
+  "SystemName": "Synchronizers.WAPIOrders",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Synchronizers.WAPIOrders.dll",
+  "Description": "This plugin allows to register NopCommerce orders through out WAPI integration.",
+  "DependsOnSystemNames": [
+    "Payments.CyberSource",
+    "Tax.FixedOrByCountryStateZip",
+    "Pickup.PickupInStore",
+    "Synchronizers.ASAP"
+  ]
+}

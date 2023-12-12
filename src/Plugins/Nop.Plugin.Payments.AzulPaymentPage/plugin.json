@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "AZUL Payment Page",
+  "SystemName": "Payments.AzulPaymentPage",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30", "4.20" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.AzulPaymentPage.dll",
+  "Description": "This plug-in allows paying with AZUL through its payment page."
+}

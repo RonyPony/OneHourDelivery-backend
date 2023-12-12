@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "CardNet Payment",
+  "SystemName": "Payments.CardNet",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.CardNet.dll",
+  "Description": "This plugin allows paying with CardNet through their payment page"
+}

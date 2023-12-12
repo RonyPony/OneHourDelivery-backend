@@ -1,0 +1,15 @@
+﻿{
+  "Group": "Synchronizers",
+  "FriendlyName": "SAP Orders Synchronizer",
+  "SystemName": "Synchronizers.SAPOrders",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Synchronizers.SAPOrders.dll",
+  "Description": "This plugin is responsible for synchronizing the orders with NopCommerce using a Web Service connected to SAP.",
+  "DependsOnSystemNames": [
+    "Synchronizers.SAPProducts",
+    "Synchronizers.SAPCustomersSynchronizer"
+  ]
+}

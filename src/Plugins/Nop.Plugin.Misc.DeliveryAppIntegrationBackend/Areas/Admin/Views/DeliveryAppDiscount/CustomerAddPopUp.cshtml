@@ -1,0 +1,119 @@
+﻿@model DeliveryAppAddCustomerToDiscountSearchModel
+@inject IWorkContext _workContext
+
+@{
+    Layout = "_AdminPopupLayout";
+
+    ViewBag.PageTitle = T("Admin.Promotions.Discounts.AppliedToCustomers.AddNew").Text;
+}
+
+@if (ViewBag.RefreshPage == true)
+{
+    <script>
+        try {window.opener.document.forms['@(Context.Request.Query["formId"])'].@(Context.Request.Query["btnId"]).click();}
+        catch (e){}
+        window.close();
+    </script>
+}
+else
+{
+    <form asp-controller="DeliveryAppDiscount" asp-action="CustomerAddPopUp"
+          asp-route-discountId="@Context.Request.Query["discountId"]"
+          asp-route-btnId="@Context.Request.Query["btnId"]"
+          asp-route-formId="@Context.Request.Query["formId"]">
+        <div class="content-header clearfix">
+            <h1 class="pull-left">
+                @T("Admin.Promotions.Discounts.AppliedToCustomers.AddNew")
+            </h1>
+            <div class="pull-right">
+                &nbsp;
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="form-horizontal">
+                <div class="panel-group">
+                    <div class="panel panel-default panel-search panel-popup">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-5">
+                                            <nop-label asp-for="SearchCustomerEmail" />
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <nop-editor asp-for="SearchCustomerEmail" />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <button type="button" id="search-customers" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            @await Html.PartialAsync("Table", new DataTablesModel
+                       {
+                           Name = "customers-grid",
+                           UrlRead = new DataUrl("CustomersAddPopupList", "DeliveryAppDiscount", new RouteValueDictionary { [nameof(Model.SearchCustomerEmail)] = Model.SearchCustomerEmail }),
+                           SearchButtonId = "search-customers",
+                           Length = Model.PageSize,
+                           LengthMenu = Model.AvailablePageSizes,
+                           Filters = new List<FilterParameter>
+                                {
+                                    new FilterParameter(nameof(Model.SearchCustomerEmail)),
+
+                                },
+                           ColumnCollection = new List<ColumnProperty>
+                                {
+                                    new ColumnProperty(nameof(CustomerModel.Id))
+                                    {
+                                        IsMasterCheckBox = true,
+                                        Render = new RenderCheckBox(nameof(DeliveryAppAddCustomerToDiscountModel.SelectedCustomerIds)),
+                                        ClassName =  NopColumnClassDefaults.CenterAll,
+                                        Width = "50"
+                                    },
+                                    new ColumnProperty(nameof(CustomerModel.FirstName))
+                                    {
+                                        Title = T("Admin.Customers.Customers.Fields.FirstName").Text
+                                    },
+                                    new ColumnProperty(nameof(CustomerModel.LastName))
+                                    {
+                                        Title = T("Admin.Customers.Customers.Fields.LastName").Text
+                                    },
+                                    new ColumnProperty(nameof(CustomerModel.Email))
+                                    {
+                                        Title = T("Admin.Customers.Customers.Fields.Email").Text
+                                    },
+                                    new ColumnProperty(nameof(CustomerModel.Active))
+                                    {
+                                        Title = T("Admin.Customers.Customers.Fields.Active").Text,
+                                        Width = "100",
+                                        ClassName = NopColumnClassDefaults.CenterAll,
+                                        Render = new RenderBoolean()
+                                    }
+                                }
+                       })
+                        </div>
+                        <div class="panel-footer">
+                            <button type="submit" name="save" class="btn bg-blue">
+                                <i class="fa fa-floppy-o"></i>
+                                @T("Admin.Common.Save")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+}

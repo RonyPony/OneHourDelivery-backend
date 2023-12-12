@@ -1,0 +1,59 @@
+﻿@model Nop.Plugin.Synchronizers.SAPOrders.Models.ConfigurationModel 
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+<form asp-controller="SapOrdersSync" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Synchronizers.SAPOrders.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ApiPostUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ApiPostUrl" asp-required="true" asp-value="@Model.ApiPostUrl" />
+                        <span asp-validation-for="ApiPostUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ApiGetUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ApiGetUrl" asp-required="true" asp-value="@Model.ApiGetUrl" />
+                        <span asp-validation-for="ApiGetUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ApiAuthenticationScheme" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ApiAuthenticationScheme" asp-required="true" asp-value="@Model.ApiAuthenticationScheme" />
+                        <span asp-validation-for="ApiAuthenticationScheme"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ApiToken" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ApiToken" asp-required="true" asp-value="@Model.ApiToken" />
+                        <span asp-validation-for="ApiToken"></span>
+                    </div>
+                </div>
+                <div class="form-group"></div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

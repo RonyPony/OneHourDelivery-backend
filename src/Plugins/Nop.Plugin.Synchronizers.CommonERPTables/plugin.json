@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Synchronizers",
+  "FriendlyName": "Common ERP Tables",
+  "SystemName": "Synchronizers.CommonERPSyncTables",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Synchronizers.CommonERPTables.dll",
+  "Description": "This plugin creates the common tables needed for the correct interaction between nopCommerce and an ERP."
+}

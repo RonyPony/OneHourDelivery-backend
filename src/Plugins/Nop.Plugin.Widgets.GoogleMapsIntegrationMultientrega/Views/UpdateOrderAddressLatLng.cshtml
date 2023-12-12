@@ -1,0 +1,76 @@
+﻿@model AddressCoordinatesMultientregaStructureModel
+@{
+    Html.AddScriptParts(ResourceLocation.Footer, $"~/Plugins/Widgets.GoogleMapsIntegrationMultientrega/Scripts/updateOrderAddressLatLng.js");
+}
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="AddressGeoCoordinates.Latitude" />
+            </div>
+            <div class="col-md-9">
+                <div class="input-group">
+                    @* Latitude input has less allowed characters because the pluging is oriented to work in Panama where latituned will never be negative. *@
+                    @* To make it work for countries where latitude can be negative, add 1 to the input maxlength property. *@
+                    <input asp-for="AddressGeoCoordinates.Latitude" class="form-control text-box single-line" type="text" maxlength="10" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="AddressGeoCoordinates.Longitude" />
+            </div>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <input asp-for="AddressGeoCoordinates.Longitude" class="form-control text-box single-line" type="text" maxlength="11" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="MultientregaAddressStructure.ProvinceName" />
+            </div>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <input asp-for="MultientregaAddressStructure.ProvinceName" disabled class="form-control text-box single-line" type="text" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="MultientregaAddressStructure.DistrictName" />
+            </div>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <input asp-for="MultientregaAddressStructure.DistrictName" disabled class="form-control text-box single-line" type="text" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="MultientregaAddressStructure.TownshipName" />
+            </div>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <input asp-for="MultientregaAddressStructure.TownshipName" disabled class="form-control text-box single-line" type="text" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="MultientregaAddressStructure.NeighborhoodName" />
+            </div>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <input asp-for="MultientregaAddressStructure.NeighborhoodName" disabled class="form-control text-box single-line" type="text" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

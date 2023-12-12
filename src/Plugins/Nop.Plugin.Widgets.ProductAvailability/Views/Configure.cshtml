@@ -1,0 +1,158 @@
+﻿@{
+    Layout = "_ConfigurePlugin";
+}
+@model ConfigurationModel
+
+<form asp-controller="ProductAvailability" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T($"{ProductAvailabilityDefault.LocaleResourcesPrefix}.Instructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ProductInventoryUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ProductInventoryUrl" asp-required="true" asp-value="@Model.ProductInventoryUrl" />
+                        <span asp-validation-for="ProductInventoryUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="StoresUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="StoresUrl" asp-required="true" asp-value="@Model.StoresUrl" />
+                        <span asp-validation-for="StoresUrl"></span>
+                    </div>
+                </div>
+                <div class="advanced-setting">
+                    <script>
+                        $(document).ready(function () {
+                            $("#@Html.IdFor(model => model.UseSameTokenForAllRequest)").click(toggleDisplayAdvanceConfig);
+                            toggleDisplayAdvanceConfig();
+                        });
+
+                        function toggleDisplayAdvanceConfig() {
+                            if ($('#@Html.IdFor(model => model.UseSameTokenForAllRequest)').is(':checked')) {
+                                $('#dvUseSameTokenForAllRequestDisabled').hide();
+                                $('#dvUseSameTokenForAllRequestEnabled').show();
+                            }
+                            else {
+                                $('#dvUseSameTokenForAllRequestEnabled').hide();
+                                $('#dvUseSameTokenForAllRequestDisabled').show();
+                            }
+                        }
+                    </script>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="UseSameTokenForAllRequest" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="UseSameTokenForAllRequest" />
+                            <span asp-validation-for="UseSameTokenForAllRequest"></span>
+                        </div>
+                    </div>
+                    <nop-nested-setting asp-for="UseSameTokenForAllRequest">
+                        <div id="dvUseSameTokenForAllRequestEnabled">
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="Token" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Token" asp-required="true" asp-value="@Model.Token" />
+                                    <span asp-validation-for="Token"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dvUseSameTokenForAllRequestDisabled">
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="ProductInventoryUrlToken" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="ProductInventoryUrlToken" asp-required="true" asp-value="@Model.ProductInventoryUrlToken" />
+                                    <span asp-validation-for="ProductInventoryUrlToken"></span>
+                                </div>
+                            </div>
+                            <div class="form-group advanced-setting">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="StoresUrlToken" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="StoresUrlToken" asp-required="true" asp-value="@Model.StoresUrlToken" />
+                                    <span asp-validation-for="StoresUrlToken"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-nested-setting>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="InventoryWarehouseId" asp-postfix=":"></nop-label>
+                    </div>
+                    <div class="inputs">
+                        <div class="col-md-9">
+                            <nop-select asp-for="InventoryWarehouseId" asp-items="Model.Warehouses"></nop-select>
+                            <span asp-validation-for="InventoryWarehouseId"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ProductAttributeId" asp-postfix=":"></nop-label>
+                    </div>
+                    <div class="inputs">
+                        <div class="col-md-9">
+                            <nop-select asp-for="ProductAttributeId" asp-required="true" asp-items="Model.ProductAttributes"></nop-select>
+                            <span asp-validation-for="ProductAttributeId"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="OneSizeProductsIdentifierCode" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="OneSizeProductsIdentifierCode" asp-required="true" asp-value="@Model.OneSizeProductsIdentifierCode" />
+                        <span asp-validation-for="OneSizeProductsIdentifierCode"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="InventoryRequestTries" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="InventoryRequestTries" asp-required="true" asp-value="@Model.InventoryRequestTries" />
+                        <span asp-validation-for="InventoryRequestTries"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DisplayStoreAvailabilityOnProductDetailsPage" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DisplayStoreAvailabilityOnProductDetailsPage" />
+                        <span asp-validation-for="DisplayStoreAvailabilityOnProductDetailsPage"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DeleteExistingProductAttributeValuesOnInventorySync" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DeleteExistingProductAttributeValuesOnInventorySync" />
+                        <span asp-validation-for="DeleteExistingProductAttributeValuesOnInventorySync"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

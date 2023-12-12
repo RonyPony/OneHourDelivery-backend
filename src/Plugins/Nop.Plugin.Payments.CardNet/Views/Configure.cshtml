@@ -1,0 +1,67 @@
+﻿@model Nop.Plugin.Payments.CardNet.Models.CardNetConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+<form asp-controller="CardNet" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Payments.CardNet.ConfigurationInstructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Url"/>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Url" asp-required="true" asp-value="@Model.Url"/>
+                        <span asp-validation-for="Url"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="PwCheckoutScriptUrl"/>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PwCheckoutScriptUrl" asp-required="true" asp-value="@Model.PwCheckoutScriptUrl"/>
+                        <span asp-validation-for="PwCheckoutScriptUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="PublicApiKey"/>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PublicApiKey" asp-required="true" asp-value="@Model.PublicApiKey" />
+                        <span asp-validation-for="PublicApiKey"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="PrivateApiKey"/>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PrivateApiKey" asp-required="true" asp-value="@Model.PrivateApiKey" />
+                        <span asp-validation-for="PrivateApiKey"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CardNetImageUrl"/>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CardNetImageUrl" asp-value="@Model.CardNetImageUrl"/>
+                    </div>
+                </div>
+                <div class="form-group"></div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

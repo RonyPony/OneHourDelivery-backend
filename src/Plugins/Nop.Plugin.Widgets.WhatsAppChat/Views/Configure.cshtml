@@ -1,0 +1,66 @@
+﻿@model Nop.Plugin.Widgets.WhatsAppChat.Models.ConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+@await Component.InvokeAsync("StoreScopeConfiguration")
+<form asp-controller="WidgetsWhatsAppChat" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(T("Plugins.Widgets.WhatsAppChat.ConfigurationInstructions"))
+                </p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="Phone_OverrideForStore" asp-input="Phone" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="Phone" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Phone" />
+                        <span asp-validation-for="Phone"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="HeaderTitle_OverrideForStore" asp-input="HeaderTitle" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="HeaderTitle" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="HeaderTitle" />
+                        <span asp-validation-for="HeaderTitle"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="PopupMessage_OverrideForStore" asp-input="PopupMessage" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="PopupMessage" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PopupMessage" />
+                        <span asp-validation-for="PopupMessage"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="Message_OverrideForStore" asp-input="Message" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="Message" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Message" />
+                        <span asp-validation-for="Message"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-blue" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,298 @@
+﻿@using Nop.Core
+@using Nop.Services.Configuration
+@using Nop.Services.Security
+@using Nop.Services.Orders
+@using Nop.Core.Domain.Orders
+
+@using Nop.Services.Localization
+
+@inject IStoreContext storeContext
+@inject IWorkContext workContext
+@inject ISettingService settingService
+@inject IPermissionService permissionService
+@inject IShoppingCartService shoppingCartService
+@inject IThemeContext themeContext
+@inject IStoreContext storeContext
+@inject ILocalizationService localizationService
+
+@{
+    Layout = "_Root.Head";
+    //logo path
+    var logoPath = $"~/Themes/{themeContext.WorkingThemeName}/Content/img/logo.png";
+
+    var themeLogo = await Component.InvokeAsync("Widget", new { widgetZone = "brooklyn_theme_logo" });
+}
+
+@{
+    var storeId = storeContext.CurrentStore.Id;
+    var numberOfItemBoxesClass = settingService.GetSettingByKey("brooklynthemesettings.catalogpagesitemboxesperrow", "items-per-row-four", storeId, true).ToLowerInvariant();
+
+    var homePageCss = String.Empty;
+    var controllerName = Url.ActionContext.RouteData.Values["controller"].ToString();
+    var isHomePage = controllerName.Equals("home", StringComparison.InvariantCultureIgnoreCase);
+    if (isHomePage)
+    {
+        homePageCss = "master-wrapper-home";
+    }
+
+    var isProductPage = controllerName.Equals("product", StringComparison.InvariantCultureIgnoreCase);
+
+    var productPageLayout = String.Empty;
+    if (isProductPage)
+    {
+        productPageLayout = settingService.GetSettingByKey("brooklynthemesettings.productpagelayout", "one-column", storeId, true);
+    }
+
+    var shoppingCartEnabled = permissionService.Authorize(StandardPermissionProvider.EnableShoppingCart);
+    var wishlistEnabled = permissionService.Authorize(StandardPermissionProvider.EnableWishlist);
+
+    var showCartQuantity = settingService.GetSettingByKey("brooklynthemesettings.ShowCartQuantityMarker", false, storeId, true);
+    int shoppingCartItems = 0;
+
+    if (showCartQuantity)
+    {
+        var customer = workContext.CurrentCustomer;
+
+        if (customer.HasShoppingCartItems)
+        {
+            shoppingCartItems = shoppingCartService.GetShoppingCart(workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, storeContext.CurrentStore.Id)
+                              .Sum(item => item.Quantity);
+        }
+    }
+}
+
+@await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.BodyStartHtmlTagAfter })
+@await Html.PartialAsync("_Notifications")
+@await Html.PartialAsync("_JavaScriptDisabledWarning")
+@await Html.PartialAsync("_OldInternetExplorerWarning")
+
+<div class="master-wrapper-page @homePageCss @numberOfItemBoxesClass">
+    @await Component.InvokeAsync("AdminHeaderLinks")
+    @await Html.PartialAsync("_Header", shoppingCartItems)
+    <script asp-location="Footer">
+        var localized_data = {
+            AjaxCartFailure: "@T("AjaxCart.Failure")"
+        };
+        AjaxCart.init(false, '.shopping-cart-link .cart-qty, .header-actions .cart-qty', '.header-links .wishlist-qty', '#flyout-cart', localized_data);
+        $(document).ready(function () {
+            $(".picture-wrapper").appendTo(".gallery");
+        });
+    </script>
+    <div class="overlayOffCanvas"></div>
+    <div class="responsive-nav-wrapper-parent">
+        <div class="responsive-nav-wrapper">
+            <div class="menu-title">
+                <span>@T("SevenSpikes.Themes.Common.MenuTitle")</span>
+            </div>
+            <a href="@Url.RouteUrl("HomePage")" class="logo" sty>
+                @if (!String.IsNullOrEmpty(themeLogo.ToHtmlString()))
+                {
+                    @themeLogo
+                }
+                else
+                { <img title="" src="@Url.Content(logoPath)" style="">
+                }
+            </a>
+            <div class="search-wrap">
+                <span>@T("Search")</span>
+            </div>
+            @if (wishlistEnabled)
+            {
+                <div class="wishlist-opener">
+                    <a alt="@T("Wishlist")" href="@Url.RouteUrl("Wishlist")" title="@T("Wishlist")">@T("Wishlist")</a>
+                </div>
+            }
+            @if (shoppingCartEnabled)
+            {
+                <div class="shopping-cart-link">
+                    <a alt="@T("Shoppingcart")" href="@Url.RouteUrl("ShoppingCart")">
+                        @if (showCartQuantity)
+                        {
+                            <small class="cart-qty">@T("ShoppingCart.HeaderQuantity", shoppingCartItems)</small>
+                        }
+                    </a>
+                </div>
+            }
+            <div class="filters-button">
+                <span>@T("SevenSpikes.Themes.Common.Filters")</span>
+            </div>
+            <div class="personal-button" id="header-links-opener">
+                <span>@T("SevenSpikes.Themes.Common.Personal")</span>
+            </div>
+        </div>
+
+        <div class="mobile-menu-display">
+            <div class="header-actions-wrapper">
+                @{ var menuHtml = await Component.InvokeAsync("Widget", new { widgetZone = "theme_header_menu" });}
+
+
+                <div id="headerMenuParent">
+                    <div id="customMenu" class="header-menu pictures-per-row-two ps-container open custom-mobile-menu" style="webkit-transform: translate(0) !important; -ms-transform: translate(0); transform: translate(0); !important;">
+
+                        @if (!String.IsNullOrEmpty(menuHtml.ToHtmlString()))
+                        {
+                            @menuHtml
+                        }
+                        else
+                        {
+                            @await Component.InvokeAsync("TopMenu")
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (isHomePage)
+    {
+        @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_main_slider" })
+
+        var secondBannerAdditionalCssClass = String.Empty;
+        var hideSecondBannerOnMobile = settingService.GetSettingByKey("brooklynthemesettings.hidesecondmainslideronmobile", false, storeId, true);
+        if (hideSecondBannerOnMobile)
+        {
+            secondBannerAdditionalCssClass = "hide-banner";
+        }
+
+        var homePageLeftBanner = await Component.InvokeAsync("Widget", new { widgetZone = "home_page_left_banner_top" });
+        var homePageRightBanner = await Component.InvokeAsync("Widget", new { widgetZone = "home_page_right_banner_top" });
+
+        if (!String.IsNullOrEmpty(homePageLeftBanner.ToHtmlString()) && !String.IsNullOrEmpty(homePageRightBanner.ToHtmlString()))
+        {
+            <div class="banner-wrapper">
+                <div class="main-banner main-banner-1">@homePageLeftBanner</div>
+                <div class="main-banner main-banner-2 @secondBannerAdditionalCssClass">@homePageRightBanner</div>
+            </div>
+        }
+    }
+    <div class="master-wrapper-content @productPageLayout">
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ContentBefore })
+        @if (IsSectionDefined("Breadcrumb"))
+        {
+            @RenderSection("Breadcrumb")
+        }
+        <div class="master-column-wrapper">
+            @RenderBody()
+        </div>
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ContentAfter })
+    </div>
+    @await Component.InvokeAsync("Footer")
+</div>
+@await Component.InvokeAsync("EuCookieLaw")
+@await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.BodyEndHtmlTagBefore })
+
+<style>
+    .importantRule {
+        display: none !important;
+    }
+
+    .responsive-nav-wrapper .menu-title, .responsive-nav-wrapper .logo {
+        float: left !important;
+        margin: auto 7px;
+        height: 50px;
+        width: auto !important
+    }
+
+    .responsive-nav-wrapper .search-wrap, .responsive-nav-wrapper .wishlist-opener,
+    .responsive-nav-wrapper .shopping-cart-link, .responsive-nav-wrapper .filters-button, .responsive-nav-wrapper .personal-button {
+        float: right !important;
+        margin: auto 7px;
+        height: 50px;
+    }
+
+    .responsive-nav-wrapper a.logo {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+        .responsive-nav-wrapper a.logo img {
+            width: 70px;
+            height: 50px;
+        }
+
+    .responsive-nav-wrapper > div > span, .responsive-nav-wrapper > div > a {
+        color: #2a2a2a !important;
+    }
+
+    @@media (max-width: 1024px) {
+        .mobile-menu-display .header-menu {
+            position: static !important;
+            top: initial !important;
+            left: initial !important;
+            width: auto !important;
+            height: 100% !important;
+        }
+
+            .mobile-menu-display .header-menu ul {
+                display: flex;
+                justify-content: center !important;
+                align-items: center !important;
+                position: relative !important;
+                flex-wrap: wrap !important;
+            }
+
+            .mobile-menu-display .header-menu.custom-mobile-menu ul {
+                overflow-x: auto;
+                flex-wrap: nowrap !important;
+                justify-content: center !important;
+            }
+
+            .mobile-menu-display .header-menu > ul li {
+                position: static !important;
+                display: inline-block !important;
+            }
+
+        /* .header-menu ul:nth-of-type(1) {
+            display: none !important;
+        }
+
+        .header-menu ul:nth-of-type(3) {
+            display: none !important;
+        }*/
+
+        .header-menu.custom-mobile-menu > ul li > a, .header-menu > ul li > span {
+            display: block;
+            position: relative;
+            z-index: 0;
+            width: auto !important;
+            margin: 0 10px;
+            border-bottom: 2px solid #eee;
+            padding: 25px 5px 12px;
+            line-height: 16px;
+            color: #444;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: none !important;
+            white-space: nowrap;
+        }
+
+        .header-logo {
+            display: none !important;
+        }
+    }
+
+    @@media (max-width:426px) {
+
+        .responsive-nav-wrapper > * {
+            width: 45px !important;
+        }
+
+        .responsive-nav-wrapper .search-wrap, .responsive-nav-wrapper .wishlist-opener,
+        .responsive-nav-wrapper .shopping-cart-link, .responsive-nav-wrapper .filters-button, .responsive-nav-wrapper .personal-button {
+            margin: 0 !important;
+        }
+    }
+    @@media(max-width:645px){
+        .mobile-menu-display .header-menu.custom-mobile-menu ul {
+            justify-content: flex-start !important;
+        }
+    }
+</style>
+<script asp-location="Footer">
+    if ($(window).width() >= 1024) {
+        $(".header-options-wrapper .search-box.store-search-box").remove();
+        $(".mobile-custom-menu.importantRule").remove();
+    } else {
+        $('.search-box').prependTo('.search-box.store-search-box');
+        $('.search-box.store-search-box .search-box:nth-child(2)').remove();
+    }
+</script>

@@ -1,0 +1,6 @@
+﻿@{
+    Html.AddScriptParts(ResourceLocation.Footer, $"~/{Defaults.PluginOutputDir}/Scripts/checkoutAddNewAddress.js");
+}
+<script asp-location="Footer">
+    let title = '@T("checkout.orenternewaddress")';
+</script>

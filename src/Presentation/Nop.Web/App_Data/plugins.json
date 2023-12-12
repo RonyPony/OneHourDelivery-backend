@@ -1,0 +1,42 @@
+﻿{
+  "InstalledPluginNames": [
+    "Obsolete field, using only for compatibility"
+  ],
+  "InstalledPlugins": [
+    {
+      "SystemName": "Widgets.GoogleMapsIntegration",
+      "Version": "1.00"
+    },
+    {
+      "SystemName": "Nop.Plugin.Api",
+      "Version": "4.3.3"
+    },
+    {
+      "SystemName": "Shipping.FixedByWeightByTotal",
+      "Version": "2.23"
+    },
+    {
+      "SystemName": "Widgets.WarehouseSchedule",
+      "Version": "1.00"
+    },
+    {
+      "SystemName": "Payments.CheckMoneyOrder",
+      "Version": "1.44"
+    },
+    {
+      "SystemName": "Widgets.NivoSlider",
+      "Version": "1.38"
+    },
+    {
+      "SystemName": "Misc.DeliveryAppIntegrationBackend",
+      "Version": "1.00"
+    },
+    {
+      "SystemName": "Payments.CyberSource",
+      "Version": "1.00"
+    }
+  ],
+  "PluginNamesToUninstall": [],
+  "PluginNamesToDelete": [],
+  "PluginNamesToInstall": []
+}

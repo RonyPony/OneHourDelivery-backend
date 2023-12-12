@@ -1,0 +1,39 @@
+﻿@model VendorWarehouseMappingModel
+
+<button type="button" name="selectwarehouse" class="btn bg-olive" data-toggle="modal" data-target="#selectwarehouse-window">
+    <i class="fa fa-th-large"></i>
+    @T($"{Defaults.LocaleResourcesPrefix}.VendorWarehouse.Button.SelectWarehouse")
+</button>
+
+@*select warehouse form*@
+<div id="selectwarehouse-window" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="selectwarehouse-window-title">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="selectwarehouse-window-title">@T($"{Defaults.LocaleResourcesPrefix}.VendorWarehouse.ModalTitle.SelectWarehouse")</h4>
+            </div>
+            <form asp-controller="DeliveryAppShipping" asp-action="SelectWarehouse" method="post">
+                @Html.HiddenFor(model => model.VendorId)
+                <div class="form-horizontal">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <nop-label asp-for="WarehouseId" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="WarehouseId" asp-items="Model.Warehouses" />
+                                <span asp-validation-for="WarehouseId"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">
+                            @T("Admin.Common.Save")
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

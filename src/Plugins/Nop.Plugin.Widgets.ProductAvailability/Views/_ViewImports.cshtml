@@ -1,0 +1,21 @@
+﻿@inherits Nop.Web.Framework.Mvc.Razor.NopRazorPage<TModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Nop.Web.Framework
+
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@using Nop.Web.Framework.UI
+@using Nop.Web.Framework.Extensions
+@using System.Text.Encodings.Web
+@using Nop.Services.Events
+@using Nop.Web.Extensions
+@using Nop.Web.Framework.Events
+@using Nop.Web.Framework.Infrastructure
+@using Nop.Web.Models.Catalog
+@using Nop.Plugin.Widgets.ProductAvailability.Models
+@using Nop.Plugin.Widgets.ProductAvailability.Models.Inventory
+@using System.Net.Http
+@using Newtonsoft.Json
+@using Nop.Plugin.Widgets.ProductAvailability
+@using Nop.Core
+@using Nop.Core.Domain.Seo
+@using Nop.Web.Models.Checkout

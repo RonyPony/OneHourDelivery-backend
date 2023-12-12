@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Auto Advance Search",
+  "SystemName": "Widget.AutoAdvanceSearch",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widget.AutoAdvanceSearch.dll",
+  "Description": "This plugin makes the search of nopCommerce to be automatically advance."
+}

@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Google Maps Integration Multientrega",
+  "SystemName": "Widgets.GoogleMapsIntegrationMultientrega",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.GoogleMapsIntegrationMultientrega.dll",
+  "Description": "This plug-in is responsible for the integration with Google Maps API's for addresses in nopCommerce and using multientrega"
+}

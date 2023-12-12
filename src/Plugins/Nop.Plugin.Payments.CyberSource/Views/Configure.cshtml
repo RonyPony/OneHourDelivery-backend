@@ -1,0 +1,158 @@
+﻿@{
+    Layout = "_ConfigurePlugin";
+}
+
+@model Nop.Plugin.Payments.CyberSource.Models.ConfigurationModel
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+@await Component.InvokeAsync("SettingMode")
+
+<form asp-controller="PaymentCyberSource" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="PaymentPageUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PaymentPageUrl" asp-required="true" />
+                        <span asp-validation-for="PaymentPageUrl"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="RedirectUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="RedirectUrl" asp-required="true" />
+                        <span asp-validation-for="RedirectUrl"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Access_key" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Access_key" asp-required="true" />
+                        <span asp-validation-for="Access_key"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MerchantId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MerchantId" asp-required="true" />
+                        <span asp-validation-for="MerchantId"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Secret_key" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Secret_key" asp-required="true" />
+                        <span asp-validation-for="Secret_key"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="SerialNumber" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="SerialNumber" asp-required="true" />
+                        <span asp-validation-for="SerialNumber"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Transaction_type" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Transaction_type" asp-required="true" />
+                        <span asp-validation-for="Transaction_type"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Currency" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Currency" asp-required="true" />
+                        <span asp-validation-for="Currency"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Locale" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Locale" asp-required="true" />
+                        <span asp-validation-for="Locale"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AdditionalFee" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AdditionalFee" />
+                        <span asp-validation-for="AdditionalFee"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CybersourceEnvironment" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CybersourceEnvironment" asp-required="true" />
+                        <span asp-validation-for="CybersourceEnvironment"></span>
+                    </div>
+                </div>
+
+                <div class="advanced-setting">
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="OrderStatusId" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="OrderStatusId" asp-items="@Model.OrderStatus" />
+                            <span asp-validation-for="OrderStatusId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group advanced-setting">
+                        <div class="col-md-3">
+                            <nop-label asp-for="MarkAsPaid" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="MarkAsPaid" />
+                            <span asp-validation-for="MarkAsPaid"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        &nbsp;
+                    </div>
+                    <div class="col-md-9">
+                        <input type="submit" name="save" class="btn bg-blue" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>

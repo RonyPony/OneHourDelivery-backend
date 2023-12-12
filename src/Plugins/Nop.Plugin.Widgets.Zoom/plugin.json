@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Zoom",
+  "SystemName": "Widgets.Zoom",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.Zoom.dll",
+  "Description": "This plugin allows you to activate a zoom on product images in the product details page, also you could enable a carousel for the thumbnail images when the page is displayed on a movile device and also can set if the main image changes when the thumbs are hovered or when clicked."
+}

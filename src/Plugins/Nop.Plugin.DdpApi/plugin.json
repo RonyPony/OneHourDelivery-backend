@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Api",
+  "FriendlyName": "DDP Api plugin",
+  "SystemName": "Nop.Plugin.DdpApi",
+  "Version": "4.3.3",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Nop-Templates team, modified by Wepsys S.R.L",
+  "DisplayOrder": -1,
+  "FileName": "Nop.Plugin.DdpApi.dll",
+  "Description": "This plugin is Restfull API for nopCommerce"
+}

@@ -1,0 +1,192 @@
+@model CustomWarehouseEditModel
+@{
+    Html.AddCssFileParts(ResourceLocation.Head, $"~/{Defaults.PluginOutputDir}/Content/Styles.css");
+    Html.AddScriptParts(ResourceLocation.Footer, $"~/{Defaults.PluginOutputDir}/Scripts/main.js");
+}
+
+<div asp-validation-summary="All"></div>
+<input asp-for="WarehouseModel.Id" type="hidden" />
+<input asp-for="AddressGeoCoordinatesMapping.AddressId" type="hidden" />
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = AdminWidgetZones.WarehouseDetailsTop, additionalData = Model.WarehouseModel })
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="WarehouseModel.Name" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="WarehouseModel.Name" asp-required="true" />
+                            <span asp-validation-for="WarehouseModel.Name"></span>
+                        </div>
+                    </div>
+                    @if (Model.PluginConfigurationSettings.AddressAutocompleteEnabled)
+                    {
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="autocomplete">
+                                        @Html.Raw(T($"{Defaults.ResourcesNamePrefix}.Inputs.AddressAutocomplete"))
+                                    </label>
+                                    <div title="@T($"{Defaults.ResourcesNamePrefix}.Inputs.AddressAutocomplete.Hint")" data-toggle="tooltip" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input id="autocomplete" type="text" class="form-control text-box single-line" />
+                            </div>
+                        </div>
+                    }
+                    @if (Model.PluginConfigurationSettings.GetAddressFromCoordinatesEnabled)
+                    {
+                        <div class="form-group d-flex align-items-center">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="geocoordinateSearch">
+                                        @Html.Raw(T($"{Defaults.ResourcesNamePrefix}.Inputs.GeocoordinatesSearch"))
+                                    </label>
+                                    <div title="@T($"{Defaults.ResourcesNamePrefix}.Inputs.GeocoordinatesSearch.Hint")" data-toggle="tooltip" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <input id="geocoordinateSearch" class="form-control text-box single-line" type="text" placeholder="@T($"{Defaults.ResourcesNamePrefix}.Inputs.GeocoordinatesSearch.Placeholder")" />
+                            </div>
+                            <div class="col-md-1 pull-right">
+                                <button id="btn-geocoordinateSearch" type="button" name="save" class="btn bg-blue">
+                                    <i class="fa fa-search"></i>
+                                    @T($"{Defaults.ResourcesNamePrefix}.Inputs.Search")
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.PluginConfigurationSettings.SelectAddresFromMapEnabled)
+                    {
+                        <div class="form-group">
+                            <div class="col-md-9 pull-right map-container">
+                                <div id="map"></div>
+                                <span class="marker-tip">@T($"{Defaults.ResourcesNamePrefix}.Text.Marker.Tip")</span>
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddressGeoCoordinatesMapping.Latitude" />
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-required">
+                                <input asp-for="AddressGeoCoordinatesMapping.Latitude" asp-required="true" class="form-control text-box single-line" type="text" />
+                                <div class="input-group-btn">
+                                    <span class="required">*</span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="AddressGeoCoordinatesMapping.Latitude"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddressGeoCoordinatesMapping.Longitude" />
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-required">
+                                <input asp-for="AddressGeoCoordinatesMapping.Longitude" asp-required="true" class="form-control text-box single-line" type="text" />
+                                <div class="input-group-btn">
+                                    <span class="required">*</span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="AddressGeoCoordinatesMapping.Longitude"></span>
+                        </div>
+                    </div>
+                    <nop-editor asp-for="WarehouseModel.Address" asp-template="Address" />
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="WarehouseModel.AdminComment" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-textarea asp-for="WarehouseModel.AdminComment" />
+                            <span asp-validation-for="WarehouseModel.AdminComment"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = AdminWidgetZones.WarehouseDetailsBottom, additionalData = Model.WarehouseModel })
+        </div>
+        @{
+            decimal addressLatitude = Model.AddressGeoCoordinatesMapping.Latitude.Value;
+            decimal addressLongitude = Model.AddressGeoCoordinatesMapping.Longitude.Value;
+
+            <script>
+                let mapDivId = 'map';
+                let autocompleteInputId = 'autocomplete';
+                let geocoordinatesSearchInputId = 'geocoordinateSearch';
+                let addressLatitude = '@addressLatitude';
+                let addressLongitude = '@addressLongitude';
+            </script>
+        }
+        @if (Model.PluginConfigurationSettings.AddressAutocompleteEnabled
+        || Model.PluginConfigurationSettings.SelectAddresFromMapEnabled
+        || Model.PluginConfigurationSettings.GetAddressFromCoordinatesEnabled)
+        {
+            string selectAddresFromMapApiKey = Model.PluginConfigurationSettings.ApiKey;
+            <script defer src="https://maps.googleapis.com/maps/api/js?key=@selectAddresFromMapApiKey&callback=initMap&libraries=places&v=weekly"></script>
+
+            string addressIdInput = Html.IdFor(model => model.AddressGeoCoordinatesMapping.AddressId);
+            string latitudeInputId = Html.IdFor(model => model.AddressGeoCoordinatesMapping.Latitude);
+            string longitudeInputId = Html.IdFor(model => model.AddressGeoCoordinatesMapping.Longitude);
+            string countryInputId = Html.IdFor(model => model.WarehouseModel.Address.CountryId);
+            string cityInputId = Html.IdFor(model => model.WarehouseModel.Address.City);
+            string address1InputId = Html.IdFor(model => model.WarehouseModel.Address.Address1);
+            string zipPostalCodeInputId = Html.IdFor(model => model.WarehouseModel.Address.ZipPostalCode);
+            bool autocompleteEnabled = Model.PluginConfigurationSettings.AddressAutocompleteEnabled;
+            bool mapEnabled = Model.PluginConfigurationSettings.SelectAddresFromMapEnabled;
+            bool geocodingEnabled = Model.PluginConfigurationSettings.GetAddressFromCoordinatesEnabled;
+            bool mapBoundariesEnabled = Model.PluginConfigurationSettings.MapBoundariesEnabled;
+            bool defaultLatLngEnabled = Model.PluginConfigurationSettings.DefaultLatLngEnabled;
+
+            <script>
+                let apiKey = '@selectAddresFromMapApiKey';
+                let addressIdInput = @addressIdInput;
+                let latitudeInput = @latitudeInputId;
+                let longitudeInput = @longitudeInputId;
+                let countryInput = @countryInputId;
+                let cityInput = @cityInputId;
+                let address1Input = @address1InputId;
+                let zipPostalCodeInput = @zipPostalCodeInputId;
+                let autocompleteEnabled = '@autocompleteEnabled';
+                let mapEnabled = '@mapEnabled';
+                let geocodingEnabled = '@geocodingEnabled';
+                let mapBoundariesEnabled = '@mapBoundariesEnabled';
+                let defaultLatLngEnabled = '@defaultLatLngEnabled';
+            </script>
+        }
+        @if (Model.PluginConfigurationSettings.MapBoundariesEnabled)
+        {
+            decimal northBound = Model.PluginConfigurationSettings.NorthBound;
+            decimal southBound = Model.PluginConfigurationSettings.SouthBound;
+            decimal westBound = Model.PluginConfigurationSettings.WestBound;
+            decimal eastBound = Model.PluginConfigurationSettings.EastBound;
+
+            <script>
+                let northBound = '@northBound';
+                let southBound = '@southBound';
+                let westBound = '@westBound';
+                let eastBound = '@eastBound';
+            </script>
+        }
+        @if (Model.PluginConfigurationSettings.DefaultLatLngEnabled)
+        {
+            decimal defaultLat = Model.PluginConfigurationSettings.DefaultLatitude;
+            decimal defaultLng = Model.PluginConfigurationSettings.DefaultLongitude;
+
+            <script>
+                let defaultLat = '@defaultLat';
+                let defaultLng = '@defaultLng';
+            </script>
+        }
+    </div>
+</div>

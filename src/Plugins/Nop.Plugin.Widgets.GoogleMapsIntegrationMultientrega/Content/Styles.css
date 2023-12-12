@@ -1,0 +1,38 @@
+﻿.map-container {
+    margin-bottom: 20px;
+    text-align: end;
+}
+
+#map, #billing-map, #shipping-map {
+    height: 400px;
+    width: 100%;
+}
+
+.marker-tip {
+    font-size: 14px;
+    color: #888;
+    font-weight: lighter;
+    font-style: italic !important;
+}
+
+.d-flex {
+    display: flex!important;
+}
+
+.align-items-center {
+    align-items: center!important;
+}
+
+.custom-mb {
+    margin: 0 0 40px !important;
+}
+
+.add-new-address-box {
+    display: flex;
+    justify-content: center;
+    min-height: 216px;
+    align-items: center;
+    background: url(../Content/Images/add-location.png) no-repeat;
+    background-position: center;
+    background-size: 150px;
+}

@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Synchronizers",
+  "FriendlyName": "SAP Products Synchronizer",
+  "SystemName": "Synchronizers.SAPProducts",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Synchronizers.SAPProducts.dll",
+  "Description": "This plugin creates a scheduled task to sync products from SAP"
+}

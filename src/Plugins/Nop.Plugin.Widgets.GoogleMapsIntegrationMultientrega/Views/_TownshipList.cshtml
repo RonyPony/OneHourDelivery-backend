@@ -1,0 +1,26 @@
+﻿@model MultientregaSearchModel
+
+@await Html.PartialAsync("Table", new DataTablesModel
+{
+    Name = "multientrega-township-grid",
+    UrlRead = new DataUrl("/Multientrega/TownshipList"),
+    Length = 10,
+    ColumnCollection = new List<ColumnProperty>
+    {
+        new ColumnProperty(nameof(TownshipMappingModel.MultientregaId))
+        {
+            Title = $"{T($"{Defaults.ResourcesNamePrefix}.Fields.TownshipId").Text}Id",
+            Width = "100"
+        },
+        new ColumnProperty(nameof(TownshipMappingModel.MultientregaDistrictId))
+        {
+            Title = $"{T($"{Defaults.ResourcesNamePrefix}.Fields.DistrictId").Text}Id",
+            Width = "100"
+        },
+        new ColumnProperty(nameof(TownshipMappingModel.Name))
+        {
+            Title = T($"{Defaults.ResourcesNamePrefix}.Fields.TownshipId").Text,
+            Width = "250"
+        }
+    }
+})

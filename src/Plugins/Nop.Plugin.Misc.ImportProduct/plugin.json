@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Misc",
+  "FriendlyName": "Import Product",
+  "SystemName": "ImportProduct",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Misc.ImportProduct.dll",
+  "Description": "This plug-in allows to import products to Nop-Commerce."
+}

@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Custom Fields Validator",
+  "SystemName": "Widgets.CustomFieldsValidator",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.CustomFieldsValidator.dll",
+  "Description": "This widgets use for validating the NIT/NCR fields due to this field are not validated by nopCommerce."
+}

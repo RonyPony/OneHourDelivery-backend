@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Synchronizers",
+  "FriendlyName": "SAP Customers Synchronizer",
+  "SystemName": "Synchronizers.SAPCustomersSynchronizer",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Synchronizers.SAPCustomers.dll",
+  "Description": "This plug-in is responsible for synchronizing the customers in an SAP environment with a NopCommerce environment."
+}
