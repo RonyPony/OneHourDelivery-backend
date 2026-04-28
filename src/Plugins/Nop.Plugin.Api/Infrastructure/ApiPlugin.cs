@@ -95,17 +95,14 @@ public class ApiPlugin : BasePlugin, IAdminMenuPlugin
         await base.UninstallAsync();
     }
 
-    public void ManageSiteMap(SiteMapNode rootNode)
-        => ManageSiteMapAsync(rootNode).GetAwaiter().GetResult();
-
-    public async Task ManageSiteMapAsync(SiteMapNode rootNode)
+    public async Task ManageSiteMapAsync(AdminMenuItem rootNode)
     {
         var pluginMenuName = await _localizationService.GetResourceAsync("Plugins.Api.Admin.Menu.Title");
         var settingsMenuName = await _localizationService.GetResourceAsync("Plugins.Api.Admin.Menu.Settings.Title");
 
         const string adminUrlPart = "Admin/";
 
-        var pluginMainMenu = new SiteMapNode
+        var pluginMainMenu = new AdminMenuItem
         {
             Title = string.IsNullOrWhiteSpace(pluginMenuName) ? "API" : pluginMenuName,
             Visible = true,
@@ -113,7 +110,7 @@ public class ApiPlugin : BasePlugin, IAdminMenuPlugin
             IconClass = "fa-genderless"
         };
 
-        pluginMainMenu.ChildNodes.Add(new SiteMapNode
+        pluginMainMenu.ChildNodes.Add(new AdminMenuItem
         {
             Title = string.IsNullOrWhiteSpace(settingsMenuName) ? "Settings" : settingsMenuName,
             Url = _webHelper.GetStoreLocation() + adminUrlPart + "ApiAdmin/Settings",

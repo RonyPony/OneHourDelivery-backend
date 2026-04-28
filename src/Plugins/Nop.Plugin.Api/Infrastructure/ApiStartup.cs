@@ -14,7 +14,6 @@ using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Authorization.Policies;
 using Nop.Plugin.Api.Authorization.Requirements;
 using Nop.Plugin.Api.Configuration;
-using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Api.Infrastructure
 {
@@ -26,7 +25,7 @@ namespace Nop.Plugin.Api.Infrastructure
 
             if (apiConfigSection != null)
             {
-                var apiConfig = services.ConfigureStartupConfig<ApiConfiguration>(apiConfigSection);
+                var apiConfig = apiConfigSection.Get<ApiConfiguration>() ?? new ApiConfiguration();
 
                 if (!string.IsNullOrEmpty(apiConfig.SecurityKey))
                 {
