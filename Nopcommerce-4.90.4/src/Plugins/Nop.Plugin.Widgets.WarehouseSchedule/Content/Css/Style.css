@@ -1,0 +1,40 @@
+﻿#tbl-schedule {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#tbl-schedule td, #tbl-schedule th {
+    border: 1px solid #ddd;
+    padding: 8px;
+    font-size: large;
+}
+
+#tbl-schedule tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#tbl-schedule tr:hover {
+    background-color: #ddd;
+}
+
+#tbl-schedule th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color: #0073b7;
+    color: white;
+}
+
+#tbl-schedule td {
+    text-align: center;
+}
+
+.text-start {
+    text-align: start !important;
+}
+
+.hidden-col-header {
+    background: transparent;
+    border-left: none;
+    border-top: none;
+}

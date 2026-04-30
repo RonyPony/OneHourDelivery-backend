@@ -1,0 +1,62 @@
+﻿@model  IList<WarehouseScheduleMapping>
+@{
+    Layout = "";
+    NopHtml.AddCssFileParts("~/Plugins/Widgets.WarehouseSchedule/Content/Css/Style.css");
+    NopHtml.AddScriptParts(ResourceLocation.Footer, "~/Plugins/Widgets.WarehouseSchedule/Content/Scripts/WarehouseSchedule.Main.js");
+}
+
+<nop-panel asp-name="warehouse-schedule" asp-icon="fa fa-calendar" asp-title="@T($"{WarehouseScheduleDefaults.LocaleResourcesPrefix}.Schedule")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+    <div class="panel-body">
+        <table id="tbl-schedule">
+            <tr>
+                <th class="hidden-col-header"></th>
+                <th>@T($"{WarehouseScheduleDefaults.LocaleResourcesPrefix}.Table.Header.IsActive")</th>
+                <th>@T($"{WarehouseScheduleDefaults.LocaleResourcesPrefix}.Table.Header.BeginHour")</th>
+                <th>@T($"{WarehouseScheduleDefaults.LocaleResourcesPrefix}.Table.Header.EndHour")</th>
+                <th>@T("Admin.Common.Edit")</th>
+            </tr>
+
+            @foreach (WarehouseScheduleMapping scheduleMapping in Model)
+            {
+                System.Int32 currentDayId = scheduleMapping.DayId;
+
+                <tr>
+                    <td class="text-start">
+                        @await Component.InvokeAsync("DayName", new { dayId = scheduleMapping.DayId })
+                        <input type="hidden" name="WarehouseScheduleMappings[@currentDayId].WarehouseId" value="@scheduleMapping.WarehouseId" />
+                        <input type="hidden" name="WarehouseScheduleMappings[@currentDayId].DayId" value="@currentDayId" />
+                    </td>
+                    <td>
+                        @if (scheduleMapping.IsActive)
+                        {
+                            <input name="WarehouseScheduleMappings[@currentDayId].IsActive" type="checkbox" value="true" class="check-box" checked disabled />
+                        }
+                        else
+                        {
+                            <input name="WarehouseScheduleMappings[@currentDayId].IsActive" type="checkbox" value="true" class="check-box" disabled />
+                        }
+                        <input name="WarehouseScheduleMappings[@currentDayId].IsActive" type="hidden" value="false" />
+                        <input name="WarehouseScheduleMappings[@currentDayId].IsActive" type="hidden" value="true" />
+                    </td>
+                    <td>
+                        <input type="time" name="WarehouseScheduleMappings[@currentDayId].BeginTime" style="width: 210px;" value="@scheduleMapping.BeginTime" disabled>
+                    </td>
+                    <td>
+                        <input type="time" name="WarehouseScheduleMappings[@currentDayId].EndTime" style="width: 210px;" value="@scheduleMapping.EndTime" disabled>
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-default" id="buttonEdit_warehouse_schedule_@currentDayId" onclick="editData_warehouse_schedule(@currentDayId)">
+                            <i class="fa fa-pencil"></i>@T("Admin.Common.Edit")
+                        </a>
+                        <a href="#" class="btn btn-default" id="buttonConfirm_warehouse_schedule_@currentDayId" style="display:none" onclick="confirmEditData_warehouse_schedule(@currentDayId)">
+                            <i class="fa fa-check"></i>@T("Admin.Common.Update")
+                        </a>
+                        <a href="#" class="btn btn-default" id="buttonCancel_warehouse_schedule_@currentDayId" style="display:none" onclick="cancelEditData_warehouse_schedule(@currentDayId)">
+                            <i class="fa fa-ban"></i>@T("Admin.Common.Cancel")
+                        </a>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</nop-panel>
