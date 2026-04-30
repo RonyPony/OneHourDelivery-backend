@@ -288,7 +288,7 @@ namespace Nop.Plugin.Api.Services
         public int GetCustomersCount()
         {
             return _customerRepository.Table.Count(customer => !customer.Deleted
-                                      && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
+                                      && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.GetCurrentStoreAsync().GetAwaiter().GetResult().Id));
         }
 
         // Need to work with dto object so we can map the first and last name from generic attributes table.
@@ -498,14 +498,14 @@ namespace Nop.Plugin.Api.Services
         private int GetDefaultStoreLangaugeId()
         {
             // Get the default language id for the current store.
-            var defaultLanguageId = _storeContext.CurrentStore.DefaultLanguageId;
+            var defaultLanguageId = _storeContext.GetCurrentStoreAsync().GetAwaiter().GetResult().DefaultLanguageId;
 
             if (defaultLanguageId == 0)
             {
                 var allLanguages = _languageService.GetAllLanguages();
 
                 var storeLanguages = allLanguages.Where(l =>
-                    _storeMappingService.Authorize(l, _storeContext.CurrentStore.Id)).ToList();
+                    _storeMappingService.Authorize(l, _storeContext.GetCurrentStoreAsync().GetAwaiter().GetResult().Id)).ToList();
 
                 // If there is no language mapped to the current store, get all of the languages,
                 // and use the one with the first display order. This is a default nopCommerce workflow.
@@ -561,7 +561,7 @@ namespace Nop.Plugin.Api.Services
             return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
             {
                 IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.Table
-                                                        where nls.StoreId == _storeContext.CurrentStore.Id
+                                                        where nls.StoreId == _storeContext.GetCurrentStoreAsync().GetAwaiter().GetResult().Id
                                                               && nls.Active
                                                         select nls.Email).ToList();
 

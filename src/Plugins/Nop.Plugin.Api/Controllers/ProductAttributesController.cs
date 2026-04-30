@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -61,7 +62,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetProductAttributes(ProductAttributesParametersModel parameters)
+        public async Task<IActionResult> GetProductAttributes(ProductAttributesParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -97,7 +98,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ProductAttributesCountRootObject), (int)HttpStatusCode.OK)]        
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetProductAttributesCount()
+        public async Task<IActionResult> GetProductAttributesCount()
         {
             var allProductAttributesCount = _productAttributesApiService.GetProductAttributesCount();
 
@@ -123,7 +124,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetProductAttributeById(int id, string fields = "")
+        public async Task<IActionResult> GetProductAttributeById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -156,7 +157,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult CreateProductAttribute([ModelBinder(typeof(JsonModelBinder<ProductAttributeDto>))] Delta<ProductAttributeDto> productAttributeDelta)
+        public async Task<IActionResult> CreateProductAttribute([ModelBinder(typeof(JsonModelBinder<ProductAttributeDto>))] Delta<ProductAttributeDto> productAttributeDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -170,8 +171,8 @@ namespace Nop.Plugin.Api.Controllers
 
             _productAttributeService.InsertProductAttribute(productAttribute);       
 
-            CustomerActivityService.InsertActivity("AddNewProductAttribute",
-                LocalizationService.GetResource("ActivityLog.AddNewProductAttribute"), productAttribute);
+            await CustomerActivityService.InsertActivityAsync("AddNewProductAttribute",
+                await LocalizationService.GetResourceAsync("ActivityLog.AddNewProductAttribute"), productAttribute);
 
             // Preparing the result dto of the new product
             var productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
@@ -193,7 +194,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult UpdateProductAttribute([ModelBinder(typeof(JsonModelBinder<ProductAttributeDto>))] Delta<ProductAttributeDto> productAttributeDelta)
+        public async Task<IActionResult> UpdateProductAttribute([ModelBinder(typeof(JsonModelBinder<ProductAttributeDto>))] Delta<ProductAttributeDto> productAttributeDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -213,8 +214,8 @@ namespace Nop.Plugin.Api.Controllers
 
             _productAttributeService.UpdateProductAttribute(productAttribute);
           
-            CustomerActivityService.InsertActivity("EditProductAttribute",
-               LocalizationService.GetResource("ActivityLog.EditProductAttribute"), productAttribute);
+            await CustomerActivityService.InsertActivityAsync("EditProductAttribute",
+               await LocalizationService.GetResourceAsync("ActivityLog.EditProductAttribute"), productAttribute);
 
             // Preparing the result dto of the new product attribute
             var productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
@@ -236,7 +237,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteProductAttribute(int id)
+        public async Task<IActionResult> DeleteProductAttribute(int id)
         {
             if (id <= 0)
             {
@@ -253,7 +254,7 @@ namespace Nop.Plugin.Api.Controllers
             _productAttributeService.DeleteProductAttribute(productAttribute);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteProductAttribute", LocalizationService.GetResource("ActivityLog.DeleteProductAttribute"), productAttribute);
+            await CustomerActivityService.InsertActivityAsync("DeleteProductAttribute", await LocalizationService.GetResourceAsync("ActivityLog.DeleteProductAttribute"), productAttribute);
 
             return new RawJsonActionResult("{}");
         }       
