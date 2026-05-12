@@ -1,0 +1,28 @@
+﻿.map-container {
+    margin-bottom: 20px;
+    text-align: end;
+}
+
+#map, #billing-map, #shipping-map {
+    height: 400px;
+    width: 100%;
+}
+
+.marker-tip {
+    font-size: 14px;
+    color: #888;
+    font-weight: lighter;
+    font-style: italic !important;
+}
+
+.d-flex {
+    display: flex!important;
+}
+
+.align-items-center {
+    align-items: center!important;
+}
+
+.custom-mb {
+    margin: 0 0 40px !important;
+}

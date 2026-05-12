@@ -1,0 +1,273 @@
+﻿@model AddressGeoCoordinatesEditModel
+@{
+    Html.AddCssFileParts(ResourceLocation.Head, $"~/{Defaults.PluginOutputDir}/Content/Styles.css");
+    Html.AddScriptParts(ResourceLocation.Footer, $"~/{Defaults.PluginOutputDir}/Scripts/main.js");
+}
+
+<input asp-for="Address.Id" type="hidden" />
+<input asp-for="AddressGeoCoordinatesMapping.AddressId" type="hidden" />
+<div class="edit-address">
+    @if (Model.PluginConfigurationSettings.AddressAutocompleteEnabled)
+    {
+        <div class="inputs">
+            <label for="autocomplete">
+                @Html.Raw(T($"{Defaults.ResourcesNamePrefix}.Inputs.AddressAutocomplete")):
+            </label>
+            <input id="@Model.AutocompleteInputId" type="text" />
+        </div>
+    }
+    @if (Model.PluginConfigurationSettings.GetAddressFromCoordinatesEnabled)
+    {
+        <div class="inputs">
+            <label for="geocoordinateSearch">
+                @Html.Raw(T($"{Defaults.ResourcesNamePrefix}.Inputs.GeocoordinatesSearch")):
+            </label>
+            <input id="@Model.GeoCoordinatesSearchInputId" type="text" placeholder="@T($"{Defaults.ResourcesNamePrefix}.Inputs.GeocoordinatesSearch.Placeholder")" />
+        </div>
+        <div class="buttons">
+            <input id="btn-@Model.GeoCoordinatesSearchInputId" type="button" class="button-1 custom-mb" value="@T($"{Defaults.ResourcesNamePrefix}.Inputs.Search")" />
+        </div>
+    }
+    @if (Model.PluginConfigurationSettings.SelectAddresFromMapEnabled)
+    {
+        <div class="map-container">
+            <div id="@Model.MapDivId"></div>
+            <span class="marker-tip">@T($"{Defaults.ResourcesNamePrefix}.Text.Marker.Tip")</span>
+        </div>
+    }
+    <div class="inputs">
+        <label asp-for="AddressGeoCoordinatesMapping.Latitude" asp-postfix=":"></label>
+        <input asp-for="AddressGeoCoordinatesMapping.Latitude" />
+        <nop-required />
+        <span asp-validation-for="AddressGeoCoordinatesMapping.Latitude"></span>
+    </div>
+    <div class="inputs">
+        <label asp-for="AddressGeoCoordinatesMapping.Longitude" asp-postfix=":"></label>
+        <input asp-for="AddressGeoCoordinatesMapping.Longitude" />
+        <nop-required />
+        <span asp-validation-for="AddressGeoCoordinatesMapping.Longitude"></span>
+    </div>
+    <div class="inputs">
+        <label asp-for="Address.FirstName" asp-postfix=":"></label>
+        <input asp-for="Address.FirstName" />
+        <nop-required />
+        <span asp-validation-for="Address.FirstName"></span>
+    </div>
+    <div class="inputs">
+        <label asp-for="Address.LastName" asp-postfix=":"></label>
+        <input asp-for="Address.LastName" />
+        <nop-required />
+        <span asp-validation-for="Address.LastName"></span>
+    </div>
+    <div class="inputs">
+        <label asp-for="Address.Email" asp-postfix=":"></label>
+        <input asp-for="Address.Email" />
+        <nop-required />
+        <span asp-validation-for="Address.Email"></span>
+    </div>
+    @if (Model.Address.CompanyEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.Company" asp-postfix=":"></label>
+            <input asp-for="Address.Company" />
+            @if (Model.Address.CompanyRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.Company"></span>
+        </div>
+    }
+    @if (Model.Address.CountryEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.CountryId" asp-postfix=":"></label>
+            <select asp-for="Address.CountryId" asp-items="Model.Address.AvailableCountries"
+                    data-trigger="country-select"
+                    data-url="@(Url.RouteUrl("GetStatesByCountryId"))"
+                    data-stateprovince="#@Html.IdFor(model => model.Address.StateProvinceId)"
+                    data-loading="#states-loading-progress"></select>
+            <nop-required />
+            <span asp-validation-for="Address.CountryId"></span>
+        </div>
+    }
+
+    @if (Model.Address.CountryEnabled && Model.Address.StateProvinceEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.StateProvinceId" asp-postfix=":"></label>
+            <select asp-for="Address.StateProvinceId" asp-items="Model.Address.AvailableStates"></select>
+            <span id="states-loading-progress" style="display: none;" class="please-wait">@T("Common.Wait...")</span>
+            <span asp-validation-for="Address.StateProvinceId"></span>
+        </div>
+    }
+    @if (Model.Address.CountyEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.County" asp-postfix=":"></label>
+            <input asp-for="Address.County" />
+            @if (Model.Address.CountyRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.County"></span>
+        </div>
+    }
+    @if (Model.Address.CityEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.City" asp-postfix=":"></label>
+            <input asp-for="Address.City" />
+            @if (Model.Address.CityRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.City"></span>
+        </div>
+    }
+    @if (Model.Address.StreetAddressEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.Address1" asp-postfix=":"></label>
+            <input asp-for="Address.Address1" />
+            @if (Model.Address.StreetAddressRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.Address1"></span>
+        </div>
+    }
+    @if (Model.Address.StreetAddress2Enabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.Address2" asp-postfix=":"></label>
+            <input asp-for="Address.Address2" />
+            @if (Model.Address.StreetAddress2Required)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.Address2"></span>
+        </div>
+    }
+    @if (Model.Address.ZipPostalCodeEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.ZipPostalCode" asp-postfix=":"></label>
+            <input asp-for="Address.ZipPostalCode" />
+            @if (Model.Address.ZipPostalCodeRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.ZipPostalCode"></span>
+        </div>
+    }
+    @if (Model.Address.PhoneEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.PhoneNumber" asp-postfix=":"></label>
+            <input asp-for="Address.PhoneNumber" />
+            @if (Model.Address.PhoneRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.PhoneNumber"></span>
+        </div>
+    }
+    @if (Model.Address.FaxEnabled)
+    {
+        <div class="inputs">
+            <label asp-for="Address.FaxNumber" asp-postfix=":"></label>
+            <input asp-for="Address.FaxNumber" />
+            @if (Model.Address.FaxRequired)
+            {
+                <nop-required />
+            }
+            <span asp-validation-for="Address.FaxNumber"></span>
+        </div>
+    }
+    @if (Model.Address.CustomAddressAttributes.Count > 0)
+    {
+        @await Html.PartialAsync("_AddressAttributes", Model.Address.CustomAddressAttributes)
+    }
+    @{
+        string mapDivId = Model.MapDivId;
+        string autocompleteInputId = Model.AutocompleteInputId;
+        string geoCoordinatesSearchInputId = Model.GeoCoordinatesSearchInputId;
+        decimal addressLatitude = Model.AddressGeoCoordinatesMapping.Latitude;
+        decimal addressLongitude = Model.AddressGeoCoordinatesMapping.Longitude;
+
+        <script asp-location="Footer">
+                let mapDivId = '@mapDivId';
+                let autocompleteInputId = '@autocompleteInputId';
+                let geocoordinatesSearchInputId = '@geoCoordinatesSearchInputId';
+                let addressLatitude = '@addressLatitude';
+                let addressLongitude = '@addressLongitude';
+        </script>
+    }
+    @if ((Model.PluginConfigurationSettings.AddressAutocompleteEnabled
+  || Model.PluginConfigurationSettings.SelectAddresFromMapEnabled
+  || Model.PluginConfigurationSettings.GetAddressFromCoordinatesEnabled)
+  && Model.RenderGoogleMapsJavaScript)
+    {
+        string selectAddresFromMapApiKey = Model.PluginConfigurationSettings.ApiKey;
+        <script asp-location="Footer" defer src="https://maps.googleapis.com/maps/api/js?key=@selectAddresFromMapApiKey&callback=initMap&libraries=places&v=weekly"></script>
+
+        string addressIdInput = Html.IdFor(model => model.AddressGeoCoordinatesMapping.AddressId);
+        string latitudeInputId = Html.IdFor(model => model.AddressGeoCoordinatesMapping.Latitude);
+        string longitudeInputId = Html.IdFor(model => model.AddressGeoCoordinatesMapping.Longitude);
+        string countryInputId = Html.IdFor(model => model.Address.CountryId);
+        string cityInputId = Html.IdFor(model => model.Address.City);
+        string address1InputId = Html.IdFor(model => model.Address.Address1);
+        string zipPostalCodeInputId = Html.IdFor(model => model.Address.ZipPostalCode);
+        bool autocompleteEnabled = Model.PluginConfigurationSettings.AddressAutocompleteEnabled;
+        bool mapEnabled = Model.PluginConfigurationSettings.SelectAddresFromMapEnabled;
+        bool geocodingEnabled = Model.PluginConfigurationSettings.GetAddressFromCoordinatesEnabled;
+        bool mapBoundariesEnabled = Model.PluginConfigurationSettings.MapBoundariesEnabled;
+        bool defaultLatLngEnabled = Model.PluginConfigurationSettings.DefaultLatLngEnabled;
+
+        <script asp-location="Footer">
+            let apiKey = '@selectAddresFromMapApiKey';
+            let addressIdInput = @addressIdInput;
+            let latitudeInput = @latitudeInputId;
+            let longitudeInput = @longitudeInputId;
+            let countryInput = @countryInputId;
+            let cityInput = @cityInputId;
+            let address1Input = @address1InputId;
+            let zipPostalCodeInput = @zipPostalCodeInputId;
+            let autocompleteEnabled = '@autocompleteEnabled';
+            let mapEnabled = '@mapEnabled';
+            let geocodingEnabled = '@geocodingEnabled';
+            let mapBoundariesEnabled = '@mapBoundariesEnabled';
+            let defaultLatLngEnabled = '@defaultLatLngEnabled';
+        </script>
+    }
+    @if (Model.PluginConfigurationSettings.MapBoundariesEnabled)
+    {
+        decimal northBound = Model.PluginConfigurationSettings.NorthBound;
+        decimal southBound = Model.PluginConfigurationSettings.SouthBound;
+        decimal westBound = Model.PluginConfigurationSettings.WestBound;
+        decimal eastBound = Model.PluginConfigurationSettings.EastBound;
+
+        <script asp-location="Footer">
+            let northBound = '@northBound';
+            let southBound = '@southBound';
+            let westBound = '@westBound';
+            let eastBound = '@eastBound';
+        </script>
+    }
+    @if (Model.PluginConfigurationSettings.DefaultLatLngEnabled)
+    {
+        decimal defaultLat = Model.PluginConfigurationSettings.DefaultLatitude;
+        decimal defaultLng = Model.PluginConfigurationSettings.DefaultLongitude;
+
+        <script asp-location="Footer">
+            let defaultLat = '@defaultLat';
+            let defaultLng = '@defaultLng';
+        </script>
+    }
+    @if (!Model.RenderGoogleMapsJavaScript)
+    {
+        <script asp-location="Footer">
+            initMap();
+        </script>
+    }
+</div>

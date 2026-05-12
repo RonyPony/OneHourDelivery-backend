@@ -1,0 +1,18 @@
+﻿{
+  "Group": "Misc",
+  "FriendlyName": "Delivery App Integration Backend",
+  "SystemName": "Misc.DeliveryAppIntegrationBackend",
+  "Version": "4.90.4",
+  "SupportedVersions": [ "4.90" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Misc.DeliveryAppIntegrationBackend.dll",
+  "Description": "This plugin allows the exposure of some rest endpoints to integrate Nopcommerce with a Delivery App.",
+  "DependsOnSystemNames": [
+    "Nop.Plugin.Api",
+    "Shipping.FixedByWeightByTotal",
+    "Payments.CheckMoneyOrder",
+    "Widgets.NivoSlider",
+    "Widgets.WarehouseSchedule"
+  ]
+}

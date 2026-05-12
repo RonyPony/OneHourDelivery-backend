@@ -1,0 +1,153 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+	  <OutputPath>..\..\Presentation\Nop.Web\Plugins\Widgets.GoogleMapsIntegration</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <!--Set this parameter to true to get the dlls copied from the NuGet cache to the output of your project.
+    You need to set this parameter to true if your plugin has a nuget package 
+    to ensure that the dlls copied from the NuGet cache to the output of your project-->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Areas\Admin\Extensions\**" />
+    <Compile Remove="Areas\Admin\Factories\**" />
+    <Compile Remove="Extensions\**" />
+    <EmbeddedResource Remove="Areas\Admin\Extensions\**" />
+    <EmbeddedResource Remove="Areas\Admin\Factories\**" />
+    <EmbeddedResource Remove="Extensions\**" />
+    <None Remove="Areas\Admin\Extensions\**" />
+    <None Remove="Areas\Admin\Factories\**" />
+    <None Remove="Extensions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Areas\Admin\Views\AdminGoogleMapsIntegration\CreateWarehouse.cshtml" />
+    <None Remove="Areas\Admin\Views\AdminGoogleMapsIntegration\EditWarehouse.cshtml" />
+    <None Remove="Areas\Admin\Views\AdminGoogleMapsIntegration\_CreateOrUpdateWarehouse.cshtml" />
+    <None Remove="Areas\Admin\Views\_ViewStart.cshtml" />
+    <None Remove="logo.jpg" />
+	<None Remove="plugin.json" />
+	<None Remove="Views\GoogleMapsIntegration\BillingAddress.cshtml" />
+	<None Remove="Views\GoogleMapsIntegration\OnePageCheckout.cshtml" />
+	<None Remove="Views\GoogleMapsIntegration\OpcBillingAddress.cshtml" />
+	<None Remove="Views\GoogleMapsIntegration\OpcShippingAddress.cshtml" />
+	<None Remove="Views\GoogleMapsIntegration\ShippingAddress.cshtml" />
+	<None Remove="Views\GoogleMapsIntegration\_PickupPoints.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Areas\Admin\Views\AdminGoogleMapsIntegration\CreateWarehouse.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\AdminGoogleMapsIntegration\EditWarehouse.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\AdminGoogleMapsIntegration\_CreateOrUpdateWarehouse.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\_ViewStart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="logo.jpg">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\AddressAdd.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\AddressEdit.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\BillingAddress.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\OnePageCheckout.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\OpcBillingAddress.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\OpcShippingAddress.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\ShippingAddress.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\_CreateOrUpdateAddress.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Views\GoogleMapsIntegration\_PickupPoints.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Areas\Admin\Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Areas\Admin\Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Styles.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Readme.en.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Readme.es.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Scripts\main.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Configure.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+  </Target>
+</Project>

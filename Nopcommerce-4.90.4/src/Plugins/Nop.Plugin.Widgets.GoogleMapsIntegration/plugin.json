@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Google Maps Integration",
+  "SystemName": "Widgets.GoogleMapsIntegration",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.30" ],
+  "Author": "Wepsys",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.GoogleMapsIntegration.dll",
+  "Description": "This plug-in is responsible for the integration with Google Maps API's for addresses in nopCommerce."
+}

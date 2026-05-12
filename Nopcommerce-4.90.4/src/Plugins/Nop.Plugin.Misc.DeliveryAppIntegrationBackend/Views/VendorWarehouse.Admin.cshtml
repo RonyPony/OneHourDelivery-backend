@@ -1,0 +1,26 @@
+﻿@model VendorWarehouseMappingModel
+
+@if (Model.VendorId != 0)
+{
+    <nop-panel asp-name="vendor-select-warehouse" asp-icon="fa fa-th-large" asp-title="@T($"{Defaults.LocaleResourcesPrefix}.VendorWarehouse.Warehouse")" asp-hide-block-attribute-name="false" asp-hide="false" asp-advanced="false">
+        <div class="panel-body">
+            @Html.HiddenFor(model => model.VendorId)
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="WarehouseId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="WarehouseId" asp-items="Model.Warehouses" />
+                    <span asp-validation-for="WarehouseId"></span>
+                </div>
+            </div>
+            <span>
+                <b>
+                    <i class="fa fa-info-circle"></i> Tip: 
+                </b>
+                @T($"{Defaults.LocaleResourcesPrefix}.VendorWarehouse.Admin.Tip")
+            </span>
+        </div>
+    </nop-panel>
+    <script src="/@Defaults.OutputDir/Content/Scripts/VendorWarehouse.Admin.js"></script>
+}
