@@ -1,4 +1,5 @@
-﻿using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
+using System.Threading.Tasks;
+using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
 {
@@ -14,20 +15,20 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
         /// </summary>
         /// <param name="addressId">The address id</param>
         /// <returns>An instance of <see cref="AddressGeoCoordinatesMapping"/>.</returns>
-        AddressGeoCoordinatesMapping GetAddressGeoCoordinates(int addressId);
+        Task<AddressGeoCoordinatesMapping> GetAddressGeoCoordinatesAsync(int addressId);
 
         /// <summary>
         /// Inserts an address geo-coordinates.
         /// </summary>
         /// <param name="addressGeoCoordinates">An instance of <see cref="AddressGeoCoordinatesMapping"/>.</param>
         /// <param name="addressId">The address id.</param>
-        void InsertAddressGeoCoordinates(AddressGeoCoordinatesMapping addressGeoCoordinates, int addressId);
+        Task InsertAddressGeoCoordinatesAsync(AddressGeoCoordinatesMapping addressGeoCoordinates, int addressId);
 
         /// <summary>
         /// Removes an address geo-coordinates.
         /// </summary>
         /// <param name="addressId">The address id.</param>
-        void RemoveAddressGeoCoordinates(int addressId);
+        Task RemoveAddressGeoCoordinatesAsync(int addressId);
 
         #endregion
     }

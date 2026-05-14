@@ -8,7 +8,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Models
     /// <summary>
     /// Represents a custom checkout shipping address model.
     /// </summary>
-    public partial class CheckoutShippingAddressModel : BaseNopModel
+    public partial record CheckoutShippingAddressModel : BaseNopModel
     {
         /// <summary>
         /// Initializes a new instance of <see cref="CheckoutShippingAddressModel"/>.

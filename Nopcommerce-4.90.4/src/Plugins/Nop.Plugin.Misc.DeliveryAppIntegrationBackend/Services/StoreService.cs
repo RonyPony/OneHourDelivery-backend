@@ -1,8 +1,8 @@
 ﻿using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Media;
 using Nop.Data;
+using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Services.Catalog;
 using Nop.Services.Media;
 using System.Collections.Generic;

@@ -1,15 +1,14 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nop.Core.Caching;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Infrastructure;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Services;
 using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Factories;
+using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Factories;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services;

@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Shipping;
+using Nop.Data;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Areas.Admin.Models;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Services;
@@ -15,8 +18,8 @@ using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Areas.Admin.Factories;
 using Nop.Web.Areas.Admin.Infrastructure.Mapper.Extensions;
 using Nop.Web.Extensions;
+using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
-using System;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
 {
@@ -33,9 +36,11 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         private readonly ICustomerActivityService _customerActivityService;
         private readonly IPermissionService _permissionService;
         private readonly IShippingModelFactory _shippingModelFactory;
-        private readonly IShippingService _shippingService;
         private readonly ISettingService _settingService;
+        private readonly IWarehouseService _warehouseService;
         private readonly IAddressGeoCoordinatesService _addressGeoCoordinatesService;
+        private readonly IRepository<WarehouseUserCreatorMapping> _warehouseUserCreatorMappingRepository;
+        private readonly IRepository<VendorWarehouseMapping> _vendorWarehouseMappingRepository;
 
         #endregion
 
@@ -44,15 +49,6 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// <summary>
         /// Initializes a new instance of <see cref="AdminGoogleMapsIntegrationController"/>.
         /// </summary>
-        /// <param name="localizationService">An implementation of <see cref="ILocalizationService"/>.</param>
-        /// <param name="notificationService">An implementation of <see cref="INotificationService"/>.</param>
-        /// <param name="addressService">An implementation of <see cref="IAddressService"/>.</param>
-        /// <param name="addressGeoCoordinatesService">An implementation of <see cref="IAddressGeoCoordinatesService"/>.</param>
-        /// <param name="customerActivityService">An implementation of <see cref="ICustomerActivityService"/>.</param>
-        /// <param name="permissionService">An implementation of <see cref="IPermissionService"/>.</param>
-        /// <param name="settingService">An implementation of <see cref="ISettingService"/>.</param>
-        /// <param name="shippingModelFactory">An implementation of <see cref="IShippingModelFactory"/>.</param>
-        /// <param name="shippingService">An implementation of <see cref="IShippingService"/>.</param>
         public AdminGoogleMapsIntegrationController(
             ILocalizationService localizationService,
             INotificationService notificationService,
@@ -60,9 +56,11 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             ICustomerActivityService customerActivityService,
             IPermissionService permissionService,
             IShippingModelFactory shippingModelFactory,
-            IShippingService shippingService,
             ISettingService settingService,
-            IAddressGeoCoordinatesService addressGeoCoordinatesService)
+            IWarehouseService warehouseService,
+            IAddressGeoCoordinatesService addressGeoCoordinatesService,
+            IRepository<WarehouseUserCreatorMapping> warehouseUserCreatorMappingRepository,
+            IRepository<VendorWarehouseMapping> vendorWarehouseMappingRepository)
         {
             _localizationService = localizationService;
             _notificationService = notificationService;
@@ -70,9 +68,11 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             _customerActivityService = customerActivityService;
             _permissionService = permissionService;
             _shippingModelFactory = shippingModelFactory;
-            _shippingService = shippingService;
             _settingService = settingService;
+            _warehouseService = warehouseService;
             _addressGeoCoordinatesService = addressGeoCoordinatesService;
+            _warehouseUserCreatorMappingRepository = warehouseUserCreatorMappingRepository;
+            _vendorWarehouseMappingRepository = vendorWarehouseMappingRepository;
         }
 
         #endregion
@@ -85,15 +85,14 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// Gets and sets the required models for adding new warehouse including address geo coordinates.
         /// </summary>
         /// <returns>An implementation of <see cref="IActionResult"/>.</returns>
-        public virtual IActionResult CreateWarehouse()
+        public virtual async Task<IActionResult> CreateWarehouse()
         {
-            if (!_permissionService.Authorize(StandardPermissionProvider.ManageShippingSettings))
+            if (!await _permissionService.AuthorizeAsync(StandardPermission.Configuration.MANAGE_SHIPPING_SETTINGS))
                 return AccessDeniedView();
 
-            //prepare model
             var model = new CustomWarehouseEditModel
             {
-                PluginConfigurationSettings = _settingService.LoadSetting<PluginConfigurationSettings>(),
+                PluginConfigurationSettings = await _settingService.LoadSettingAsync<PluginConfigurationSettings>(),
                 AddressGeoCoordinatesMapping = new AddressGeoCoordinatesMapping
                 {
                     Latitude = 0.0000000m,
@@ -101,7 +100,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 }
             };
 
-            _shippingModelFactory.PrepareWarehouseModel(model.WarehouseModel, null);
+            await _shippingModelFactory.PrepareWarehouseModelAsync(model.WarehouseModel, null);
 
             return View(model);
         }
@@ -113,39 +112,34 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// <param name="continueEditing">A boolean indicating if continue editing.</param>
         /// <returns>An implementation of <see cref="IActionResult"/>.</returns>
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        public virtual IActionResult CreateWarehouse(CustomWarehouseEditModel model, bool continueEditing)
+        public virtual async Task<IActionResult> CreateWarehouse(CustomWarehouseEditModel model, bool continueEditing)
         {
-            if (!_permissionService.Authorize(StandardPermissionProvider.ManageShippingSettings))
+            if (!await _permissionService.AuthorizeAsync(StandardPermission.Configuration.MANAGE_SHIPPING_SETTINGS))
                 return AccessDeniedView();
 
             if (ModelState.IsValid)
             {
                 var address = model.WarehouseModel.Address.ToEntity<Address>();
                 address.CreatedOnUtc = DateTime.UtcNow;
-                _addressService.InsertAddress(address);
-                _addressGeoCoordinatesService.InsertAddressGeoCoordinates(model.AddressGeoCoordinatesMapping, address.Id);
+                await _addressService.InsertAddressAsync(address);
+                await _addressGeoCoordinatesService.InsertAddressGeoCoordinatesAsync(model.AddressGeoCoordinatesMapping, address.Id);
 
-                //fill entity from model
                 var warehouse = model.WarehouseModel.ToEntity<Warehouse>();
                 warehouse.AddressId = address.Id;
 
-                _shippingService.InsertWarehouse(warehouse);
+                await _warehouseService.InsertWarehouseAsync(warehouse);
 
-                //activity log
-                _customerActivityService.InsertActivity("AddNewWarehouse",
-                    string.Format(_localizationService.GetResource("ActivityLog.AddNewWarehouse"), warehouse.Id), warehouse);
+                await _customerActivityService.InsertActivityAsync("AddNewWarehouse",
+                    string.Format(await _localizationService.GetResourceAsync("ActivityLog.AddNewWarehouse"), warehouse.Id), warehouse);
 
-                _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Shipping.Warehouses.Added"));
+                _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Shipping.Warehouses.Added"));
 
                 return continueEditing ? RedirectToAction("EditWarehouse", new { id = warehouse.Id }) : RedirectToAction("Warehouses", "Shipping");
             }
 
-            //prepare model
-            var pluginConfigSettings = _settingService.LoadSetting<PluginConfigurationSettings>();
-            model.PluginConfigurationSettings = pluginConfigSettings;
-            _shippingModelFactory.PrepareWarehouseModel(model.WarehouseModel, null, true);
+            model.PluginConfigurationSettings = await _settingService.LoadSettingAsync<PluginConfigurationSettings>();
+            await _shippingModelFactory.PrepareWarehouseModelAsync(model.WarehouseModel, null, true);
 
-            //if we got this far, something failed, redisplay form
             return View(model);
         }
 
@@ -154,22 +148,20 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// </summary>
         /// <param name="id">The id of the warehouse to edit.</param>
         /// <returns>An implementation of <see cref="IActionResult"/>.</returns>
-        public virtual IActionResult EditWarehouse(int id)
+        public virtual async Task<IActionResult> EditWarehouse(int id)
         {
-            if (!_permissionService.Authorize(StandardPermissionProvider.ManageShippingSettings))
+            if (!await _permissionService.AuthorizeAsync(StandardPermission.Configuration.MANAGE_SHIPPING_SETTINGS))
                 return AccessDeniedView();
 
-            //try to get a warehouse with the specified id
-            var warehouse = _shippingService.GetWarehouseById(id);
+            var warehouse = await _warehouseService.GetWarehouseByIdAsync(id);
             if (warehouse == null)
                 return RedirectToAction("Warehouses", "Shipping");
 
-            //prepare model
             var model = new CustomWarehouseEditModel
             {
-                PluginConfigurationSettings = _settingService.LoadSetting<PluginConfigurationSettings>(),
-                AddressGeoCoordinatesMapping = _addressGeoCoordinatesService.GetAddressGeoCoordinates(warehouse.AddressId),
-                WarehouseModel = _shippingModelFactory.PrepareWarehouseModel(null, warehouse)
+                PluginConfigurationSettings = await _settingService.LoadSettingAsync<PluginConfigurationSettings>(),
+                AddressGeoCoordinatesMapping = await _addressGeoCoordinatesService.GetAddressGeoCoordinatesAsync(warehouse.AddressId),
+                WarehouseModel = await _shippingModelFactory.PrepareWarehouseModelAsync(null, warehouse)
             };
 
             if (model.AddressGeoCoordinatesMapping is null)
@@ -192,80 +184,112 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// <param name="continueEditing">A boolean indicating if continue editing.</param>
         /// <returns>An implementation of <see cref="IActionResult"/>.</returns>
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        public virtual IActionResult EditWarehouse(CustomWarehouseEditModel model, bool continueEditing)
+        public virtual async Task<IActionResult> EditWarehouse(CustomWarehouseEditModel model, bool continueEditing)
         {
-            if (!_permissionService.Authorize(StandardPermissionProvider.ManageShippingSettings))
+            if (!await _permissionService.AuthorizeAsync(StandardPermission.Configuration.MANAGE_SHIPPING_SETTINGS))
                 return AccessDeniedView();
 
-            //try to get a warehouse with the specified id
-            var warehouse = _shippingService.GetWarehouseById(model.WarehouseModel.Id);
+            var warehouse = await _warehouseService.GetWarehouseByIdAsync(model.WarehouseModel.Id);
             if (warehouse == null)
                 return RedirectToAction("Warehouses", "Shipping");
 
             if (ModelState.IsValid)
             {
-                var address = _addressService.GetAddressById(warehouse.AddressId) ??
+                var address = await _addressService.GetAddressByIdAsync(warehouse.AddressId) ??
                     new Address
                     {
                         CreatedOnUtc = DateTime.UtcNow
                     };
+
                 address = model.WarehouseModel.Address.ToEntity(address);
                 if (address.Id > 0)
-                    _addressService.UpdateAddress(address);
+                    await _addressService.UpdateAddressAsync(address);
                 else
-                    _addressService.InsertAddress(address);
+                    await _addressService.InsertAddressAsync(address);
 
-                _addressGeoCoordinatesService.InsertAddressGeoCoordinates(model.AddressGeoCoordinatesMapping, address.Id);
+                await _addressGeoCoordinatesService.InsertAddressGeoCoordinatesAsync(model.AddressGeoCoordinatesMapping, address.Id);
 
-                //fill entity from model
                 warehouse = model.WarehouseModel.ToEntity(warehouse);
-
                 warehouse.AddressId = address.Id;
 
-                _shippingService.UpdateWarehouse(warehouse);
+                await _warehouseService.UpdateWarehouseAsync(warehouse);
 
-                //activity log
-                _customerActivityService.InsertActivity("EditWarehouse",
-                    string.Format(_localizationService.GetResource("ActivityLog.EditWarehouse"), warehouse.Id), warehouse);
+                await _customerActivityService.InsertActivityAsync("EditWarehouse",
+                    string.Format(await _localizationService.GetResourceAsync("ActivityLog.EditWarehouse"), warehouse.Id), warehouse);
 
-                _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Shipping.Warehouses.Updated"));
+                _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Shipping.Warehouses.Updated"));
 
                 return continueEditing ? RedirectToAction("EditWarehouse", new { id = warehouse.Id }) : RedirectToAction("Warehouses", "Shipping");
             }
 
-            //prepare model
-            var pluginConfigSettings = _settingService.LoadSetting<PluginConfigurationSettings>();
-            model.PluginConfigurationSettings = pluginConfigSettings;
-            model.WarehouseModel = _shippingModelFactory.PrepareWarehouseModel(model.WarehouseModel, warehouse, true);
+            model.PluginConfigurationSettings = await _settingService.LoadSettingAsync<PluginConfigurationSettings>();
+            model.WarehouseModel = await _shippingModelFactory.PrepareWarehouseModelAsync(model.WarehouseModel, warehouse, true);
 
-            //if we got this far, something failed, redisplay form
             return View(model);
         }
 
         /// <summary>
         /// Deletes a warehouse and its geo coordinates.
         /// </summary>
-        /// <param name="addressId">The id of the address to delete.</param>
+        /// <param name="id">The id of the warehouse to delete.</param>
         /// <returns>An implementation of <see cref="IActionResult"/>.</returns>
+        //[HttpPost]
+        //public virtual async Task<IActionResult> DeleteWarehouse(int id)
+        //{
+        //    if (!await _permissionService.AuthorizeAsync(StandardPermission.Configuration.MANAGE_SHIPPING_SETTINGS))
+        //        return AccessDeniedView();
+
+        //    var warehouse = await _warehouseService.GetWarehouseByIdAsync(id);
+        //    if (warehouse == null)
+        //        return RedirectToAction("Warehouses", "Shipping");
+
+        //    await _addressGeoCoordinatesService.RemoveAddressGeoCoordinatesAsync(warehouse.AddressId);
+        //    await _warehouseService.DeleteWarehouseAsync(warehouse);
+
+        //    await _customerActivityService.InsertActivityAsync("DeleteWarehouse",
+        //        string.Format(await _localizationService.GetResourceAsync("ActivityLog.DeleteWarehouse"), warehouse.Id), warehouse);
+
+        //    _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Shipping.warehouses.Deleted"));
+
+        //    return RedirectToAction("Warehouses", "Shipping");
+        //}
+
         [HttpPost]
-        public virtual IActionResult DeleteWarehouse(int id)
+        public virtual async Task<IActionResult> DeleteWarehouse(int id)
         {
-            if (!_permissionService.Authorize(StandardPermissionProvider.ManageShippingSettings))
+            if (!await _permissionService.AuthorizeAsync(StandardPermission.Configuration.MANAGE_SHIPPING_SETTINGS))
                 return AccessDeniedView();
 
-            //try to get a warehouse with the specified id
-            var warehouse = _shippingService.GetWarehouseById(id);
+            var warehouse = await _warehouseService.GetWarehouseByIdAsync(id);
+
             if (warehouse == null)
-                return RedirectToAction("Warehouses");
+                return RedirectToAction("Warehouses", "Shipping");
 
-            _addressGeoCoordinatesService.RemoveAddressGeoCoordinates(warehouse.AddressId);
-            _shippingService.DeleteWarehouse(warehouse);
+            var warehouseUserCreatorMappings = _warehouseUserCreatorMappingRepository.Table
+                .Where(mapping => mapping.WarehouseId == id)
+                .ToList();
 
-            //activity log
-            _customerActivityService.InsertActivity("DeleteWarehouse",
-                string.Format(_localizationService.GetResource("ActivityLog.DeleteWarehouse"), warehouse.Id), warehouse);
+            foreach (var mapping in warehouseUserCreatorMappings)
+                await _warehouseUserCreatorMappingRepository.DeleteAsync(mapping);
 
-            _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Shipping.warehouses.Deleted"));
+            var vendorWarehouseMappings = _vendorWarehouseMappingRepository.Table
+                .Where(mapping => mapping.WarehouseId == id)
+                .ToList();
+
+            foreach (var mapping in vendorWarehouseMappings)
+                await _vendorWarehouseMappingRepository.DeleteAsync(mapping);
+
+            await _addressGeoCoordinatesService.RemoveAddressGeoCoordinatesAsync(warehouse.AddressId);
+
+            await _warehouseService.DeleteWarehouseAsync(warehouse);
+
+            await _customerActivityService.InsertActivityAsync(
+                "DeleteWarehouse",
+                string.Format(await _localizationService.GetResourceAsync("ActivityLog.DeleteWarehouse"), warehouse.Id),
+                warehouse);
+
+            _notificationService.SuccessNotification(
+                await _localizationService.GetResourceAsync("Admin.Configuration.Shipping.Warehouses.Deleted"));
 
             return RedirectToAction("Warehouses", "Shipping");
         }

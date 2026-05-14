@@ -29,7 +29,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Infrastructure
         public void RegisterRoutes(IEndpointRouteBuilder endpointRouteBuilder)
         {
             var pattern = string.Empty;
-            if (DataSettingsManager.DatabaseIsInstalled)
+            if (DataSettingsManager.IsDatabaseInstalled())
             {
                 var localizationSettings = endpointRouteBuilder.ServiceProvider.GetRequiredService<LocalizationSettings>();
                 if (localizationSettings.SeoFriendlyUrlsForLanguagesEnabled)
@@ -42,7 +42,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Infrastructure
 
             endpointRouteBuilder.MapControllerRoute(Defaults.ConfigurationRouteName,
                 pattern + "Plugins/Widgets/GoogleMapsIntegration/Configure",
-                new { controller = "GoogleMapsIntegration", action = "Configure", area = AreaNames.Admin });
+                new { controller = "GoogleMapsIntegration", action = "Configure", area = AreaNames.ADMIN });
 
             endpointRouteBuilder.MapControllerRoute("CustomerAddressDelete",
                 pattern + "customer/addressdelete",
@@ -70,15 +70,15 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Infrastructure
 
             endpointRouteBuilder.MapControllerRoute(name: "GMICreateWarehouse",
                 pattern: "Admin/Shipping/CreateWarehouse",
-                new { controller = "AdminGoogleMapsIntegration", action = "CreateWarehouse", area = AreaNames.Admin });
+                new { controller = "AdminGoogleMapsIntegration", action = "CreateWarehouse", area = AreaNames.ADMIN });
 
             endpointRouteBuilder.MapControllerRoute(name: "GMIEditWarehouse",
                 pattern: "Admin/Shipping/EditWarehouse/{id:min(0)}",
-                new { controller = "AdminGoogleMapsIntegration", action = "EditWarehouse", area = AreaNames.Admin });
+                new { controller = "AdminGoogleMapsIntegration", action = "EditWarehouse", area = AreaNames.ADMIN });
 
             endpointRouteBuilder.MapControllerRoute(name: "GMIDeleteWarehouse",
                 pattern: "Admin/Shipping/DeleteWarehouse/{id:min(0)}",
-                new { controller = "AdminGoogleMapsIntegration", action = "DeleteWarehouse", area = AreaNames.Admin });
+                new { controller = "AdminGoogleMapsIntegration", action = "DeleteWarehouse", area = AreaNames.ADMIN });
         }
 
         #endregion

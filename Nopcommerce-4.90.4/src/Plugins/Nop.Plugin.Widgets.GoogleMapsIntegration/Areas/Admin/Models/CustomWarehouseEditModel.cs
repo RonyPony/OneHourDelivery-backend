@@ -7,7 +7,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Areas.Admin.Models
     /// <summary>
     /// Represents a model for adding and editing warehouses addresses with Google Maps API's integration for geo coordinates.
     /// </summary>
-    public partial class CustomWarehouseEditModel : BaseNopModel
+    public partial record CustomWarehouseEditModel : BaseNopModel
     {
         /// <summary>
         /// Initializes a new instance of <see cref="CustomWarehouseEditModel"/>.

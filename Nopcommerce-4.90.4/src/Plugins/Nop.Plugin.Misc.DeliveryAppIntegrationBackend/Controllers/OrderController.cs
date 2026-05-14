@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
@@ -27,8 +27,6 @@ using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.DTO;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Services;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Customers;

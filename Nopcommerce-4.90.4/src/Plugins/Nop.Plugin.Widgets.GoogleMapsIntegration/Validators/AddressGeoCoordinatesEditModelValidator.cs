@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Helpers;
@@ -29,30 +29,30 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Validators
         {
             RuleFor(editModel => editModel.AddressGeoCoordinatesMapping.Latitude)
                 .NotEmpty()
-                .WithMessage(localizationService.GetResource($"{Defaults.ResourcesNamePrefix}.Fields.Latitude.Required"));
+                .WithMessage(localizationService.GetResourceAsync($"{Defaults.ResourcesNamePrefix}.Fields.Latitude.Required").GetAwaiter().GetResult());
             RuleFor(editModel => editModel.AddressGeoCoordinatesMapping.Longitude)
                 .NotEmpty()
-                .WithMessage(localizationService.GetResource($"{Defaults.ResourcesNamePrefix}.Fields.Longitude.Required"));
+                .WithMessage(localizationService.GetResourceAsync($"{Defaults.ResourcesNamePrefix}.Fields.Longitude.Required").GetAwaiter().GetResult());
             RuleFor(editModel => editModel.Address.FirstName)
                 .NotEmpty()
-                .WithMessage(localizationService.GetResource("Address.Fields.FirstName.Required"));
+                .WithMessage(localizationService.GetResourceAsync("Address.Fields.FirstName.Required").GetAwaiter().GetResult());
             RuleFor(editModel => editModel.Address.LastName)
                 .NotEmpty()
-                .WithMessage(localizationService.GetResource("Address.Fields.LastName.Required"));
+                .WithMessage(localizationService.GetResourceAsync("Address.Fields.LastName.Required").GetAwaiter().GetResult());
             RuleFor(editModel => editModel.Address.Email)
                 .NotEmpty()
-                .WithMessage(localizationService.GetResource("Address.Fields.Email.Required"));
+                .WithMessage(localizationService.GetResourceAsync("Address.Fields.Email.Required").GetAwaiter().GetResult());
             RuleFor(editModel => editModel.Address.Email)
                 .EmailAddress()
-                .WithMessage(localizationService.GetResource("Common.WrongEmail"));
+                .WithMessage(localizationService.GetResourceAsync("Common.WrongEmail").GetAwaiter().GetResult());
             if (addressSettings.CountryEnabled)
             {
                 RuleFor(editModel => editModel.Address.CountryId)
                     .NotNull()
-                    .WithMessage(localizationService.GetResource("Address.Fields.Country.Required"));
+                    .WithMessage(localizationService.GetResourceAsync("Address.Fields.Country.Required").GetAwaiter().GetResult());
                 RuleFor(editModel => editModel.Address.CountryId)
                     .NotEqual(0)
-                    .WithMessage(localizationService.GetResource("Address.Fields.Country.Required"));
+                    .WithMessage(localizationService.GetResourceAsync("Address.Fields.Country.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.CountryEnabled && addressSettings.StateProvinceEnabled)
             {
@@ -60,7 +60,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Validators
                 {
                     //does selected country has states?
                     var countryId = editModel.Address.CountryId ?? 0;
-                    var hasStates = stateProvinceService.GetStateProvincesByCountryId(countryId).Any();
+                    var hasStates = stateProvinceService.GetStateProvincesByCountryIdAsync(countryId).GetAwaiter().GetResult().Any();
 
                     if (hasStates)
                     {
@@ -70,43 +70,43 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Validators
                     }
 
                     return true;
-                }).WithMessage(localizationService.GetResource("Address.Fields.StateProvince.Required"));
+                }).WithMessage(localizationService.GetResourceAsync("Address.Fields.StateProvince.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.CompanyRequired && addressSettings.CompanyEnabled)
             {
-                RuleFor(editModel => editModel.Address.Company).NotEmpty().WithMessage(localizationService.GetResource("Account.Fields.Company.Required"));
+                RuleFor(editModel => editModel.Address.Company).NotEmpty().WithMessage(localizationService.GetResourceAsync("Account.Fields.Company.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.StreetAddressRequired && addressSettings.StreetAddressEnabled)
             {
-                RuleFor(editModel => editModel.Address.Address1).NotEmpty().WithMessage(localizationService.GetResource("Account.Fields.StreetAddress.Required"));
+                RuleFor(editModel => editModel.Address.Address1).NotEmpty().WithMessage(localizationService.GetResourceAsync("Account.Fields.StreetAddress.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.StreetAddress2Required && addressSettings.StreetAddress2Enabled)
             {
-                RuleFor(editModel => editModel.Address.Address2).NotEmpty().WithMessage(localizationService.GetResource("Account.Fields.StreetAddress2.Required"));
+                RuleFor(editModel => editModel.Address.Address2).NotEmpty().WithMessage(localizationService.GetResourceAsync("Account.Fields.StreetAddress2.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.ZipPostalCodeRequired && addressSettings.ZipPostalCodeEnabled)
             {
-                RuleFor(editModel => editModel.Address.ZipPostalCode).NotEmpty().WithMessage(localizationService.GetResource("Account.Fields.ZipPostalCode.Required"));
+                RuleFor(editModel => editModel.Address.ZipPostalCode).NotEmpty().WithMessage(localizationService.GetResourceAsync("Account.Fields.ZipPostalCode.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.CountyEnabled && addressSettings.CountyRequired)
             {
-                RuleFor(editModel => editModel.Address.County).NotEmpty().WithMessage(localizationService.GetResource("Address.Fields.County.Required"));
+                RuleFor(editModel => editModel.Address.County).NotEmpty().WithMessage(localizationService.GetResourceAsync("Address.Fields.County.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.CityRequired && addressSettings.CityEnabled)
             {
-                RuleFor(editModel => editModel.Address.City).NotEmpty().WithMessage(localizationService.GetResource("Account.Fields.City.Required"));
+                RuleFor(editModel => editModel.Address.City).NotEmpty().WithMessage(localizationService.GetResourceAsync("Account.Fields.City.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.PhoneRequired && addressSettings.PhoneEnabled)
             {
-                RuleFor(editModel => editModel.Address.PhoneNumber).NotEmpty().WithMessage(localizationService.GetResource("Account.Fields.Phone.Required"));
+                RuleFor(editModel => editModel.Address.PhoneNumber).NotEmpty().WithMessage(localizationService.GetResourceAsync("Account.Fields.Phone.Required").GetAwaiter().GetResult());
             }
             if (addressSettings.PhoneEnabled)
             {
-                RuleFor(editModel => editModel.Address.PhoneNumber).IsPhoneNumber(customerSettings).WithMessage(localizationService.GetResource("Account.Fields.Phone.NotValid"));
+                RuleFor(editModel => editModel.Address.PhoneNumber).IsPhoneNumber(customerSettings).WithMessage(localizationService.GetResourceAsync("Account.Fields.Phone.NotValid").GetAwaiter().GetResult());
             }
             if (addressSettings.FaxRequired && addressSettings.FaxEnabled)
             {
-                RuleFor(editModel => editModel.Address.FaxNumber).NotEmpty().WithMessage(localizationService.GetResource("Account.Fields.Fax.Required"));
+                RuleFor(editModel => editModel.Address.FaxNumber).NotEmpty().WithMessage(localizationService.GetResourceAsync("Account.Fields.Fax.Required").GetAwaiter().GetResult());
             }
         }
     }

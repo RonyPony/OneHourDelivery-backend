@@ -6,7 +6,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Models
     /// <summary>
     /// Represents the configurations for Google Maps Integration plugin.
     /// </summary>
-    public sealed class PluginConfiguration : BaseNopEntityModel
+    public sealed record PluginConfiguration : BaseNopEntityModel
     {
         /// <summary>
         /// Unique identifier that authenticates requests associated to Google Maps API's.

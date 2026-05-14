@@ -1,6 +1,6 @@
-﻿# Google Maps Integration Widget
+# Google Maps Integration Widget
 
-This plugin was developed in order to integrate NopCommerce (version 4.30) with Google Maps Platform, allowing NopCommerce addresses to manage geo coordinates and allowing the user to access some of the Google Maps most ussefull services.
+This plugin was developed in order to integrate NopCommerce (version 4.90.4) with Google Maps Platform, allowing NopCommerce addresses to manage geo coordinates and allowing the user to access some of the Google Maps most ussefull services.
 
 ## Features:
 
@@ -27,7 +27,7 @@ There's two ways to install this plugin:
 	- Compile the class library you just added to your project.
 	- Go to `Presentation/Nop.Web/Plugins` and locate a folder named `Widgets.GoogleMapsIntegration`.
 	- Zip the folder.
-	- Now you can install it in any instance of NopCommerce (version 4.30), to install it, just:
+	- Now you can install it in any instance of NopCommerce (version 4.90.4), to install it, just:
 		- Go to the admin area (you will need to log in as administrator).
 		- Go to `Configuration > Local plugins`.
 		- Click "Upload plugin or theme".

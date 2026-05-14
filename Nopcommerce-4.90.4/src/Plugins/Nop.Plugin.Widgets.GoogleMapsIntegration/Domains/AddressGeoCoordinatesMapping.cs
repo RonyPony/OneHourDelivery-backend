@@ -1,6 +1,7 @@
 ﻿using Nop.Core;
 using Nop.Web.Framework.Mvc.ModelBinding;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Domains
 {

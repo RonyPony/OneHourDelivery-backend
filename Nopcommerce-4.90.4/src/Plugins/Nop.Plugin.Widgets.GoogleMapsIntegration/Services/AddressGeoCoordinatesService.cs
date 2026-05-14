@@ -1,7 +1,6 @@
-﻿using Nop.Data;
+using System.Threading.Tasks;
+using Nop.Data;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
-using Nop.Services.Events;
-using System.Linq;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
 {
@@ -13,7 +12,6 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
         #region Fields
 
         private readonly IRepository<AddressGeoCoordinatesMapping> _addressGeoCoordinatesMappingRepository;
-        private readonly IEventPublisher _eventPublisher;
 
         #endregion
 
@@ -23,13 +21,9 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
         /// Initializes a new instance of <see cref="AddressGeoCoordinatesService"/>.
         /// </summary>
         /// <param name="addressGeoCoordinatesMappingRepository">An implementation of <see cref="IRepository{AddressGeoCoordinatesMapping}"/>.</param>
-        /// <param name="eventPublisher">An implementation of <see cref="IEventPublisher"/>.</param>
-        public AddressGeoCoordinatesService(
-            IRepository<AddressGeoCoordinatesMapping> addressGeoCoordinatesMappingRepository,
-            IEventPublisher eventPublisher)
+        public AddressGeoCoordinatesService(IRepository<AddressGeoCoordinatesMapping> addressGeoCoordinatesMappingRepository)
         {
             _addressGeoCoordinatesMappingRepository = addressGeoCoordinatesMappingRepository;
-            _eventPublisher = eventPublisher;
         }
 
         #endregion
@@ -41,17 +35,17 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
         /// </summary>
         /// <param name="addressId">The address id</param>
         /// <returns>An instance of <see cref="AddressGeoCoordinatesMapping"/> or <see cref="null"/> if <paramref name="addressId"/> doesn't have registered geo-coordinates.</returns>
-        public AddressGeoCoordinatesMapping GetAddressGeoCoordinates(int addressId)
-            => _addressGeoCoordinatesMappingRepository.Table.FirstOrDefault(geoCoordinates => geoCoordinates.AddressId == addressId);
+        public async Task<AddressGeoCoordinatesMapping> GetAddressGeoCoordinatesAsync(int addressId)
+            => await _addressGeoCoordinatesMappingRepository.Table.FirstOrDefaultAsync(geoCoordinates => geoCoordinates.AddressId == addressId);
 
         /// <summary>
         /// Inserts an address geo-coordinates if doesn't exist and updates it if exists.
         /// </summary>
         /// <param name="addressGeoCoordinates">An instance of <see cref="AddressGeoCoordinatesMapping"/>.</param>
         /// <param name="addressId">The address id.</param>
-        public void InsertAddressGeoCoordinates(AddressGeoCoordinatesMapping addressGeoCoordinates, int addressId)
+        public async Task InsertAddressGeoCoordinatesAsync(AddressGeoCoordinatesMapping addressGeoCoordinates, int addressId)
         {
-            AddressGeoCoordinatesMapping foundGeoCoordinates = _addressGeoCoordinatesMappingRepository.Table.FirstOrDefault(geoCoordinates => geoCoordinates.AddressId == addressId);
+            var foundGeoCoordinates = await _addressGeoCoordinatesMappingRepository.Table.FirstOrDefaultAsync(geoCoordinates => geoCoordinates.AddressId == addressId);
 
             if (foundGeoCoordinates is null)
             {
@@ -62,15 +56,14 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
                     Longitude = addressGeoCoordinates.Longitude
                 };
 
-                _addressGeoCoordinatesMappingRepository.Insert(newAddressGeoCoordinates);
-                _eventPublisher.EntityInserted(newAddressGeoCoordinates);
-            } else
+                await _addressGeoCoordinatesMappingRepository.InsertAsync(newAddressGeoCoordinates);
+            }
+            else
             {
                 foundGeoCoordinates.Latitude = addressGeoCoordinates.Latitude;
                 foundGeoCoordinates.Longitude = addressGeoCoordinates.Longitude;
 
-                _addressGeoCoordinatesMappingRepository.Update(foundGeoCoordinates);
-                _eventPublisher.EntityUpdated(foundGeoCoordinates);
+                await _addressGeoCoordinatesMappingRepository.UpdateAsync(foundGeoCoordinates);
             }
         }
 
@@ -78,13 +71,10 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Services
         /// Removes an address geo-coordinates.
         /// </summary>
         /// <param name="addressId">The address id.</param>
-        public void RemoveAddressGeoCoordinates(int addressId)
+        public async Task RemoveAddressGeoCoordinatesAsync(int addressId)
         {
-            if (_addressGeoCoordinatesMappingRepository.Table.FirstOrDefault(geoCoordinates => geoCoordinates.AddressId == addressId) is AddressGeoCoordinatesMapping addressGeoCoordinates)
-            {
-                _addressGeoCoordinatesMappingRepository.Delete(addressGeoCoordinates);
-                _eventPublisher.EntityDeleted(addressGeoCoordinates);
-            }
+            if (await _addressGeoCoordinatesMappingRepository.Table.FirstOrDefaultAsync(geoCoordinates => geoCoordinates.AddressId == addressId) is AddressGeoCoordinatesMapping addressGeoCoordinates)
+                await _addressGeoCoordinatesMappingRepository.DeleteAsync(addressGeoCoordinates);
         }
 
         #endregion

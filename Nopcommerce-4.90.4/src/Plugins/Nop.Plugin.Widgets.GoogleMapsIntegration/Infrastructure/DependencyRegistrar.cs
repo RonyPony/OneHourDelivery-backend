@@ -1,24 +1,31 @@
-﻿using Autofac;
-using Nop.Core.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Nop.Core.Infrastructure;
-using Nop.Core.Infrastructure.DependencyManagement;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Factories;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Services;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Infrastructure
 {
     /// <summary>
-    /// Plug-in dependency registrar
+    /// Plug-in dependency registrar.
     /// </summary>
-    public class DependencyRegistrar : IDependencyRegistrar
+    public class DependencyRegistrar : INopStartup
     {
         /// <summary>
-        /// This will registry the dependency of our services
+        /// Registers plugin dependencies.
         /// </summary>
-        public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
+        public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            builder.RegisterType<AddressGeoCoordinatesService>().As<IAddressGeoCoordinatesService>().InstancePerLifetimeScope();
-            builder.RegisterType<CheckoutModelCustomFactory>().As<ICheckoutModelCustomFactory>().InstancePerLifetimeScope();
+            services.AddScoped<IAddressGeoCoordinatesService, AddressGeoCoordinatesService>();
+            services.AddScoped<ICheckoutModelCustomFactory, CheckoutModelCustomFactory>();
+        }
+
+        /// <summary>
+        /// Configures plugin middleware.
+        /// </summary>
+        public void Configure(IApplicationBuilder application)
+        {
         }
 
         /// <summary>

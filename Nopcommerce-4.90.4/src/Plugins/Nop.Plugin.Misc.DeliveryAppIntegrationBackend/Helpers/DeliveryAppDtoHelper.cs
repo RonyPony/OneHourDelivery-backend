@@ -29,7 +29,6 @@ using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Services;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.DTO;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Services;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Configuration;

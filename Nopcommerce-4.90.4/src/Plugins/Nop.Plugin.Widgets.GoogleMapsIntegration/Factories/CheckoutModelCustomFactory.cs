@@ -1,4 +1,8 @@
-﻿using Nop.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Nop.Core;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Orders;
@@ -19,16 +23,13 @@ using Nop.Services.Tax;
 using Nop.Web.Factories;
 using Nop.Web.Models.Checkout;
 using Nop.Web.Models.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using CheckoutBillingAddressModel = Nop.Plugin.Widgets.GoogleMapsIntegration.Models.CheckoutBillingAddressModel;
 using CheckoutShippingAddressModel = Nop.Plugin.Widgets.GoogleMapsIntegration.Models.CheckoutShippingAddressModel;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Factories
 {
     /// <summary>
-    /// Represents a model factory for <see cref="CheckoutBillingAddressModel"/>, <see cref="CheckoutShippingAddressModel"/>, <see cref="CheckoutBillingGeoCoordinatesAddressModel"/>, <see cref="CheckoutShippingGeoCoordinatesAddressModel"/> and <see cref="CustomOnePageCheckoutModel"/>.
+    /// Represents a model factory for checkout models extended with geo coordinates.
     /// </summary>
     public partial class CheckoutModelCustomFactory : ICheckoutModelCustomFactory
     {
@@ -60,30 +61,6 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Factories
 
         #region Ctor
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="CheckoutModelCustomFactory"/>.
-        /// </summary>
-        /// <param name="addressSettings">An instance of <see cref="AddressSettings"/>.</param>
-        /// <param name="addressModelFactory">An implementation of <see cref="IAddressModelFactory"/>.</param>
-        /// <param name="addressService">An implementation of <see cref="IAddressService"/>.</param>
-        /// <param name="countryService">An implementation of <see cref="ICountryService"/>.</param>
-        /// <param name="currencyService">An implementation of <see cref="ICurrencyService"/>.</param>
-        /// <param name="customerService">An implementation of <see cref="ICustomerService"/>.</param>
-        /// <param name="localizationService">An implementation of <see cref="ILocalizationService"/>.</param>
-        /// <param name="orderTotalCalculationService">An implementation of <see cref="IOrderTotalCalculationService"/>.</param>
-        /// <param name="pickupPluginManager">An implementation of <see cref="IPickupPluginManager"/>.</param>
-        /// <param name="priceFormatter">An implementation of <see cref="IPriceFormatter"/>.</param>
-        /// <param name="shippingPluginManager">An implementation of <see cref="IShippingPluginManager"/>.</param>
-        /// <param name="shippingService">An implementation of <see cref="IShippingService"/>.</param>
-        /// <param name="shoppingCartService">An implementation of <see cref="IShoppingCartService"/>.</param>
-        /// <param name="stateProvinceService">An implementation of <see cref="IStateProvinceService"/>.</param>
-        /// <param name="storeContext">An implementation of <see cref="IStoreContext"/>.</param>
-        /// <param name="storeMappingService">An implementation of <see cref="IStoreMappingService"/>.</param>
-        /// <param name="taxService">An implementation of <see cref="ITaxService"/>.</param>
-        /// <param name="workContext">An implementation of <see cref="IWorkContext"/>.</param>
-        /// <param name="orderSettings">An instance of <see cref="OrderSettings"/>.</param>
-        /// <param name="shippingSettings">An instance of <see cref="ShippingSettings"/>.</param>
-        /// <param name="settingService">An implementation of <see cref="ISettingService"/>.</param>
         public CheckoutModelCustomFactory(AddressSettings addressSettings,
             IAddressModelFactory addressModelFactory,
             IAddressService addressService,
@@ -133,123 +110,128 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Factories
 
         #region Utilities
 
-        /// <summary>
-        /// Prepares the checkout pickup points model
-        /// </summary>
-        /// <param name="cart">Cart</param>
-        /// <returns>The checkout pickup points model</returns>
-        protected virtual CheckoutPickupPointsModel PrepareCheckoutPickupPointsModel(IList<ShoppingCartItem> cart)
+        protected virtual async Task<CheckoutPickupPointsModel> PrepareCheckoutPickupPointsModelAsync(IList<ShoppingCartItem> cart)
         {
-            var model = new CheckoutPickupPointsModel()
+            var model = new CheckoutPickupPointsModel
             {
                 AllowPickupInStore = _shippingSettings.AllowPickupInStore
             };
-            if (model.AllowPickupInStore)
+
+            if (!model.AllowPickupInStore)
+                return model;
+
+            model.DisplayPickupPointsOnMap = _shippingSettings.DisplayPickupPointsOnMap;
+            model.GoogleMapsApiKey = _shippingSettings.GoogleMapsApiKey;
+
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var pickupPointProviders = await _pickupPluginManager.LoadActivePluginsAsync(customer, store.Id);
+
+            if (pickupPointProviders.Any())
             {
-                model.DisplayPickupPointsOnMap = _shippingSettings.DisplayPickupPointsOnMap;
-                model.GoogleMapsApiKey = _shippingSettings.GoogleMapsApiKey;
-                var pickupPointProviders = _pickupPluginManager.LoadActivePlugins(_workContext.CurrentCustomer, _storeContext.CurrentStore.Id);
-                if (pickupPointProviders.Any())
+                var languageId = (await _workContext.GetWorkingLanguageAsync()).Id;
+                var billingAddress = customer.BillingAddressId.HasValue
+                    ? await _addressService.GetAddressByIdAsync(customer.BillingAddressId.Value)
+                    : null;
+                var pickupPointsResponse = await _shippingService.GetPickupPointsAsync(cart, billingAddress, customer, storeId: store.Id);
+
+                if (pickupPointsResponse.Success)
                 {
-                    var languageId = _workContext.WorkingLanguage.Id;
-                    var pickupPointsResponse = _shippingService.GetPickupPoints(_workContext.CurrentCustomer.BillingAddressId ?? 0,
-                        _workContext.CurrentCustomer, storeId: _storeContext.CurrentStore.Id);
-                    if (pickupPointsResponse.Success)
-                        model.PickupPoints = pickupPointsResponse.PickupPoints.Select(point =>
-                        {
-                            var country = _countryService.GetCountryByTwoLetterIsoCode(point.CountryCode);
-                            var state = _stateProvinceService.GetStateProvinceByAbbreviation(point.StateAbbreviation, country?.Id);
-
-                            var pickupPointModel = new CheckoutPickupPointModel
-                            {
-                                Id = point.Id,
-                                Name = point.Name,
-                                Description = point.Description,
-                                ProviderSystemName = point.ProviderSystemName,
-                                Address = point.Address,
-                                City = point.City,
-                                County = point.County,
-                                StateName = state != null ? _localizationService.GetLocalized(state, x => x.Name, languageId) : string.Empty,
-                                CountryName = country != null ? _localizationService.GetLocalized(country, x => x.Name, languageId) : string.Empty,
-                                ZipPostalCode = point.ZipPostalCode,
-                                Latitude = point.Latitude,
-                                Longitude = point.Longitude,
-                                OpeningHours = point.OpeningHours
-                            };
-
-                            var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
-                            var amount = _orderTotalCalculationService.IsFreeShipping(cart) ? 0 : point.PickupFee;
-
-                            if (amount > 0)
-                            {
-                                amount = _taxService.GetShippingPrice(amount, _workContext.CurrentCustomer);
-                                amount = _currencyService.ConvertFromPrimaryStoreCurrency(amount, _workContext.WorkingCurrency);
-                                pickupPointModel.PickupFee = _priceFormatter.FormatShippingPrice(amount, true);
-                            }
-
-                            //adjust rate
-                            var shippingTotal = _orderTotalCalculationService.AdjustShippingRate(point.PickupFee, cart, out var _, true);
-                            var rateBase = _taxService.GetShippingPrice(shippingTotal, _workContext.CurrentCustomer);
-                            var rate = _currencyService.ConvertFromPrimaryStoreCurrency(rateBase, _workContext.WorkingCurrency);
-                            pickupPointModel.PickupFee = _priceFormatter.FormatShippingPrice(rate, true);
-
-                            return pickupPointModel;
-                        }).ToList();
-                    else
-                        foreach (var error in pickupPointsResponse.Errors)
-                            model.Warnings.Add(error);
-                }
-
-                //only available pickup points
-                var shippingProviders = _shippingPluginManager.LoadActivePlugins(_workContext.CurrentCustomer, _storeContext.CurrentStore.Id);
-                if (!shippingProviders.Any())
-                {
-                    if (!pickupPointProviders.Any())
+                    foreach (var point in pickupPointsResponse.PickupPoints)
                     {
-                        model.Warnings.Add(_localizationService.GetResource("Checkout.ShippingIsNotAllowed"));
-                        model.Warnings.Add(_localizationService.GetResource("Checkout.PickupPoints.NotAvailable"));
+                        var country = await _countryService.GetCountryByTwoLetterIsoCodeAsync(point.CountryCode);
+                        var state = await _stateProvinceService.GetStateProvinceByAbbreviationAsync(point.StateAbbreviation, country?.Id);
+
+                        var pickupPointModel = new CheckoutPickupPointModel
+                        {
+                            Id = point.Id,
+                            Name = point.Name,
+                            Description = point.Description,
+                            ProviderSystemName = point.ProviderSystemName,
+                            Address = point.Address,
+                            City = point.City,
+                            County = point.County,
+                            StateName = state != null ? await _localizationService.GetLocalizedAsync(state, x => x.Name, languageId) : string.Empty,
+                            CountryName = country != null ? await _localizationService.GetLocalizedAsync(country, x => x.Name, languageId) : string.Empty,
+                            ZipPostalCode = point.ZipPostalCode,
+                            Latitude = point.Latitude,
+                            Longitude = point.Longitude,
+                            OpeningHours = point.OpeningHours
+                        };
+
+                        var (shippingTotal, _) = await _orderTotalCalculationService.AdjustShippingRateAsync(point.PickupFee, cart, true);
+                        var (rateBase, _) = await _taxService.GetShippingPriceAsync(shippingTotal, customer);
+                        var rate = await _currencyService.ConvertFromPrimaryStoreCurrencyAsync(rateBase, await _workContext.GetWorkingCurrencyAsync());
+                        pickupPointModel.PickupFee = await _priceFormatter.FormatShippingPriceAsync(rate, true);
+
+                        model.PickupPoints.Add(pickupPointModel);
                     }
-                    model.PickupInStoreOnly = true;
-                    model.PickupInStore = true;
-                    return model;
                 }
+                else
+                {
+                    foreach (var error in pickupPointsResponse.Errors)
+                        model.Warnings.Add(error);
+                }
+            }
+
+            var shippingProviders = await _shippingPluginManager.LoadActivePluginsAsync(customer, store.Id);
+            if (!shippingProviders.Any())
+            {
+                if (!pickupPointProviders.Any())
+                {
+                    model.Warnings.Add(await _localizationService.GetResourceAsync("Checkout.ShippingIsNotAllowed"));
+                    model.Warnings.Add(await _localizationService.GetResourceAsync("Checkout.PickupPoints.NotAvailable"));
+                }
+
+                model.PickupInStoreOnly = true;
+                model.PickupInStore = true;
             }
 
             return model;
         }
 
-        private IList<Address> GetExistingAddresses()
-            => _customerService.GetAddressesByCustomerId(_workContext.CurrentCustomer.Id)
-                   .Where(a => _countryService.GetCountryByAddress(a) is Country country &&
-                       (//published
-                       country.Published &&
-                       //allow billing
-                       country.AllowsBilling &&
-                       //enabled for the current store
-                       _storeMappingService.Authorize(country)))
-                   .ToList();
+        private async Task<IList<Address>> GetExistingAddressesAsync(bool validForShipping)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var addresses = await _customerService.GetAddressesByCustomerIdAsync(customer.Id);
+            var result = new List<Address>();
 
-        private IList<AddressModel> GetAddressModelByValidState(IList<Address> addresses, bool validAddressState)
+            foreach (var address in addresses)
+            {
+                var country = await _countryService.GetCountryByAddressAsync(address);
+                if (country == null || !country.Published)
+                    continue;
+
+                if (validForShipping && !country.AllowsShipping)
+                    continue;
+
+                if (!validForShipping && !country.AllowsBilling)
+                    continue;
+
+                if (!await _storeMappingService.AuthorizeAsync(country))
+                    continue;
+
+                result.Add(address);
+            }
+
+            return result;
+        }
+
+        private async Task<IList<AddressModel>> GetAddressModelByValidStateAsync(IList<Address> addresses, bool validAddressState)
         {
             var addressesModels = new List<AddressModel>();
 
             foreach (var address in addresses)
             {
                 var addressModel = new AddressModel();
-                _addressModelFactory.PrepareAddressModel(addressModel,
+                await _addressModelFactory.PrepareAddressModelAsync(addressModel,
                     address: address,
                     excludeProperties: false,
                     addressSettings: _addressSettings);
 
-                if (validAddressState && _addressService.IsAddressValid(address))
-                {
+                var isAddressValid = await _addressService.IsAddressValidAsync(address);
+                if (validAddressState == isAddressValid)
                     addressesModels.Add(addressModel);
-                }
-                
-                if (!validAddressState && !_addressService.IsAddressValid(address))
-                {
-                    addressesModels.Add(addressModel);
-                }
             }
 
             return addressesModels;
@@ -259,69 +241,49 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Factories
 
         #region Methods
 
-        /// <summary>
-        /// Prepares a <see cref="CheckoutBillingAddressModel"/>.
-        /// </summary>
-        /// <param name="cart">An implementation of <see cref="IList{T}"/> where T is <see cref="ShoppingCartItem"/>.</param>
-        /// <returns>An instance of <see cref="CheckoutBillingAddressModel"/>.</returns>
-        public virtual CheckoutBillingAddressModel PrepareBillingAddressModel(IList<ShoppingCartItem> cart)
+        public virtual async Task<CheckoutBillingAddressModel> PrepareBillingAddressModelAsync(IList<ShoppingCartItem> cart)
         {
             var model = new CheckoutBillingAddressModel
             {
-                ShipToSameAddressAllowed = _shippingSettings.ShipToSameAddress && _shoppingCartService.ShoppingCartRequiresShipping(cart),
-                //allow customers to enter (choose) a shipping address if "Disable Billing address step" setting is enabled
+                ShipToSameAddressAllowed = _shippingSettings.ShipToSameAddress && await _shoppingCartService.ShoppingCartRequiresShippingAsync(cart),
                 ShipToSameAddress = !_orderSettings.DisableBillingAddressCheckoutStep
             };
 
-            //existing addresses
-            var addresses = GetExistingAddresses();
-            model.ExistingAddresses = GetAddressModelByValidState(addresses, true);
-            model.InvalidExistingAddresses = GetAddressModelByValidState(addresses, false);
+            var addresses = await GetExistingAddressesAsync(false);
+            model.ExistingAddresses = await GetAddressModelByValidStateAsync(addresses, true);
+            model.InvalidExistingAddresses = await GetAddressModelByValidStateAsync(addresses, false);
 
             return model;
         }
 
-        /// <summary>
-        /// Prepares a <see cref="CheckoutShippingAddressModel"/>.
-        /// </summary>
-        /// <param name="cart">An implementation of <see cref="IList{T}"/> where T is of <see cref="ShoppingCartItem"/>.</param>
-        /// <returns>An instance of <see cref="CheckoutShippingAddressModel"/>.</returns>
-        public virtual CheckoutShippingAddressModel PrepareShippingAddressModel(IList<ShoppingCartItem> cart)
+        public virtual async Task<CheckoutShippingAddressModel> PrepareShippingAddressModelAsync(IList<ShoppingCartItem> cart)
         {
-            var model = new CheckoutShippingAddressModel()
+            var model = new CheckoutShippingAddressModel
             {
                 DisplayPickupInStore = !_orderSettings.DisplayPickupInStoreOnShippingMethodPage
             };
 
             if (!_orderSettings.DisplayPickupInStoreOnShippingMethodPage)
-                model.PickupPointsModel = PrepareCheckoutPickupPointsModel(cart);
+                model.PickupPointsModel = await PrepareCheckoutPickupPointsModelAsync(cart);
 
-            //existing addresses
-            var addresses = GetExistingAddresses();
-            model.ExistingAddresses = GetAddressModelByValidState(addresses, true);
-            model.InvalidExistingAddresses = GetAddressModelByValidState(addresses, false);
+            var addresses = await GetExistingAddressesAsync(true);
+            model.ExistingAddresses = await GetAddressModelByValidStateAsync(addresses, true);
+            model.InvalidExistingAddresses = await GetAddressModelByValidStateAsync(addresses, false);
 
             return model;
         }
 
-        /// <summary>
-        /// Prepares a <see cref="CheckoutBillingGeoCoordinatesAddressModel"/>.
-        /// </summary>
-        /// <param name="cart">An implementation of <see cref="IList{T}"/> where T is of <see cref="ShoppingCartItem"/>.</param>
-        /// <param name="addressId">An address id.</param>
-        /// <param name="countryId">A country id.</param>
-        /// <param name="attributesXml">Custom attributes for address.</param>
-        /// <param name="latitude">A latitude.</param>
-        /// <param name="longitude">A longitude.</param>
-        /// <returns>An instance of <see cref="CheckoutBillingGeoCoordinatesAddressModel"/>.</returns>
-        public virtual CheckoutBillingGeoCoordinatesAddressModel PrepareCheckoutBillingGeoCoordinatesAddressModel(IList<ShoppingCartItem> cart,
+        public virtual async Task<CheckoutBillingGeoCoordinatesAddressModel> PrepareCheckoutBillingGeoCoordinatesAddressModelAsync(IList<ShoppingCartItem> cart,
             int? addressId = null, int? countryId = null, string attributesXml = "", decimal? latitude = null, decimal? longitude = null)
         {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var languageId = (await _workContext.GetWorkingLanguageAsync()).Id;
+
             var model = new CheckoutBillingGeoCoordinatesAddressModel
             {
                 AddressGeoCoordinatesEditModel = new AddressGeoCoordinatesEditModel
                 {
-                    PluginConfigurationSettings = _settingService.LoadSetting<PluginConfigurationSettings>(),
+                    PluginConfigurationSettings = await _settingService.LoadSettingAsync<PluginConfigurationSettings>(),
                     AddressGeoCoordinatesMapping = new AddressGeoCoordinatesMapping
                     {
                         AddressId = addressId ?? 0,
@@ -333,42 +295,34 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Factories
                     AutocompleteInputId = "billing-autocomplete",
                     GeoCoordinatesSearchInputId = "billing-geocoordinatesSearch"
                 },
-                CheckoutBillingAddressModel = PrepareBillingAddressModel(cart)
+                CheckoutBillingAddressModel = await PrepareBillingAddressModelAsync(cart)
             };
 
             model.AddressGeoCoordinatesEditModel.Address.Id = addressId ?? 0;
             model.AddressGeoCoordinatesEditModel.Address.CountryId = countryId ?? 0;
-            _addressModelFactory.PrepareAddressModel(model.AddressGeoCoordinatesEditModel.Address,
+            await _addressModelFactory.PrepareAddressModelAsync(model.AddressGeoCoordinatesEditModel.Address,
                 address: null,
                 excludeProperties: false,
                 addressSettings: _addressSettings,
-                loadCountries: () => _countryService.GetAllCountries(_workContext.WorkingLanguage.Id),
+                loadCountries: async () => await _countryService.GetAllCountriesForBillingAsync(languageId),
                 prePopulateWithCustomerFields: true,
-                customer: _workContext.CurrentCustomer,
+                customer: customer,
                 overrideAttributesXml: attributesXml);
 
             return model;
         }
 
-        /// <summary>
-        /// Prepares a <see cref="CheckoutShippingGeoCoordinatesAddressModel"/>.
-        /// </summary>
-        /// <param name="cart">An implementation of <see cref="IList{T}"/> where T is of <see cref="ShoppingCartItem"/>.</param>
-        /// <param name="renderMapsJS">A boolean that indicates if Google Maps JavaScript API renderization is required.</param>
-        /// <param name="addressId">An address id.</param>
-        /// <param name="countryId">A country id.</param>
-        /// <param name="attributesXml">Custom attributes for address.</param>
-        /// <param name="latitude">A latitude.</param>
-        /// <param name="longitude">A longitude.</param>
-        /// <returns>An instance of <see cref="CheckoutShippingGeoCoordinatesAddressModel"/>.</returns>
-        public virtual CheckoutShippingGeoCoordinatesAddressModel PrepareCheckoutShippingGeoCoordinatesAddressModel(IList<ShoppingCartItem> cart,
+        public virtual async Task<CheckoutShippingGeoCoordinatesAddressModel> PrepareCheckoutShippingGeoCoordinatesAddressModelAsync(IList<ShoppingCartItem> cart,
             bool renderMapsJS, int? addressId = null, int? countryId = null, string attributesXml = "", decimal? latitude = null, decimal? longitude = null)
         {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var languageId = (await _workContext.GetWorkingLanguageAsync()).Id;
+
             var model = new CheckoutShippingGeoCoordinatesAddressModel
             {
                 AddressGeoCoordinatesEditModel = new AddressGeoCoordinatesEditModel
                 {
-                    PluginConfigurationSettings = _settingService.LoadSetting<PluginConfigurationSettings>(),
+                    PluginConfigurationSettings = await _settingService.LoadSettingAsync<PluginConfigurationSettings>(),
                     AddressGeoCoordinatesMapping = new AddressGeoCoordinatesMapping
                     {
                         AddressId = addressId ?? 0,
@@ -380,41 +334,35 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Factories
                     AutocompleteInputId = "shipping-autocomplete",
                     GeoCoordinatesSearchInputId = "shipping-geocoordinatesSearch"
                 },
-                CheckoutShippingAddressModel = PrepareShippingAddressModel(cart)
+                CheckoutShippingAddressModel = await PrepareShippingAddressModelAsync(cart)
             };
 
             model.AddressGeoCoordinatesEditModel.Address.Id = addressId ?? 0;
             model.AddressGeoCoordinatesEditModel.Address.CountryId = countryId ?? 0;
-            _addressModelFactory.PrepareAddressModel(model.AddressGeoCoordinatesEditModel.Address,
+            await _addressModelFactory.PrepareAddressModelAsync(model.AddressGeoCoordinatesEditModel.Address,
                 address: null,
                 excludeProperties: false,
                 addressSettings: _addressSettings,
-                loadCountries: () => _countryService.GetAllCountries(_workContext.WorkingLanguage.Id),
+                loadCountries: async () => await _countryService.GetAllCountriesForShippingAsync(languageId),
                 prePopulateWithCustomerFields: true,
-                customer: _workContext.CurrentCustomer,
+                customer: customer,
                 overrideAttributesXml: attributesXml);
 
             return model;
         }
 
-        /// <summary>
-        /// Prepares a <see cref="CustomOnePageCheckoutModel"/>.
-        /// </summary>
-        /// <param name="cart">An implementation of <see cref="IList{T}"/> where T is of <see cref="ShoppingCartItem"/>.</param>
-        /// <returns>An instance of <see cref="OnePageCheckoutModel"/>.</returns>
-        public virtual CustomOnePageCheckoutModel PrepareOnePageCheckoutModel(IList<ShoppingCartItem> cart)
+        public virtual async Task<CustomOnePageCheckoutModel> PrepareOnePageCheckoutModelAsync(IList<ShoppingCartItem> cart)
         {
-            if (cart == null)
-                throw new ArgumentNullException(nameof(cart));
+            ArgumentNullException.ThrowIfNull(cart);
 
-            var model = new CustomOnePageCheckoutModel
+            var customer = await _workContext.GetCurrentCustomerAsync();
+
+            return new CustomOnePageCheckoutModel
             {
-                ShippingRequired = _shoppingCartService.ShoppingCartRequiresShipping(cart),
-                DisableBillingAddressCheckoutStep = _orderSettings.DisableBillingAddressCheckoutStep && _customerService.GetAddressesByCustomerId(_workContext.CurrentCustomer.Id).Any(),
-                CheckoutBillingGeoCoordinatesAddressModel = PrepareCheckoutBillingGeoCoordinatesAddressModel(cart)
+                ShippingRequired = await _shoppingCartService.ShoppingCartRequiresShippingAsync(cart),
+                DisableBillingAddressCheckoutStep = _orderSettings.DisableBillingAddressCheckoutStep && (await _customerService.GetAddressesByCustomerIdAsync(customer.Id)).Any(),
+                CheckoutBillingGeoCoordinatesAddressModel = await PrepareCheckoutBillingGeoCoordinatesAddressModelAsync(cart)
             };
-
-            return model;
         }
 
         #endregion

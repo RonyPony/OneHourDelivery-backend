@@ -7,6 +7,7 @@ using Nop.Services.Events;
 using Nop.Services.Logging;
 using Nop.Services.Messages;
 using System;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Consumers
 {
@@ -53,18 +54,18 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Consumers
         /// Event consumer that will be fired every time an order is placed.
         /// </summary>
         /// <param name="eventMessage">An instance of <see cref="OrderPlacedEvent"/>.</param>
-        public void HandleEvent(OrderPlacedEvent eventMessage)
+        public async Task HandleEventAsync(OrderPlacedEvent eventMessage)
         {
             if (eventMessage.Order.ShippingAddressId.HasValue)
             {
                 try
                 {
-                    Customer customer = _customerService.GetCustomerById(eventMessage.Order.CustomerId);
+                    Customer customer = await _customerService.GetCustomerByIdAsync(eventMessage.Order.CustomerId);
 
                     if (customer.ShippingAddressId.HasValue && customer.ShippingAddressId.Value != eventMessage.Order.ShippingAddressId.Value)
                     {
-                        AddressGeoCoordinatesMapping customerShippingAddressGeoCoordinates = _addressGeoCoordinatesService.GetAddressGeoCoordinates(customer.ShippingAddressId.Value);
-                        AddressGeoCoordinatesMapping orderShippingAddressGeoCoordinates = _addressGeoCoordinatesService.GetAddressGeoCoordinates(eventMessage.Order.ShippingAddressId.Value);
+                        AddressGeoCoordinatesMapping customerShippingAddressGeoCoordinates = await _addressGeoCoordinatesService.GetAddressGeoCoordinatesAsync(customer.ShippingAddressId.Value);
+                        AddressGeoCoordinatesMapping orderShippingAddressGeoCoordinates = await _addressGeoCoordinatesService.GetAddressGeoCoordinatesAsync(eventMessage.Order.ShippingAddressId.Value);
 
                         if (customerShippingAddressGeoCoordinates != null && orderShippingAddressGeoCoordinates is null)
                         {
@@ -75,13 +76,13 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Consumers
                                 Longitude = customerShippingAddressGeoCoordinates.Longitude
                             };
 
-                            _addressGeoCoordinatesService.InsertAddressGeoCoordinates(orderShippingAddressGeoCoordinates, eventMessage.Order.ShippingAddressId.Value);
+                            await _addressGeoCoordinatesService.InsertAddressGeoCoordinatesAsync(orderShippingAddressGeoCoordinates, eventMessage.Order.ShippingAddressId.Value);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    _logger.Error($"Error duplicating shipping address geo coordinates for order #{eventMessage.Order.Id}. {e.Message}", e);
+                    await _logger.ErrorAsync($"Error duplicating shipping address geo coordinates for order #{eventMessage.Order.Id}. {e.Message}", e);
                     _notificationService.WarningNotification("Order placed successfully but some errors may have occurred while processing shipment information, please contact the administrators.");
                 }
             }

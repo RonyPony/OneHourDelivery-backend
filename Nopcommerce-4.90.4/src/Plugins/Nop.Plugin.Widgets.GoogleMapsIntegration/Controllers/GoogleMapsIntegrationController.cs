@@ -3,15 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
+using Nop.Core.Domain.Directory;
+using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
 using Nop.Core.Domain.Shipping;
+using Nop.Core.Domain.Stores;
 using Nop.Core.Http.Extensions;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Factories;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Helpers;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Models;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Services;
+using Nop.Services.Attributes;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
@@ -51,7 +55,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         private readonly AddressSettings _addressSettings;
         private readonly IAddressModelFactory _addressModelFactory;
         private readonly IWorkContext _workContext;
-        private readonly IAddressAttributeParser _addressAttributeParser;
+        private readonly IAttributeParser<AddressAttribute, AddressAttributeValue> _addressAttributeParser;
         private readonly ICountryService _countryService;
         private readonly IAddressService _addressService;
         private readonly IAddressGeoCoordinatesService _addressGeoCoordinatesService;
@@ -71,6 +75,18 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
 
         #endregion
 
+        #region Properties
+
+        private Customer CurrentCustomer => _workContext.GetCurrentCustomerAsync().GetAwaiter().GetResult();
+
+        private Store CurrentStore => _storeContext.GetCurrentStoreAsync().GetAwaiter().GetResult();
+
+        private Language WorkingLanguage => _workContext.GetWorkingLanguageAsync().GetAwaiter().GetResult();
+
+        private Currency WorkingCurrency => _workContext.GetWorkingCurrencyAsync().GetAwaiter().GetResult();
+
+        #endregion
+
         #region Ctor
 
         /// <summary>
@@ -79,7 +95,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// <param name="localizationService">An implementation of <see cref="ILocalizationService"/>.</param>
         /// <param name="notificationService">An implementation of <see cref="INotificationService"/>.</param>
         /// <param name="settingService">An implementation of <see cref="ISettingService"/>.</param>
-        /// <param name="addressAttributeParser">An implementation of <see cref="IAddressAttributeParser"/>.</param>
+        /// <param name="addressAttributeParser">An implementation of <see cref="IAttributeParser{TAttribute,TAttributeValue}"/>.</param>
         /// <param name="addressGeoCoordinatesService">An implementation of <see cref="IAddressGeoCoordinatesService"/>.</param>
         /// <param name="addressModelFactory">An implementation of <see cref="IAddressModelFactory"/>.</param>
         /// <param name="addressService">An implementation of <see cref="IAddressService"/>.</param>
@@ -108,7 +124,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             AddressSettings addressSettings,
             IAddressModelFactory addressModelFactory,
             IWorkContext workContext,
-            IAddressAttributeParser addressAttributeParser,
+            IAttributeParser<AddressAttribute, AddressAttributeValue> addressAttributeParser,
             ICountryService countryService,
             IAddressService addressService,
             IAddressGeoCoordinatesService addressGeoCoordinatesService,
@@ -170,6 +186,9 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             return model;
         }
 
+        private string RenderPartialViewToString(string viewName, object model)
+            => RenderPartialViewToStringAsync(viewName, model).GetAwaiter().GetResult();
+
         /// <summary>
         /// Parses the value indicating whether the "pickup in store" is allowed
         /// </summary>
@@ -189,13 +208,17 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// <summary>
         /// Parses the pickup option
         /// </summary>
+        /// <param name="cart">Shopping cart.</param>
         /// <param name="form">The form</param>
         /// <returns>The pickup option</returns>
-        protected virtual PickupPoint ParsePickupOption(IFormCollection form)
+        protected virtual PickupPoint ParsePickupOption(IList<ShoppingCartItem> cart, IFormCollection form)
         {
             var pickupPoint = form["pickup-points-id"].ToString().Split(new[] { "___" }, StringSplitOptions.None);
-            var pickupPoints = _shippingService.GetPickupPoints(_workContext.CurrentCustomer.BillingAddressId ?? 0,
-                _workContext.CurrentCustomer, pickupPoint[1], _storeContext.CurrentStore.Id).PickupPoints.ToList();
+            var billingAddress = CurrentCustomer.BillingAddressId.HasValue
+                ? _addressService.GetAddressById(CurrentCustomer.BillingAddressId.Value)
+                : null;
+            var pickupPoints = _shippingService.GetPickupPointsAsync(cart, billingAddress,
+                CurrentCustomer, pickupPoint[1], CurrentStore.Id).GetAwaiter().GetResult().PickupPoints.ToList();
             var selectedPoint = pickupPoints.FirstOrDefault(x => x.Id.Equals(pickupPoint[0]));
             if (selectedPoint == null)
                 throw new Exception("Pickup point is not allowed");
@@ -217,8 +240,8 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 ShippingRateComputationMethodSystemName = pickupPoint.ProviderSystemName,
                 IsPickupInStore = true
             };
-            _genericAttributeService.SaveAttribute(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, pickUpInStoreShippingOption, _storeContext.CurrentStore.Id);
-            _genericAttributeService.SaveAttribute(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, pickupPoint, _storeContext.CurrentStore.Id);
+            _genericAttributeService.SaveAttribute(CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, pickUpInStoreShippingOption, CurrentStore.Id);
+            _genericAttributeService.SaveAttribute(CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, pickupPoint, CurrentStore.Id);
         }
 
         /// <summary>
@@ -228,15 +251,15 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// <returns>An instance of <see cref="JsonResult"/>.</returns>
         protected virtual JsonResult OpcLoadStepAfterShippingAddress(IList<ShoppingCartItem> cart)
         {
-            var shippingMethodModel = _checkoutModelFactory.PrepareShippingMethodModel(cart, _customerService.GetCustomerShippingAddress(_workContext.CurrentCustomer));
+            var shippingMethodModel = _checkoutModelFactory.PrepareShippingMethodModel(cart, _customerService.GetCustomerShippingAddress(CurrentCustomer));
             if (_shippingSettings.BypassShippingMethodSelectionIfOnlyOne &&
                 shippingMethodModel.ShippingMethods.Count == 1)
             {
                 //if we have only one shipping method, then a customer doesn't have to choose a shipping method
-                _genericAttributeService.SaveAttribute(_workContext.CurrentCustomer,
+                _genericAttributeService.SaveAttribute(CurrentCustomer,
                     NopCustomerDefaults.SelectedShippingOptionAttribute,
                     shippingMethodModel.ShippingMethods.First().ShippingOption,
-                    _storeContext.CurrentStore.Id);
+                    CurrentStore.Id);
 
                 //load next step
                 return OpcLoadStepAfterShippingMethod(cart);
@@ -269,7 +292,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 var filterByCountryId = 0;
                 if (_addressSettings.CountryEnabled)
                 {
-                    filterByCountryId = _customerService.GetCustomerBillingAddress(_workContext.CurrentCustomer)?.CountryId ?? 0;
+                    filterByCountryId = _customerService.GetCustomerBillingAddress(CurrentCustomer)?.CountryId ?? 0;
                 }
 
                 //payment is required
@@ -282,12 +305,12 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                     //so customer doesn't have to choose a payment method
 
                     var selectedPaymentMethodSystemName = paymentMethodModel.PaymentMethods[0].PaymentMethodSystemName;
-                    _genericAttributeService.SaveAttribute(_workContext.CurrentCustomer,
+                    _genericAttributeService.SaveAttribute(CurrentCustomer,
                         NopCustomerDefaults.SelectedPaymentMethodAttribute,
-                        selectedPaymentMethodSystemName, _storeContext.CurrentStore.Id);
+                        selectedPaymentMethodSystemName, CurrentStore.Id);
 
                     var paymentMethodInst = _paymentPluginManager
-                        .LoadPluginBySystemName(selectedPaymentMethodSystemName, _workContext.CurrentCustomer, _storeContext.CurrentStore.Id);
+                        .LoadPluginBySystemName(selectedPaymentMethodSystemName, CurrentCustomer, CurrentStore.Id);
                     if (!_paymentPluginManager.IsPluginActive(paymentMethodInst))
                         throw new Exception("Selected payment method can't be parsed");
 
@@ -307,8 +330,8 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             }
 
             //payment is not required
-            _genericAttributeService.SaveAttribute<string>(_workContext.CurrentCustomer,
-                NopCustomerDefaults.SelectedPaymentMethodAttribute, null, _storeContext.CurrentStore.Id);
+            _genericAttributeService.SaveAttribute<string>(CurrentCustomer,
+                NopCustomerDefaults.SelectedPaymentMethodAttribute, null, CurrentStore.Id);
 
             var confirmOrderModel = _checkoutModelFactory.PrepareConfirmOrderModel(cart);
             return Json(new
@@ -375,7 +398,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// </summary>
         /// <returns>An <see cref="IActionResult"/> with the configuration's view.</returns>
         [AuthorizeAdmin]
-        [Area(AreaNames.Admin)]
+        [Area(AreaNames.ADMIN)]
         public IActionResult Configure()
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageWidgets))
@@ -393,7 +416,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         /// <returns>An <see cref="IActionResult"/> with the configuration's view.</returns>
         [HttpPost]
         [AuthorizeAdmin]
-        [Area(AreaNames.Admin)]
+        [Area(AreaNames.ADMIN)]
         public IActionResult Configure(PluginConfiguration model)
         {
             if (!ModelState.IsValid)
@@ -421,10 +444,10 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         [HttpsRequirement]
         public virtual IActionResult AddressDelete(int addressId)
         {
-            if (!_customerService.IsRegistered(_workContext.CurrentCustomer))
+            if (!_customerService.IsRegistered(CurrentCustomer))
                 return Challenge();
 
-            var customer = _workContext.CurrentCustomer;
+            var customer = CurrentCustomer;
 
             //find address (ensure that it belongs to the current customer)
             var address = _customerService.GetCustomerAddress(customer.Id, addressId);
@@ -451,7 +474,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         [HttpsRequirement]
         public virtual IActionResult AddressAdd()
         {
-            if (!_customerService.IsRegistered(_workContext.CurrentCustomer))
+            if (!_customerService.IsRegistered(CurrentCustomer))
                 return Challenge();
 
             var model = new AddressGeoCoordinatesEditModel {
@@ -471,7 +494,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 address: null,
                 excludeProperties: false,
                 addressSettings: _addressSettings,
-                loadCountries: () => _countryService.GetAllCountries(_workContext.WorkingLanguage.Id));
+                loadCountries: () => _countryService.GetAllCountries(WorkingLanguage.Id));
 
             return View(model);
         }
@@ -485,7 +508,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         [HttpPost]
         public virtual IActionResult AddressAdd(AddressGeoCoordinatesEditModel model, IFormCollection form)
         {
-            if (!_customerService.IsRegistered(_workContext.CurrentCustomer))
+            if (!_customerService.IsRegistered(CurrentCustomer))
                 return Challenge();
 
             //custom address attributes
@@ -509,7 +532,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
 
 
                 _addressService.InsertAddress(address);
-                _customerService.InsertCustomerAddress(_workContext.CurrentCustomer, address);
+                _customerService.InsertCustomerAddress(CurrentCustomer, address);
                 _addressGeoCoordinatesService.InsertAddressGeoCoordinates(model.AddressGeoCoordinatesMapping, address.Id);
 
                 return RedirectToRoute("CustomerAddresses");
@@ -522,7 +545,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 address: null,
                 excludeProperties: true,
                 addressSettings: _addressSettings,
-                loadCountries: () => _countryService.GetAllCountries(_workContext.WorkingLanguage.Id),
+                loadCountries: () => _countryService.GetAllCountries(WorkingLanguage.Id),
                 overrideAttributesXml: customAttributes);
 
             return View(model);
@@ -536,10 +559,10 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         [HttpsRequirement]
         public virtual IActionResult AddressEdit(int addressId)
         {
-            if (!_customerService.IsRegistered(_workContext.CurrentCustomer))
+            if (!_customerService.IsRegistered(CurrentCustomer))
                 return Challenge();
 
-            var customer = _workContext.CurrentCustomer;
+            var customer = CurrentCustomer;
             //find address (ensure that it belongs to the current customer)
             var address = _customerService.GetCustomerAddress(customer.Id, addressId);
             if (address == null)
@@ -569,7 +592,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 address: address,
                 excludeProperties: false,
                 addressSettings: _addressSettings,
-                loadCountries: () => _countryService.GetAllCountries(_workContext.WorkingLanguage.Id));
+                loadCountries: () => _countryService.GetAllCountries(WorkingLanguage.Id));
 
             return View(model);
         }
@@ -584,10 +607,10 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
         [HttpPost]
         public virtual IActionResult AddressEdit(AddressGeoCoordinatesEditModel model, int addressId, IFormCollection form)
         {
-            if (!_customerService.IsRegistered(_workContext.CurrentCustomer))
+            if (!_customerService.IsRegistered(CurrentCustomer))
                 return Challenge();
 
-            var customer = _workContext.CurrentCustomer;
+            var customer = CurrentCustomer;
             //find address (ensure that it belongs to the current customer)
             var address = _customerService.GetCustomerAddress(customer.Id, addressId);
             if (address == null)
@@ -619,7 +642,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 address: address,
                 excludeProperties: true,
                 addressSettings: _addressSettings,
-                loadCountries: () => _countryService.GetAllCountries(_workContext.WorkingLanguage.Id),
+                loadCountries: () => _countryService.GetAllCountries(WorkingLanguage.Id),
                 overrideAttributesXml: customAttributes);
 
             return View(model);
@@ -640,7 +663,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.CheckoutDisabled)
                 return RedirectToRoute("ShoppingCart");
 
-            var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
+            var cart = _shoppingCartService.GetShoppingCart(CurrentCustomer, ShoppingCartType.ShoppingCart, CurrentStore.Id);
 
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
@@ -648,7 +671,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.OnePageCheckoutEnabled)
                 return RedirectToRoute("CheckoutOnePage");
 
-            if (_customerService.IsGuest(_workContext.CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
+            if (_customerService.IsGuest(CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
                 return Challenge();
 
             //model
@@ -685,7 +708,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.CheckoutDisabled)
                 return RedirectToRoute("ShoppingCart");
 
-            var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
+            var cart = _shoppingCartService.GetShoppingCart(CurrentCustomer, ShoppingCartType.ShoppingCart, CurrentStore.Id);
 
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
@@ -693,7 +716,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.OnePageCheckoutEnabled)
                 return RedirectToRoute("CheckoutOnePage");
 
-            if (_customerService.IsGuest(_workContext.CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
+            if (_customerService.IsGuest(CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
                 return Challenge();
 
             //custom address attributes
@@ -709,7 +732,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (ModelState.IsValid)
             {
                 //try to find an address with the same values (don't duplicate records)
-                var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(_workContext.CurrentCustomer.Id).ToList(),
+                var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(CurrentCustomer.Id).ToList(),
                     newAddress.FirstName, newAddress.LastName, newAddress.PhoneNumber,
                     newAddress.Email, newAddress.FaxNumber, newAddress.Company,
                     newAddress.Address1, newAddress.Address2, newAddress.City,
@@ -730,24 +753,24 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                         address.StateProvinceId = null;
 
                     _addressService.InsertAddress(address);
-                    _customerService.InsertCustomerAddress(_workContext.CurrentCustomer, address);
+                    _customerService.InsertCustomerAddress(CurrentCustomer, address);
                 }
 
                 _addressGeoCoordinatesService.InsertAddressGeoCoordinates(model.AddressGeoCoordinatesEditModel.AddressGeoCoordinatesMapping, address.Id);
 
-                _workContext.CurrentCustomer.BillingAddressId = address.Id;
+                CurrentCustomer.BillingAddressId = address.Id;
 
-                _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                _customerService.UpdateCustomer(CurrentCustomer);
 
                 //ship to the same address?
                 if (_shippingSettings.ShipToSameAddress && model.CheckoutBillingAddressModel.ShipToSameAddress && _shoppingCartService.ShoppingCartRequiresShipping(cart))
                 {
-                    _workContext.CurrentCustomer.ShippingAddressId = _workContext.CurrentCustomer.BillingAddressId;
-                    _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                    CurrentCustomer.ShippingAddressId = CurrentCustomer.BillingAddressId;
+                    _customerService.UpdateCustomer(CurrentCustomer);
 
                     //reset selected shipping method (in case if "pick up in store" was selected)
-                    _genericAttributeService.SaveAttribute<ShippingOption>(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, null, _storeContext.CurrentStore.Id);
-                    _genericAttributeService.SaveAttribute<PickupPoint>(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, _storeContext.CurrentStore.Id);
+                    _genericAttributeService.SaveAttribute<ShippingOption>(CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, null, CurrentStore.Id);
+                    _genericAttributeService.SaveAttribute<PickupPoint>(CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, CurrentStore.Id);
 
                     //limitation - "Ship to the same address" doesn't properly work in "pick up in store only" case (when no shipping plugins are available) 
                     return RedirectToRoute("CheckoutShippingMethod");
@@ -775,7 +798,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.CheckoutDisabled)
                 return RedirectToRoute("ShoppingCart");
 
-            var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
+            var cart = _shoppingCartService.GetShoppingCart(CurrentCustomer, ShoppingCartType.ShoppingCart, CurrentStore.Id);
 
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
@@ -783,7 +806,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.OnePageCheckoutEnabled)
                 return RedirectToRoute("CheckoutOnePage");
 
-            if (_customerService.IsGuest(_workContext.CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
+            if (_customerService.IsGuest(CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
                 return Challenge();
 
             if (!_shoppingCartService.ShoppingCartRequiresShipping(cart))
@@ -809,7 +832,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.CheckoutDisabled)
                 return RedirectToRoute("ShoppingCart");
 
-            var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
+            var cart = _shoppingCartService.GetShoppingCart(CurrentCustomer, ShoppingCartType.ShoppingCart, CurrentStore.Id);
 
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
@@ -817,7 +840,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.OnePageCheckoutEnabled)
                 return RedirectToRoute("CheckoutOnePage");
 
-            if (_customerService.IsGuest(_workContext.CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
+            if (_customerService.IsGuest(CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
                 return Challenge();
 
             if (!_shoppingCartService.ShoppingCartRequiresShipping(cart))
@@ -829,14 +852,14 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 var pickupInStore = ParsePickupInStore(form);
                 if (pickupInStore)
                 {
-                    var pickupOption = ParsePickupOption(form);
+                    var pickupOption = ParsePickupOption(cart, form);
                     SavePickupOption(pickupOption);
 
                     return RedirectToRoute("CheckoutPaymentMethod");
                 }
 
                 //set value indicating that "pick up in store" option has not been chosen
-                _genericAttributeService.SaveAttribute<PickupPoint>(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, _storeContext.CurrentStore.Id);
+                _genericAttributeService.SaveAttribute<PickupPoint>(CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, CurrentStore.Id);
             }
 
             //custom address attributes
@@ -852,7 +875,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (ModelState.IsValid)
             {
                 //try to find an address with the same values (don't duplicate records)
-                var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(_workContext.CurrentCustomer.Id).ToList(),
+                var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(CurrentCustomer.Id).ToList(),
                     newAddress.FirstName, newAddress.LastName, newAddress.PhoneNumber,
                     newAddress.Email, newAddress.FaxNumber, newAddress.Company,
                     newAddress.Address1, newAddress.Address2, newAddress.City,
@@ -872,14 +895,14 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
 
                     _addressService.InsertAddress(address);
 
-                    _customerService.InsertCustomerAddress(_workContext.CurrentCustomer, address);
+                    _customerService.InsertCustomerAddress(CurrentCustomer, address);
 
                 }
 
                 _addressGeoCoordinatesService.InsertAddressGeoCoordinates(model.AddressGeoCoordinatesEditModel.AddressGeoCoordinatesMapping, address.Id);
 
-                _workContext.CurrentCustomer.ShippingAddressId = address.Id;
-                _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                CurrentCustomer.ShippingAddressId = address.Id;
+                _customerService.UpdateCustomer(CurrentCustomer);
 
                 return RedirectToRoute("CheckoutShippingMethod");
             }
@@ -907,7 +930,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (_orderSettings.CheckoutDisabled)
                 return RedirectToRoute("ShoppingCart");
 
-            var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
+            var cart = _shoppingCartService.GetShoppingCart(CurrentCustomer, ShoppingCartType.ShoppingCart, CurrentStore.Id);
 
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
@@ -915,7 +938,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
             if (!_orderSettings.OnePageCheckoutEnabled)
                 return RedirectToRoute("Checkout");
 
-            if (_customerService.IsGuest(_workContext.CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
+            if (_customerService.IsGuest(CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
                 return Challenge();
 
             var model = _checkoutModelCustomFactory.PrepareOnePageCheckoutModel(cart);
@@ -938,7 +961,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 if (_orderSettings.CheckoutDisabled)
                     throw new Exception(_localizationService.GetResource("Checkout.Disabled"));
 
-                var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
+                var cart = _shoppingCartService.GetShoppingCart(CurrentCustomer, ShoppingCartType.ShoppingCart, CurrentStore.Id);
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -946,7 +969,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 if (!_orderSettings.OnePageCheckoutEnabled)
                     throw new Exception("One page checkout is disabled");
 
-                if (_customerService.IsGuest(_workContext.CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
+                if (_customerService.IsGuest(CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
                     throw new Exception("Anonymous checkout is not allowed");
 
                 int.TryParse(form["billing_address_id"], out var billingAddressId);
@@ -954,11 +977,11 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 if (billingAddressId > 0)
                 {
                     //existing address
-                    var address = _customerService.GetCustomerAddress(_workContext.CurrentCustomer.Id, billingAddressId)
+                    var address = _customerService.GetCustomerAddress(CurrentCustomer.Id, billingAddressId)
                         ?? throw new Exception(_localizationService.GetResource("Checkout.Address.NotFound"));
 
-                    _workContext.CurrentCustomer.BillingAddressId = address.Id;
-                    _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                    CurrentCustomer.BillingAddressId = address.Id;
+                    _customerService.UpdateCustomer(CurrentCustomer);
                 }
                 else
                 {
@@ -992,7 +1015,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                     }
 
                     //try to find an address with the same values (don't duplicate records)
-                    var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(_workContext.CurrentCustomer.Id).ToList(),
+                    var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(CurrentCustomer.Id).ToList(),
                         newAddress.FirstName, newAddress.LastName, newAddress.PhoneNumber,
                         newAddress.Email, newAddress.FaxNumber, newAddress.Company,
                         newAddress.Address1, newAddress.Address2, newAddress.City,
@@ -1015,31 +1038,31 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
 
                         _addressService.InsertAddress(address);
 
-                        _customerService.InsertCustomerAddress(_workContext.CurrentCustomer, address);
+                        _customerService.InsertCustomerAddress(CurrentCustomer, address);
                     }
 
                     _addressGeoCoordinatesService.InsertAddressGeoCoordinates(model.AddressGeoCoordinatesEditModel.AddressGeoCoordinatesMapping, address.Id);
 
-                    _workContext.CurrentCustomer.BillingAddressId = address.Id;
+                    CurrentCustomer.BillingAddressId = address.Id;
 
-                    _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                    _customerService.UpdateCustomer(CurrentCustomer);
                 }
 
                 if (_shoppingCartService.ShoppingCartRequiresShipping(cart))
                 {
                     //shipping is required
-                    var address = _customerService.GetCustomerBillingAddress(_workContext.CurrentCustomer);
+                    var address = _customerService.GetCustomerBillingAddress(CurrentCustomer);
 
                     //by default Shipping is available if the country is not specified
                     var shippingAllowed = _addressSettings.CountryEnabled ? _countryService.GetCountryByAddress(address)?.AllowsShipping ?? false : true;
                     if (_shippingSettings.ShipToSameAddress && model.CheckoutBillingAddressModel.ShipToSameAddress && shippingAllowed)
                     {
                         //ship to the same address
-                        _workContext.CurrentCustomer.ShippingAddressId = address.Id;
-                        _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                        CurrentCustomer.ShippingAddressId = address.Id;
+                        _customerService.UpdateCustomer(CurrentCustomer);
                         //reset selected shipping method (in case if "pick up in store" was selected)
-                        _genericAttributeService.SaveAttribute<ShippingOption>(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, null, _storeContext.CurrentStore.Id);
-                        _genericAttributeService.SaveAttribute<PickupPoint>(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, _storeContext.CurrentStore.Id);
+                        _genericAttributeService.SaveAttribute<ShippingOption>(CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, null, CurrentStore.Id);
+                        _genericAttributeService.SaveAttribute<PickupPoint>(CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, CurrentStore.Id);
                         //limitation - "Ship to the same address" doesn't properly work in "pick up in store only" case (when no shipping plugins are available) 
                         return OpcLoadStepAfterShippingAddress(cart);
                     }
@@ -1059,14 +1082,14 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 }
 
                 //shipping is not required
-                _genericAttributeService.SaveAttribute<ShippingOption>(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, null, _storeContext.CurrentStore.Id);
+                _genericAttributeService.SaveAttribute<ShippingOption>(CurrentCustomer, NopCustomerDefaults.SelectedShippingOptionAttribute, null, CurrentStore.Id);
 
                 //load next step
                 return OpcLoadStepAfterShippingMethod(cart);
             }
             catch (Exception exc)
             {
-                _logger.Warning(exc.Message, exc, _workContext.CurrentCustomer);
+                _logger.Warning(exc.Message, exc, CurrentCustomer);
                 return Json(new { error = 1, message = exc.Message });
             }
         }
@@ -1086,7 +1109,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 if (_orderSettings.CheckoutDisabled)
                     throw new Exception(_localizationService.GetResource("Checkout.Disabled"));
 
-                var cart = _shoppingCartService.GetShoppingCart(_workContext.CurrentCustomer, ShoppingCartType.ShoppingCart, _storeContext.CurrentStore.Id);
+                var cart = _shoppingCartService.GetShoppingCart(CurrentCustomer, ShoppingCartType.ShoppingCart, CurrentStore.Id);
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -1094,7 +1117,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 if (!_orderSettings.OnePageCheckoutEnabled)
                     throw new Exception("One page checkout is disabled");
 
-                if (_customerService.IsGuest(_workContext.CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
+                if (_customerService.IsGuest(CurrentCustomer) && !_orderSettings.AnonymousCheckoutAllowed)
                     throw new Exception("Anonymous checkout is not allowed");
 
                 if (!_shoppingCartService.ShoppingCartRequiresShipping(cart))
@@ -1106,14 +1129,14 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                     var pickupInStore = ParsePickupInStore(form);
                     if (pickupInStore)
                     {
-                        var pickupOption = ParsePickupOption(form);
+                        var pickupOption = ParsePickupOption(cart, form);
                         SavePickupOption(pickupOption);
 
                         return OpcLoadStepAfterShippingMethod(cart);
                     }
 
                     //set value indicating that "pick up in store" option has not been chosen
-                    _genericAttributeService.SaveAttribute<PickupPoint>(_workContext.CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, _storeContext.CurrentStore.Id);
+                    _genericAttributeService.SaveAttribute<PickupPoint>(CurrentCustomer, NopCustomerDefaults.SelectedPickupPointAttribute, null, CurrentStore.Id);
                 }
 
                 int.TryParse(form["shipping_address_id"], out var shippingAddressId);
@@ -1121,11 +1144,11 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                 if (shippingAddressId > 0)
                 {
                     //existing address
-                    var address = _customerService.GetCustomerAddress(_workContext.CurrentCustomer.Id, shippingAddressId)
+                    var address = _customerService.GetCustomerAddress(CurrentCustomer.Id, shippingAddressId)
                         ?? throw new Exception(_localizationService.GetResource("Checkout.Address.NotFound"));
 
-                    _workContext.CurrentCustomer.ShippingAddressId = address.Id;
-                    _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                    CurrentCustomer.ShippingAddressId = address.Id;
+                    _customerService.UpdateCustomer(CurrentCustomer);
                 }
                 else
                 {
@@ -1158,7 +1181,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
                     }
 
                     //try to find an address with the same values (don't duplicate records)
-                    var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(_workContext.CurrentCustomer.Id).ToList(),
+                    var address = _addressService.FindAddress(_customerService.GetAddressesByCustomerId(CurrentCustomer.Id).ToList(),
                         newAddress.FirstName, newAddress.LastName, newAddress.PhoneNumber,
                         newAddress.Email, newAddress.FaxNumber, newAddress.Company,
                         newAddress.Address1, newAddress.Address2, newAddress.City,
@@ -1173,21 +1196,21 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Controllers
 
                         _addressService.InsertAddress(address);
 
-                        _customerService.InsertCustomerAddress(_workContext.CurrentCustomer, address);
+                        _customerService.InsertCustomerAddress(CurrentCustomer, address);
                     }
 
                     _addressGeoCoordinatesService.InsertAddressGeoCoordinates(model.AddressGeoCoordinatesEditModel.AddressGeoCoordinatesMapping, address.Id);
 
-                    _workContext.CurrentCustomer.ShippingAddressId = address.Id;
+                    CurrentCustomer.ShippingAddressId = address.Id;
 
-                    _customerService.UpdateCustomer(_workContext.CurrentCustomer);
+                    _customerService.UpdateCustomer(CurrentCustomer);
                 }
 
                 return OpcLoadStepAfterShippingAddress(cart);
             }
             catch (Exception exc)
             {
-                _logger.Warning(exc.Message, exc, _workContext.CurrentCustomer);
+                _logger.Warning(exc.Message, exc, CurrentCustomer);
                 return Json(new { error = 1, message = exc.Message });
             }
         }

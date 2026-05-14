@@ -9,7 +9,6 @@ using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains.Enums;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Services.Catalog;
 using Nop.Services.Orders;
 using System;

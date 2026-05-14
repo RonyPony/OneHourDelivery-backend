@@ -6,7 +6,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Models
     /// <summary>
     /// Represents a customized one page checkout model (<see cref="OnePageCheckoutModel"/>).
     /// </summary>
-    public partial class CustomOnePageCheckoutModel : BaseNopModel
+    public partial record CustomOnePageCheckoutModel : BaseNopModel
     {
         /// <summary>
         /// Indicates if shipping is required.

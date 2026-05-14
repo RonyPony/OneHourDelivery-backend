@@ -7,7 +7,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Models
     /// <summary>
     /// Represents a model for adding and editing customer addresses with Google Maps API's integration for geo-coordinates.
     /// </summary>
-    public partial class AddressGeoCoordinatesEditModel : BaseNopModel
+    public partial record AddressGeoCoordinatesEditModel : BaseNopModel
     {
         /// <summary>
         /// Initializes a new instance of <see cref="AddressGeoCoordinatesEditModel"/>.

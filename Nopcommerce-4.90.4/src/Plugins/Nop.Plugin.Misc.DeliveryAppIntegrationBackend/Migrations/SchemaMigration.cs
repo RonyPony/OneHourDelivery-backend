@@ -1,6 +1,7 @@
-using FluentMigrator;
-using Nop.Data.Migrations;
+﻿using FluentMigrator;
 using Nop.Data.Extensions;
+using Nop.Data.Mapping;
+using Nop.Data.Migrations;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
 

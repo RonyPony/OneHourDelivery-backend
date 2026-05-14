@@ -1,4 +1,4 @@
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
@@ -18,7 +18,6 @@ using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains.Enums;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.DTO;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Customers;

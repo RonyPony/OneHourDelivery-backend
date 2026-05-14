@@ -4,7 +4,6 @@ using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.contracts;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Services.Configuration;
 using Nop.Services.Shipping;
 using System.Collections.Generic;

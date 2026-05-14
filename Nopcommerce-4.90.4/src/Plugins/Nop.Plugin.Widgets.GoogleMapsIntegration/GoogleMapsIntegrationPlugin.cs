@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Nop.Core;
 using Nop.Core.Domain.Cms;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Plugin.Widgets.GoogleMapsIntegration.Helpers;
@@ -8,8 +10,6 @@ using Nop.Services.Cms;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Plugins;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Nop.Plugin.Widgets.GoogleMapsIntegration
 {
@@ -24,8 +24,7 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration
         private readonly ILanguageService _languageService;
         private readonly ILocalizationService _localizationService;
         private readonly ISettingService _settingService;
-        private readonly IUrlHelperFactory _urlHelperFactory;
-        private readonly IActionContextAccessor _actionContextAccessor;
+        private readonly IWebHelper _webHelper;
 
         #endregion
 
@@ -38,46 +37,39 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration
         /// <param name="languageService">An implementation of <see cref="ILanguageService"/>.</param>
         /// <param name="localizationService">An implementation of <see cref="ILocalizationService"/>.</param>
         /// <param name="settingService">An implementation of <see cref="ISettingService"/>.</param>
-        /// <param name="urlHelperFactory">An implementation of <see cref="IUrlHelperFactory"/>.</param>
-        /// <param name="actionContextAccessor">An implementation of <see cref="IActionContextAccessor"/>.</param>
+        /// <param name="webHelper">An implementation of <see cref="IWebHelper"/>.</param>
         public GoogleMapsIntegrationPlugin(
             WidgetSettings widgetSettings,
             ILanguageService languageService,
             ILocalizationService localizationService,
             ISettingService settingService,
-            IUrlHelperFactory urlHelperFactory,
-            IActionContextAccessor actionContextAccessor)
+            IWebHelper webHelper)
         {
             _widgetSettings = widgetSettings;
             _languageService = languageService;
             _localizationService = localizationService;
             _settingService = settingService;
-            _urlHelperFactory = urlHelperFactory;
-            _actionContextAccessor = actionContextAccessor;
+            _webHelper = webHelper;
         }
 
         #endregion
 
         #region Utilities
 
-        private void InsertLanguagesResources()
+        private async Task InsertLanguagesResourcesAsync()
         {
-            var language = _languageService.GetAllLanguages().FirstOrDefault(x => x.LanguageCulture.Contains("es-"));
+            var language = (await _languageService.GetAllLanguagesAsync(true)).FirstOrDefault(x => x.LanguageCulture.Contains("es-"));
 
             if (language != null)
-            {
-                AddLocaleResources(GoogleMapsIntegrationLocaleResources.SpanishResources, language.LanguageCulture);
-            }
+                await AddLocaleResourcesAsync(GoogleMapsIntegrationLocaleResources.SpanishResources, language.LanguageCulture);
 
-            AddLocaleResources(GoogleMapsIntegrationLocaleResources.EnglishResources, "en-US");
+            await AddLocaleResourcesAsync(GoogleMapsIntegrationLocaleResources.EnglishResources, "en-US");
         }
 
-        private void AddLocaleResources(Dictionary<string, string> resources, string languageLanguageCulture)
+        private async Task AddLocaleResourcesAsync(Dictionary<string, string> resources, string languageLanguageCulture)
         {
             foreach (var resource in resources)
-            {
-                _localizationService.AddOrUpdatePluginLocaleResource(resource.Key, resource.Value, languageLanguageCulture);
-            }
+                await _localizationService.AddOrUpdateLocaleResourceAsync(resource.Key, resource.Value, languageLanguageCulture);
         }
 
         #endregion
@@ -90,57 +82,57 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration
         public bool HideInWidgetList => false;
 
         /// <summary>
-        /// Gets a name of a view component for displaying widget.
+        /// Gets a type of a view component for displaying widget.
         /// </summary>
         /// <param name="widgetZone">Name of the widget zone.</param>
-        /// <returns>The name of the view component for this plugin.</returns>
-        public string GetWidgetViewComponentName(string widgetZone) => string.Empty;
+        /// <returns>The type of the view component for this plugin.</returns>
+        public Type GetWidgetViewComponent(string widgetZone) => null;
 
         /// <summary>
         /// Returns the widget zones for this plugin.
         /// </summary>
         /// <returns>An instance of <see cref="List{T}"/> where T the name of a widget zone used by this plugin.</returns>
-        public IList<string> GetWidgetZones() => new List<string>();
+        public Task<IList<string>> GetWidgetZonesAsync() => Task.FromResult<IList<string>>(new List<string>());
 
         /// <summary>
         /// Gets the configuration page URL.
         /// </summary>
         public override string GetConfigurationPageUrl()
-            => _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext).RouteUrl(Defaults.ConfigurationRouteName);
+            => $"{_webHelper.GetStoreLocation()}Admin/GoogleMapsIntegration/Configure";
 
         /// <summary>
         /// Installs Google Maps Integration plugin.
         /// </summary>
-        public override void Install()
+        public override async Task InstallAsync()
         {
-            InsertLanguagesResources();
+            await InsertLanguagesResourcesAsync();
 
             if (!_widgetSettings.ActiveWidgetSystemNames.Contains(Defaults.SystemName))
             {
                 _widgetSettings.ActiveWidgetSystemNames.Add(Defaults.SystemName);
-                _settingService.SaveSetting(_widgetSettings);
+                await _settingService.SaveSettingAsync(_widgetSettings);
             }
 
-            base.Install();
+            await base.InstallAsync();
         }
 
         /// <summary>
         /// Uninstalls Google Maps Integration plugin.
         /// </summary>
-        public override void Uninstall()
+        public override async Task UninstallAsync()
         {
             if (_widgetSettings.ActiveWidgetSystemNames.Contains(Defaults.SystemName))
             {
                 _widgetSettings.ActiveWidgetSystemNames.Remove(Defaults.SystemName);
-                _settingService.SaveSetting(_widgetSettings);
+                await _settingService.SaveSettingAsync(_widgetSettings);
             }
 
-            _settingService.DeleteSetting<PluginConfigurationSettings>();
-            _localizationService.DeletePluginLocaleResources(Defaults.ResourcesNamePrefix);
+            await _settingService.DeleteSettingAsync<PluginConfigurationSettings>();
+            await _localizationService.DeleteLocaleResourcesAsync(Defaults.ResourcesNamePrefix);
 
-            base.Uninstall();
+            await base.UninstallAsync();
         }
 
         #endregion
-    };
+    }
 }

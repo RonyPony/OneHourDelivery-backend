@@ -10,7 +10,6 @@ using Nop.Data;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
@@ -653,14 +652,90 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         ///<inheritdoc/>
         public IList<StoreResponseModel> GetClosestStores(decimal latitud, decimal longitud)
         {
-            IList<AddressGeoCoordinatesMapping> warehousesAddresses =
-               (from vw in _vendorWarehouseMappingRepository.Table
-                join w in _warehouseRepository.Table on vw.WarehouseId equals w.Id
-                join agc in _addressGeoCoordinateRepository.Table on w.AddressId equals agc.AddressId
-                join vend in _vendorRepository.Table on vw.VendorId equals vend.Id
-                join customer in _customerRepository.Table on vend.Id equals customer.VendorId
-                where customer.VendorId != 0 && !vend.Deleted
-                select agc).ToList();
+            //IList<AddressGeoCoordinatesMapping> warehousesAddresses = [];
+
+            //warehousesAddresses =
+            //   (from vw in _vendorWarehouseMappingRepository.Table
+            //    join w in _warehouseRepository.Table on vw.WarehouseId equals w.Id
+            //    join agc in _addressGeoCoordinateRepository.Table on w.AddressId equals agc.AddressId
+            //    join vend in _vendorRepository.Table on vw.VendorId equals vend.Id
+            //    join customer in _customerRepository.Table on vend.Id equals customer.VendorId
+            //    where customer.VendorId != 0 && !vend.Deleted
+            //    select agc).ToList();
+
+            IList<AddressGeoCoordinatesMapping> warehousesAddresses = new List<AddressGeoCoordinatesMapping>();
+
+            var vendorWarehouseMappings = _vendorWarehouseMappingRepository.Table.ToList();
+
+            var warehouses = _warehouseRepository.Table.ToList();
+
+            var addressGeoCoordinates = _addressGeoCoordinateRepository.Table.ToList();
+
+            var vendors = _vendorRepository.Table.ToList();
+
+            var customers = _customerRepository.Table.ToList();
+
+            var warehouseJoin = vendorWarehouseMappings
+                .Join(
+                    warehouses,
+                    vendorWarehouseMapping => vendorWarehouseMapping.WarehouseId,
+                    warehouse => warehouse.Id,
+                    (vendorWarehouseMapping, warehouse) => new
+                    {
+                        VendorWarehouseMapping = vendorWarehouseMapping,
+                        Warehouse = warehouse
+                    })
+                .ToList();
+
+            var addressJoin = warehouseJoin
+                .Join(
+                    addressGeoCoordinates,
+                    warehouseData => warehouseData.Warehouse.AddressId,
+                    addressGeoCoordinate => addressGeoCoordinate.AddressId,
+                    (warehouseData, addressGeoCoordinate) => new
+                    {
+                        warehouseData.VendorWarehouseMapping,
+                        warehouseData.Warehouse,
+                        AddressGeoCoordinate = addressGeoCoordinate
+                    })
+                .ToList();
+
+            var vendorJoin = addressJoin
+                .Join(
+                    vendors,
+                    addressData => addressData.VendorWarehouseMapping.VendorId,
+                    vendor => vendor.Id,
+                    (addressData, vendor) => new
+                    {
+                        addressData.VendorWarehouseMapping,
+                        addressData.Warehouse,
+                        addressData.AddressGeoCoordinate,
+                        Vendor = vendor
+                    })
+                .ToList();
+
+            var customerJoin = vendorJoin
+                .Join(
+                    customers,
+                    vendorData => vendorData.Vendor.Id,
+                    customer => customer.VendorId,
+                    (vendorData, customer) => new
+                    {
+                        vendorData.VendorWarehouseMapping,
+                        vendorData.Warehouse,
+                        vendorData.AddressGeoCoordinate,
+                        vendorData.Vendor,
+                        Customer = customer
+                    })
+                .ToList();
+
+            var filteredCustomerJoin = customerJoin
+                .Where(data => data.Customer.VendorId != 0 && !data.Vendor.Deleted)
+                .ToList();
+
+            warehousesAddresses = filteredCustomerJoin
+                .Select(data => data.AddressGeoCoordinate)
+                .ToList();
 
             List<StoreResponseModel> closestStores = warehousesAddresses == null || warehousesAddresses.Count == 0 ?
                                                       GetAllStores().ToList() :

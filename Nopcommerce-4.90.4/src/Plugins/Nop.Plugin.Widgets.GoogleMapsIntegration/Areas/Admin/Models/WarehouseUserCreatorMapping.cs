@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Nop.Core;
 
-namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains
+namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Areas.Admin.Models
 {
     /// <summary>
     /// Represents the relation between a warehouse and it's creator.

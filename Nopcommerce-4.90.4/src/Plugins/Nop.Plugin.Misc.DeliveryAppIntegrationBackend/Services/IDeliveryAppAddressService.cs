@@ -1,6 +1,6 @@
 ﻿using Nop.Core.Domain.Common;
+using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
-using Nop.Plugin.Widgets.GoogleMapsIntegration.Domains;
 using System.Collections.Generic;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
