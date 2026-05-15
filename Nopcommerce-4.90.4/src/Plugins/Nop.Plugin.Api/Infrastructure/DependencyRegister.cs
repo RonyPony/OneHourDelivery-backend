@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +8,7 @@ using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Infrastructure;
+using Nop.Plugin.Api.Configuration;
 using Nop.Plugin.Api.Converters;
 using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.Helpers;
@@ -24,6 +25,11 @@ namespace Nop.Plugin.Api.Infrastructure
         {
             RegisterPluginServices(services);
             RegisterModelBinders(services);
+            var apiConfiguration = new ApiConfiguration();
+
+            configuration.GetSection("Api").Bind(apiConfiguration);
+
+            services.AddSingleton(apiConfiguration);
         }
 
         public void Configure(IApplicationBuilder application)
@@ -76,6 +82,7 @@ namespace Nop.Plugin.Api.Infrastructure
 
             services.AddHttpContextAccessor();
             services.AddSingleton<Dictionary<string, object>>();
+
         }
 
         public int Order => int.MaxValue;

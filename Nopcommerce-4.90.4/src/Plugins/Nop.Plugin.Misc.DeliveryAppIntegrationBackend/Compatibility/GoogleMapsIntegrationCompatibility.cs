@@ -6,6 +6,7 @@ using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains
 {
+    [Table("Address_GeoCoordinates_Mapping")]
     public sealed class AddressGeoCoordinatesMapping : BaseEntity
     {
         /// <summary>
@@ -92,4 +93,3 @@ namespace Nop.Plugin.Widgets.GoogleMapsIntegration.Helpers
         }
     }
 }
-

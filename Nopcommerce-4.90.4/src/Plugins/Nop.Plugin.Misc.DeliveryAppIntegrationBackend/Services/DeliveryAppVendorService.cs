@@ -627,24 +627,57 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
 
             }
 
+            //return new DeliveryAppVendor
+            //{
+            //    VendorId = vendorId,
+            //    Name = currentVendor.Name,
+            //    Image = string.IsNullOrWhiteSpace(productImage) ? _pictureService.GetPictureUrl(currentVendor.PictureId) : productImage,
+            //    Categories = categoriesWithProductsResult,
+            //    Info = currentVendor.Description is null ? $"{currentVendor.Name} no tiene descripción."
+            //    : RemoveHtmlParagraphTags(currentVendor.Description),
+            //    VendorTags = new List<string>(),
+            //    Rating = GetRatingAttribute(vendorId) != null ? double.Parse(GetRatingAttribute(vendorId)) : 0,
+            //    EstimatedWaitTime = GetEstimatedTimeAttribute(vendorId) != null ? GetEstimatedTimeAttribute(vendorId) : "25-30m",
+            //    IsFreeShipping = _settingService.LoadSetting<ShippingSettings>().FreeShippingOverXEnabled,
+            //    AdditionalShippingCharge = shippingRate == null ? 0.0m : decimal.Parse(shippingRate.Value),
+            //    AdultsLimitated = GetVendorAdultsLimitatedAttribute(vendorId),
+            //    IsOpen = IsVendorWarehouseOpen(currentVendor),
+            //    IsFavorite = _customerFavoriteMappingRepository.Table
+            //    .Any(customerFavorite => customerFavorite.CustomerId == customerId
+            //    && customerFavorite.VendorId == vendorId),
+            //    CategoryName = GetVendorCategoryAttribute(vendorId)
+            //};
+
+            var ratingAttribute = GetRatingAttribute(vendorId);
+            var estimatedTimeAttribute = GetEstimatedTimeAttribute(vendorId);
+
+            double rating = 0;
+
+            if (!string.IsNullOrWhiteSpace(ratingAttribute))
+                double.TryParse(ratingAttribute, out rating);
+
+            decimal additionalShippingCharge = 0.0m;
+
+            if (shippingRate != null && !string.IsNullOrWhiteSpace(shippingRate.Value))
+                decimal.TryParse(shippingRate.Value, out additionalShippingCharge);
+
             return new DeliveryAppVendor
             {
                 VendorId = vendorId,
                 Name = currentVendor.Name,
                 Image = string.IsNullOrWhiteSpace(productImage) ? _pictureService.GetPictureUrl(currentVendor.PictureId) : productImage,
                 Categories = categoriesWithProductsResult,
-                Info = currentVendor.Description is null ? $"{currentVendor.Name} no tiene descripción."
-                : RemoveHtmlParagraphTags(currentVendor.Description),
+                Info = string.IsNullOrWhiteSpace(currentVendor.Description) ? $"{currentVendor.Name} no tiene descripción." : RemoveHtmlParagraphTags(currentVendor.Description),
                 VendorTags = new List<string>(),
-                Rating = GetRatingAttribute(vendorId) != null ? double.Parse(GetRatingAttribute(vendorId)) : 0,
-                EstimatedWaitTime = GetEstimatedTimeAttribute(vendorId) != null ? GetEstimatedTimeAttribute(vendorId) : "25-30m",
+                Rating = rating,
+                EstimatedWaitTime = string.IsNullOrWhiteSpace(estimatedTimeAttribute) ? "25-30m" : estimatedTimeAttribute,
                 IsFreeShipping = _settingService.LoadSetting<ShippingSettings>().FreeShippingOverXEnabled,
-                AdditionalShippingCharge = shippingRate == null ? 0.0m : decimal.Parse(shippingRate.Value),
+                AdditionalShippingCharge = additionalShippingCharge,
                 AdultsLimitated = GetVendorAdultsLimitatedAttribute(vendorId),
                 IsOpen = IsVendorWarehouseOpen(currentVendor),
-                IsFavorite = _customerFavoriteMappingRepository.Table
-                .Any(customerFavorite => customerFavorite.CustomerId == customerId
-                && customerFavorite.VendorId == vendorId),
+                IsFavorite = _customerFavoriteMappingRepository.Table.Any(customerFavorite =>
+                    customerFavorite.CustomerId == customerId &&
+                    customerFavorite.VendorId == vendorId),
                 CategoryName = GetVendorCategoryAttribute(vendorId)
             };
         }

@@ -1,52 +1,57 @@
 ﻿@using Nop.Plugin.Api.Infrastructure
+@using Nop.Web.Framework.UI
+
 @model Nop.Plugin.Api.Areas.Admin.Models.ConfigurationModel
 
-@{ 
+@inject INopHtmlHelper NopHtml
+
+@{
     Layout = Constants.ViewNames.AdminLayout;
 
-    //page title
     ViewBag.Title = T("Plugins.Api.Admin.Page.Settings.Title").Text;
+    ViewBag.PageTitle = T("Plugins.Api.Admin.Page.Settings.Title").Text;
 
-    //active menu item (system name)
-    Html.SetActiveMenuItemSystemName("Api-Settings-Menu"); 
+    NopHtml.SetActiveMenuItemSystemName("Api-Settings-Menu");
 }
 
 <form asp-controller="ApiAdmin" asp-action="Settings" method="post">
     @Html.AntiForgeryToken()
 
     <div class="content-header clearfix">
-        <h1 class="pull-left">
+        <h1 class="float-left">
             @T("Plugins.Api.Admin.Page.Settings.Title")
         </h1>
-        <div class="pull-right">
-            <button type="submit" name="save" class="btn bg-blue">
-                <i class="fa fa-floppy-o"></i>
+        <div class="float-right">
+            <button type="submit" name="save" class="btn btn-primary">
+                <i class="far fa-save"></i>
                 @T("Admin.Common.Save")
             </button>
         </div>
     </div>
 
-    <div class="content">
-        <div class="form-horizontal">
-            @await Component.InvokeAsync("StoreScopeConfiguration")
-            @Html.ValidationSummary(false)
-            <div class="panel-group">
+    <section class="content">
+        <div class="container-fluid">
+            <div class="form-horizontal">
+                @await Component.InvokeAsync("StoreScopeConfiguration")
+                @Html.ValidationSummary(false)
 
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                <nop-override-store-checkbox asp-for="EnableApi_OverrideForStore" asp-input="EnableApi" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
-                                <nop-label asp-for="EnableApi" />
-                            </div>
-                            <div class="col-md-9">
-                                <nop-editor asp-for="EnableApi" />
-                                <span asp-validation-for="EnableApi"></span>
+                <div class="cards-group">
+                    <div class="card card-default">
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="EnableApi_OverrideForStore" asp-input="EnableApi" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="EnableApi" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="EnableApi" />
+                                    <span asp-validation-for="EnableApi"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </form>
