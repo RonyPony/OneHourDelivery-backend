@@ -85,7 +85,9 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains
             [$"{Defaults.LocaleResourcesPrefix}.Generics.Validation.ProfitMismatch"] = "The sum of both profits must be from 0% to 100% of the shipping tax.",
 
             [$"{Defaults.LocaleResourcesPrefix}.Generics.NotificationCenterUrl"] = "Url for notifications",
-            [$"{Defaults.LocaleResourcesPrefix}.Generics.NotificationCenterUrl.Hint"] = "Url to use for the connection with the notification service.",
+            [$"{Defaults.LocaleResourcesPrefix}.Generics.NotificationsEnabled"] = "Notifications Enabled",
+            
+        [$"{Defaults.LocaleResourcesPrefix}.Generics.NotificationCenterUrl.Hint"] = "Url to use for the connection with the notification service.",
             [$"{Defaults.LocaleResourcesPrefix}.Generics.NotificationCenterUrl.Required"] = "The url for notification is required.",
 
             [$"{Defaults.LocaleResourcesPrefix}.Generics.NotificationDriverTrackingUrl"] = "Url for tracking driver notifications",

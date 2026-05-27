@@ -1,5 +1,6 @@
 ﻿using Nop.Core;
 using Nop.Core.Configuration;
+using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domain
 {
@@ -77,6 +78,11 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domain
         /// Indicates the delivery profit percentage for the messenger.
         /// </summary>
         public decimal MessengerProfit { get; set; }
+
+        /// <summary>
+        /// Indicates the notifications are enabled.
+        /// </summary>
+        public bool NotificationsEnabled { get; set; }
 
 
         /// <summary>

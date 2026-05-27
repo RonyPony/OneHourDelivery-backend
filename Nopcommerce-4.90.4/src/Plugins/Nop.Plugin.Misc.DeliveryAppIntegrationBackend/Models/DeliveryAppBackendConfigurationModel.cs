@@ -1,4 +1,4 @@
-using Nop.Web.Framework.Models;
+﻿using Nop.Web.Framework.Models;
 using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models
@@ -85,6 +85,12 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models
         /// </summary>
         [NopResourceDisplayName("Plugin.Misc.DeliveryAppIntegrationBackend.Generics.MessengerProfit")]
         public decimal MessengerProfit { get; set; }
+
+        /// <summary>
+        /// Indicates the notifications are enabled.
+        /// </summary>
+        [NopResourceDisplayName("Plugin.Misc.DeliveryAppIntegrationBackend.Generics.NotificationsEnabled")]
+        public bool NotificationsEnabled { get; set; }
 
         /// <summary>
         /// Indicates the notification center url.

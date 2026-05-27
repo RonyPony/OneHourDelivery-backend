@@ -108,41 +108,48 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         public void SendNotification(NotificationRequest notificationRequest)
         {
             Task<HttpResponseMessage> result = null;
-
-            try
+            if (_deliveryAppBackendConfigurationSettings.NotificationsEnabled)
             {
-                if (notificationRequest is null)
-                    throw new ArgumentException("InvalidNotificationRequest");
-
-                Order order = _orderService.GetOrderById(notificationRequest.OrderId);
-
-                if (order is null)
-                    throw new ArgumentException("OrderNotFound");
-
-                using HttpClient _httpClient = new HttpClient();
-                string notificationUrl = string.Format(
-                    _deliveryAppBackendConfigurationSettings.NotificationCenterUrl,
-                    notificationRequest.TemplateType,
-                    notificationRequest.CustomerId,
-                    notificationRequest.AppPackageName);
-
-                if (!notificationRequest.Payload.ContainsKey("orderId"))
-                    notificationRequest.Payload.Add("orderId", notificationRequest.OrderId.ToString());
-
-                StringContent bodyContent = new StringContent(JsonConvert.SerializeObject(notificationRequest.Payload), Encoding.UTF8, "application/json");
-                result = _httpClient.PostAsync(notificationUrl, bodyContent);
-
-                if (!result.Result.IsSuccessStatusCode)
+                try
                 {
-                    throw new ArgumentException($"ErrorTryingToSendNotification. {result.Result}");
-                }
+                    if (notificationRequest is null)
+                        throw new ArgumentException("InvalidNotificationRequest");
 
-                AddOrderNote(order, $"Request to send notification of type \"{notificationRequest.TemplateType.Value}\" to the customer id {notificationRequest.CustomerId} was sent successfully,");
+                    Order order = _orderService.GetOrderById(notificationRequest.OrderId);
+
+                    if (order is null)
+                        throw new ArgumentException("OrderNotFound");
+
+                    using HttpClient _httpClient = new HttpClient();
+                    string notificationUrl = string.Format(
+                        _deliveryAppBackendConfigurationSettings.NotificationCenterUrl,
+                        notificationRequest.TemplateType,
+                        notificationRequest.CustomerId,
+                        notificationRequest.AppPackageName);
+
+                    if (!notificationRequest.Payload.ContainsKey("orderId"))
+                        notificationRequest.Payload.Add("orderId", notificationRequest.OrderId.ToString());
+
+                    StringContent bodyContent = new StringContent(JsonConvert.SerializeObject(notificationRequest.Payload), Encoding.UTF8, "application/json");
+                    result = _httpClient.PostAsync(notificationUrl, bodyContent);
+
+                    if (!result.Result.IsSuccessStatusCode)
+                    {
+                        throw new ArgumentException($"ErrorTryingToSendNotification. {result.Result}");
+                    }
+
+                    AddOrderNote(order, $"Request to send notification of type \"{notificationRequest.TemplateType.Value}\" to the customer id {notificationRequest.CustomerId} was sent successfully,");
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e.ToString() + "\n\n" + $"Request body: \n{JsonConvert.SerializeObject(notificationRequest)}" + "\n\n" + $"Response: {JsonConvert.SerializeObject(result == null ? default : result.Result)}", e);
+                }
             }
-            catch (Exception e)
+            else
             {
-                _logger.Error(e.ToString() + "\n\n" + $"Request body: \n{JsonConvert.SerializeObject(notificationRequest)}" + "\n\n" + $"Response: {JsonConvert.SerializeObject(result == null ? default : result.Result)}", e);
+                _logger.Warning("Notifications are disabled in the configuration settings.");
             }
+
         }
 
         ///<inheritdoc/>
