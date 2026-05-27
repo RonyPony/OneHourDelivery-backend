@@ -977,12 +977,25 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             if (vendor is null) throw new ArgumentException("VendorNotFound");
 
             decimal vendorRatingMapping = _vendorReviewMapping.Table
-                .GroupBy(group => group.VendorId == vendor.Id)
-                .Select(select => select.Average(a => a.Rating)).Sum();
+                .Where(review => review.VendorId == vendor.Id)
+                .Select(review => (decimal?)review.Rating)
+                .Average() ?? decimal.Zero;
 
-            IList<OrderPendingToClosePayment> ordersPayment = _orderPendingToClosePaymentRepository.Table
+            var latestPaymentIdsByOrder = _orderPendingToClosePaymentRepository.Table
                 .Where(payment => payment.VendorId == vendorId)
-                .GroupBy(x => new { x.OrderId }).Select(x => x.FirstOrDefault()).ToList();
+                .GroupBy(payment => payment.OrderId)
+                .Select(group => new
+                {
+                    OrderId = group.Key,
+                    PaymentId = group.Max(payment => payment.Id)
+                });
+
+            IList<OrderPendingToClosePayment> ordersPayment = (from payment in _orderPendingToClosePaymentRepository.Table
+                                                                join latestPayment in latestPaymentIdsByOrder
+                                                                    on new { payment.OrderId, PaymentId = payment.Id }
+                                                                    equals new { latestPayment.OrderId, latestPayment.PaymentId }
+                                                                where payment.VendorId == vendorId
+                                                                select payment).ToList();
 
             foreach (OrderPendingToClosePayment payment in ordersPayment)
             {

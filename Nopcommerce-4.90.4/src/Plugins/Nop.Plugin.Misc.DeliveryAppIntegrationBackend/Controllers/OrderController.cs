@@ -991,7 +991,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
             }
         }
 
-        [HttpPost("messenger-location-info"), Authorize(Roles = "Cliente , Mensajero", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("messenger-location-info"), Authorize(Roles = "Mensajero", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult CreateDriverlocationUpdateInfo([FromBody] DriverLocationInfoRequest driverRequest)
         {
@@ -1173,7 +1173,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
             return Ok();
         }
 
-        [HttpGet("request-tracking-update")]
+        [HttpGet("request-tracking-update"), Authorize(Roles = "Cliente", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult UpdateOrderTracking([FromQuery, Required] int orderId)
         {
             _notificationCenterService.SendDriverCoordinateTrackingUpdate(new DriverLocationInfoRequest

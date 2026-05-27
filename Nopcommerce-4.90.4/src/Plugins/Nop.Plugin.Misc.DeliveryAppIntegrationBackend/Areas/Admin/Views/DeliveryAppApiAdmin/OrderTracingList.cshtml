@@ -291,7 +291,7 @@
                                         break;
                                 }
 
-                                return data.trim() ? '<span class="grid-report-item ' + color + '">' + data + '</span >' : '';
+                                return data && data.trim() ? '<span class="grid-report-item ' + color + '">' + data + '</span >' : '';
                             }
 
                             function renderColumnCustomer(data, type, row, meta) {
@@ -313,7 +313,7 @@
                                         break;
                                 }
 
-                                return data.trim() ? '<span class="grid-report-item ' + color + '">' + data + '</span >' : '';
+                                return data && data.trim() ? '<span class="grid-report-item ' + color + '">' + data + '</span >' : '';
                             }
 
                             $(document).ready(function () {

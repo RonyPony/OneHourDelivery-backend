@@ -5,6 +5,7 @@ using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
 using Nop.Core.Domain.Shipping;
+using Nop.Data;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Models;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains.Enums;
@@ -17,6 +18,7 @@ using Nop.Services.Localization;
 using Nop.Services.Orders;
 using Nop.Services.Stores;
 using Nop.Services.Vendors;
+using Nop.Web.Areas.Admin.Factories;
 using Nop.Web.Areas.Admin.Models.Common;
 using Nop.Web.Areas.Admin.Models.Catalog;
 using Nop.Web.Areas.Admin.Models.Orders;
@@ -28,35 +30,56 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Factories
     public partial class OrderPendingToClosePaymentModelFactory : IOrderPendingToClosePaymentModelFactory
     {
         private readonly IAddressService _addressService;
+        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
         private readonly ICustomerService _customerService;
         private readonly IDateTimeHelper _dateTimeHelper;
+        private readonly IDeliveryAppBaseAdminModelFactory _deliveryAppBaseAdminModelFactory;
         private readonly ILocalizationService _localizationService;
         private readonly IOrderPendingToClosePaymentService _orderPendingService;
         private readonly IOrderService _orderService;
         private readonly IPriceFormatter _priceFormatter;
         private readonly Nop.Services.Stores.IStoreService _storeService;
         private readonly IVendorService _vendorService;
+        private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<OrderItem> _orderItemRepository;
+        private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<OrderDeliveryStatusMapping> _orderDeliveryStatusMappingRepository;
+        private readonly IRepository<OrderPaymentCollectionStatus> _orderPaymentCollectionStatusRepository;
 
         public OrderPendingToClosePaymentModelFactory(
             IAddressService addressService,
+            IBaseAdminModelFactory baseAdminModelFactory,
             ICustomerService customerService,
             IDateTimeHelper dateTimeHelper,
+            IDeliveryAppBaseAdminModelFactory deliveryAppBaseAdminModelFactory,
             ILocalizationService localizationService,
             IOrderPendingToClosePaymentService orderPendingService,
             IOrderService orderService,
             IPriceFormatter priceFormatter,
             Nop.Services.Stores.IStoreService storeService,
-            IVendorService vendorService)
+            IVendorService vendorService,
+            IRepository<Order> orderRepository,
+            IRepository<OrderItem> orderItemRepository,
+            IRepository<Product> productRepository,
+            IRepository<OrderDeliveryStatusMapping> orderDeliveryStatusMappingRepository,
+            IRepository<OrderPaymentCollectionStatus> orderPaymentCollectionStatusRepository)
         {
             _addressService = addressService;
+            _baseAdminModelFactory = baseAdminModelFactory;
             _customerService = customerService;
             _dateTimeHelper = dateTimeHelper;
+            _deliveryAppBaseAdminModelFactory = deliveryAppBaseAdminModelFactory;
             _localizationService = localizationService;
             _orderPendingService = orderPendingService;
             _orderService = orderService;
             _priceFormatter = priceFormatter;
             _storeService = storeService;
             _vendorService = vendorService;
+            _orderRepository = orderRepository;
+            _orderItemRepository = orderItemRepository;
+            _productRepository = productRepository;
+            _orderDeliveryStatusMappingRepository = orderDeliveryStatusMappingRepository;
+            _orderPaymentCollectionStatusRepository = orderPaymentCollectionStatusRepository;
         }
 
         public virtual OrderPendingToClosePaymentSearchModel PrepareOrderSearchModel(OrderPendingToClosePaymentSearchModel searchModel)
@@ -77,6 +100,9 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Factories
             PrepareShippingStatuses(searchModel.AvailableShippingStatuses);
             PrepareDeliveryStatuses(searchModel.AvailableDeliveryStatuses);
             PreparePaymentCollectionStatuses(searchModel.AvailablePaymentCollectionStatuses);
+            _deliveryAppBaseAdminModelFactory.PrepareDrivers(searchModel.AvailableDrivers);
+            _deliveryAppBaseAdminModelFactory.PreparePaymentMethods(searchModel.AvailablePaymentMethods);
+            _baseAdminModelFactory.PrepareVendorsAsync(searchModel.AvailableVendors).GetAwaiter().GetResult();
             return searchModel;
         }
 
@@ -89,7 +115,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Factories
 
         public virtual OrderTracingListModel PrepareOrderTracingListModel(OrderTracingSearchModel searchModel)
         {
-            var orders = SearchPendingOrders(searchModel);
+            var orders = SearchTracingOrders(searchModel);
             return new OrderTracingListModel().PrepareToGrid(searchModel, orders,
                 () => orders.Select(PrepareTracingModel));
         }
@@ -258,33 +284,81 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Factories
                 searchModel.Page - 1, pageSizeOverride ?? searchModel.PageSize);
         }
 
-        private IPagedList<OrderPendingToClosePayment> SearchPendingOrders(OrderTracingSearchModel searchModel)
+        private IPagedList<Order> SearchTracingOrders(OrderTracingSearchModel searchModel)
         {
             searchModel ??= new OrderTracingSearchModel();
             var createdFromUtc = searchModel.StartDate;
             var createdToUtc = searchModel.EndDate?.Date.AddDays(1).AddTicks(-1);
+            var query = _orderRepository.Table.Where(order => !order.Deleted);
 
-            return _orderPendingService.SearchOrders(searchModel.VendorId, searchModel.DriverId, searchModel.PaymentMethodSystemName,
-                searchModel.PaymentStatusIds?.ToList(), null, createdFromUtc, createdToUtc, searchModel.Page - 1, searchModel.PageSize);
+            if (createdFromUtc.HasValue)
+                query = query.Where(order => order.CreatedOnUtc >= createdFromUtc.Value);
+            if (createdToUtc.HasValue)
+                query = query.Where(order => order.CreatedOnUtc <= createdToUtc.Value);
+            if (searchModel.OrderStatusIds?.Any() == true && !searchModel.OrderStatusIds.Contains(0))
+                query = query.Where(order => searchModel.OrderStatusIds.Contains(order.OrderStatusId));
+            if (searchModel.PaymentStatusIds?.Any() == true && !searchModel.PaymentStatusIds.Contains(0))
+                query = query.Where(order => searchModel.PaymentStatusIds.Contains(order.PaymentStatusId));
+            if (searchModel.ShippingStatusIds?.Any() == true && !searchModel.ShippingStatusIds.Contains(0))
+                query = query.Where(order => searchModel.ShippingStatusIds.Contains(order.ShippingStatusId));
+            if (!string.IsNullOrWhiteSpace(searchModel.PaymentMethodName))
+                query = query.Where(order => order.CheckoutAttributeDescription.Contains(searchModel.PaymentMethodName));
+
+            if (searchModel.VendorId > 0)
+            {
+                query = query.Where(order => _orderItemRepository.Table.Any(item =>
+                    item.OrderId == order.Id &&
+                    _productRepository.Table.Any(product => product.Id == item.ProductId && product.VendorId == searchModel.VendorId)));
+            }
+
+            if (searchModel.DriverId > 0)
+                query = query.Where(order => _orderDeliveryStatusMappingRepository.Table.Any(mapping =>
+                    mapping.OrderId == order.Id && mapping.CustomerId == searchModel.DriverId));
+
+            if (searchModel.DeliveryStatusIds?.Any() == true && !searchModel.DeliveryStatusIds.Contains(0))
+                query = query.Where(order => _orderDeliveryStatusMappingRepository.Table.Any(mapping =>
+                    mapping.OrderId == order.Id && searchModel.DeliveryStatusIds.Contains(mapping.DeliveryStatusId)));
+
+            if (searchModel.PaymentCollectionStatusId > 0)
+                query = query.Where(order => _orderPaymentCollectionStatusRepository.Table.Any(mapping =>
+                    mapping.OrderId == order.Id && mapping.PaymentCollectionStatusId == searchModel.PaymentCollectionStatusId));
+
+            query = query.OrderByDescending(order => order.CreatedOnUtc);
+            var totalCount = query.Count();
+            var pageIndex = searchModel.Page - 1;
+            var data = query.Skip(pageIndex * searchModel.PageSize).Take(searchModel.PageSize).ToList();
+            return new PagedList<Order>(data, pageIndex, searchModel.PageSize, totalCount);
         }
 
-        private OrderTracingModel PrepareTracingModel(OrderPendingToClosePayment order)
+        private OrderTracingModel PrepareTracingModel(Order order)
         {
+            var billingAddress = PrepareAddressModel(order.BillingAddressId);
+            var orderDelivery = _orderDeliveryStatusMappingRepository.Table.FirstOrDefault(mapping => mapping.OrderId == order.Id);
+            var paymentCollection = _orderPaymentCollectionStatusRepository.Table.FirstOrDefault(mapping => mapping.OrderId == order.Id);
+            var paymentCollectionStatus = paymentCollection?.PaymentCollectionStatus ?? PaymentCollectionStatus.DoesNotApply;
             var model = new OrderTracingModel
             {
                 Id = order.Id,
                 OrderGuid = order.OrderGuid,
                 CustomOrderNumber = order.CustomOrderNumber,
                 CustomerId = order.CustomerId,
-                CustomerEmail = GetCustomerEmail(order.CustomerId),
-                CustomerInfo = GetCustomerEmail(order.CustomerId),
-                VendorName = GetVendorName(order.VendorId),
+                CustomerEmail = billingAddress.Email ?? GetCustomerEmail(order.CustomerId),
+                CustomerFullName = $"{billingAddress.FirstName} {billingAddress.LastName}".Trim(),
+                CustomerInfo = billingAddress.Email ?? GetCustomerEmail(order.CustomerId),
+                VendorName = GetOrderVendorName(order.Id),
                 StoreName = GetStoreName(order.StoreId),
                 CreatedOn = _dateTimeHelper.ConvertToUserTime(order.CreatedOnUtc, DateTimeKind.Utc),
                 OrderStatusId = order.OrderStatusId,
                 OrderStatus = _localizationService.GetLocalizedEnum(order.OrderStatus),
-                PaymentStatusId = order.VendorPaymentStatusId,
-                PaymentStatus = _localizationService.GetLocalizedEnum(order.VendorPaymentStatus),
+                PaymentStatusId = order.PaymentStatusId,
+                PaymentStatus = _localizationService.GetLocalizedEnum(order.PaymentStatus),
+                ShippingStatusId = order.ShippingStatusId,
+                ShippingStatus = _localizationService.GetLocalizedEnum(order.ShippingStatus),
+                DeliveryStatusId = orderDelivery?.DeliveryStatusId ?? 0,
+                DeliveryStatus = orderDelivery == null ? string.Empty : _localizationService.GetLocalizedEnum((DeliveryStatus)orderDelivery.DeliveryStatusId),
+                DriverName = GetDriverName(orderDelivery?.CustomerId),
+                PaymentCollectionStatusId = (int)paymentCollectionStatus,
+                PaymentCollectionStatus = _localizationService.GetLocalizedEnum(paymentCollectionStatus),
                 PaymentMethod = order.PaymentMethodSystemName,
                 OrderTotal = FormatPrice(order.OrderTotal),
                 ShippingMethod = order.ShippingMethod,
@@ -292,6 +366,22 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Factories
             };
 
             return model;
+        }
+
+        private string GetDriverName(int? driverId)
+        {
+            var driver = driverId.HasValue ? _customerService.GetCustomerById(driverId.Value) : null;
+            return driver is null ? string.Empty : driver.Email;
+        }
+
+        private string GetOrderVendorName(int orderId)
+        {
+            var vendorId = (from item in _orderItemRepository.Table
+                            join product in _productRepository.Table on item.ProductId equals product.Id
+                            where item.OrderId == orderId
+                            select product.VendorId).FirstOrDefault();
+
+            return vendorId == 0 ? string.Empty : GetVendorName(vendorId);
         }
 
         private AddressModel PrepareAddressModel(int addressId)

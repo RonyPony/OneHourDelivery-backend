@@ -888,12 +888,14 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             var order = _orderDeliveryStatusMappingRepository.Table.FirstOrDefault(o => o.OrderId == orderId);
             if (order is null) throw new ArgumentException("OrderNotFound");
 
-            if (order.DeliveryStatusId == (int)DeliveryStatus.DeclinedByStore ||
-                order.DeliveryStatusId == (int)DeliveryStatus.AwaitingForMessenger
-                || order.DeliveryStatusId == (int)DeliveryStatus.OrderPreparationCompleted)
+            if (!order.CustomerId.HasValue ||
+                order.DeliveryStatusId == (int)DeliveryStatus.DeclinedByStore)
                 throw new ArgumentException("DoesNotHaveDriverAssignedToTheOrder");
 
             var customer = _customerService.GetCustomerById(order.CustomerId.Value);
+            if (customer is null)
+                throw new ArgumentException("DriverNotFound");
+
             return customer;
         }
 
@@ -936,6 +938,8 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
 
             if (driverRequest is null)
                 throw new ArgumentException("InvalidDriverLocationRequest");
+            if (!driverRequest.Latitude.HasValue || !driverRequest.Longitude.HasValue)
+                throw new ArgumentException("InvalidDriverCoordinates");
 
             var orderDelivery = _orderDeliveryStatusMappingRepository.Table
                 .FirstOrDefault(order => order.OrderId == driverRequest.OrderId);
@@ -949,21 +953,22 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
                 driverLocationInfoMapping.DeliveryStatus = (int)DeliveryStatus.OrderPreparationCompleted;
                 driverLocationInfoMapping.DestinationType = (int)DestinationType.Commerce;
 
-                _notificationCenterService.SendDriverCoordinateTrackingUpdate(driverRequest);
-
             }
             else if (orderDelivery.DeliveryStatusId == (int)DeliveryStatus.DeliveryInProgress)
             {
                 driverLocationInfoMapping.DeliveryStatus = (int)DeliveryStatus.DeliveryInProgress;
                 driverLocationInfoMapping.DestinationType = (int)DestinationType.Client;
-                _notificationCenterService.SendDriverCoordinateTrackingUpdate(driverRequest);
             }
+            else
+                throw new ArgumentException("OrderTrackingNotAvailable");
 
             driverLocationInfoMapping.CreatedOnUtc = DateTime.UtcNow;
             driverLocationInfoMapping.OrderId = driverRequest.OrderId;
             driverLocationInfoMapping.Latitude = driverRequest.Latitude;
             driverLocationInfoMapping.Longitude = driverRequest.Longitude;
             _driverLocationInfoMappingRepository.Insert(driverLocationInfoMapping);
+
+            _notificationCenterService.SendDriverCoordinateTrackingUpdate(driverRequest);
         }
 
         ///<inheritdoc/>

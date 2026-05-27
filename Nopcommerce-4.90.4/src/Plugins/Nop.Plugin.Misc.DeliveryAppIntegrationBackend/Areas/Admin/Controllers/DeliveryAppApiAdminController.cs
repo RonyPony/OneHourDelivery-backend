@@ -320,10 +320,16 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Areas.Admin.Controllers
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageOrders))
                 return Json(new { error = "Access denied" });
 
-            //prepare model
-            var model = _orderPendingToClosePaymentModelFactory.PrepareOrderTracingListModel(searchModel);
-
-            return Json(model);
+            try
+            {
+                var model = _orderPendingToClosePaymentModelFactory.PrepareOrderTracingListModel(searchModel);
+                return Json(model);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e.Message, e);
+                return BadRequest(new { e.Message });
+            }
         }
 
         [HttpPost]

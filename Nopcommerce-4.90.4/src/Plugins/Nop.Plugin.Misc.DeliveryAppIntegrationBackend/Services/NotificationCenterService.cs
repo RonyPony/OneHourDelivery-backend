@@ -155,6 +155,9 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         ///<inheritdoc/>
         public void SendDriverCoordinateTrackingUpdate(DriverLocationInfoRequest driverRequest)
         {
+            if (!_deliveryAppBackendConfigurationSettings.NotificationsEnabled)
+                return;
+
             try
             {
                 if (driverRequest is null)
@@ -226,7 +229,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
                        GetVendorFromOrder(orderMapping.OrderId).Name : customerDestinationMessage;
                 }
 
-                using var _httpClient = new HttpClient();
+                using var _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
                 string notificationUrl = string.Format(_deliveryAppBackendConfigurationSettings.NotificationDriverTrackingUrl, driverRequest.OrderId, order.CustomerId);
 
                 var bodyContent = new StringContent(JsonConvert.SerializeObject(new
@@ -269,6 +272,9 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         ///<inheritdoc/>
         public void SendOrderStatusTrackingUpdate(int orderId)
         {
+            if (!_deliveryAppBackendConfigurationSettings.NotificationsEnabled)
+                return;
+
             try
             {
                 var order = _orderService.GetOrderById(orderId);
@@ -282,7 +288,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
                 if (orderMapping is null)
                     throw new ArgumentException("OrderDeliveryNotFound");
 
-                using var _httpClient = new HttpClient();
+                using var _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
                 string notificationUrl = string.Format(_deliveryAppBackendConfigurationSettings.NotificationDriverTrackingUrl, order.Id, order.CustomerId);
 
                 var bodyContent = new StringContent(JsonConvert.SerializeObject(new
