@@ -232,6 +232,19 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             }
         }
 
+        private IList<Shipment> GetOrCreateOrderShipments(int orderId, OrderDeliveryStatusMapping orderDeliveryStatus, DeliveryStatus expectedStatus)
+        {
+            IList<Shipment> orderShipments = _shipmentService.GetShipmentsByOrderId(orderId);
+            if (orderShipments.Count > 0)
+                return orderShipments;
+
+            if (orderDeliveryStatus.DeliveryStatusId != (int)expectedStatus)
+                throw new ArgumentException("OrderShipmentCouldNotBeFound");
+
+            InsertOrderShipment(orderId);
+            return _shipmentService.GetShipmentsByOrderId(orderId);
+        }
+
         private IList<OrderDto> FilterOrdersByLocation(IList<OrderDto> orders, decimal latitude, decimal longitude)
         {
             var orderShippingAddressIds = orders.Select(order => order.ShippingAddress?.Id);
@@ -394,11 +407,10 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         {
             Order foundOrder = _orderService.GetOrderById(orderId);
             if (foundOrder is null) throw new ArgumentException("OrderNotFound");
-            IList<Shipment> orderShipments = _shipmentService.GetShipmentsByOrderId(orderId);
-            if (orderShipments.Count == 0) throw new ArgumentException("OrderShipmentCouldNotBeFound");
             OrderDeliveryStatusMapping orderDeliveryStatus = _orderDeliveryStatusMappingRepository.Table
                 .FirstOrDefault(mapping => mapping.OrderId == orderId);
             if (orderDeliveryStatus is null) throw new ArgumentException("OrderDeliveryStatusCouldNotBeFound");
+            IList<Shipment> orderShipments = GetOrCreateOrderShipments(orderId, orderDeliveryStatus, DeliveryStatus.DeliveryInProgress);
 
             IList<OrderItem> foundStoreOrderItems = _orderService.GetOrderItems(orderId);
 
@@ -454,11 +466,10 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         {
             Order foundOrder = _orderService.GetOrderById(orderId);
             if (foundOrder is null) throw new ArgumentException("OrderNotFound");
-            IList<Shipment> orderShipments = _shipmentService.GetShipmentsByOrderId(orderId);
-            if (orderShipments.Count == 0) throw new ArgumentException("OrderShipmentCouldNotBeFound");
             OrderDeliveryStatusMapping orderDeliveryStatus = _orderDeliveryStatusMappingRepository.Table
                 .FirstOrDefault(mapping => mapping.OrderId == orderId);
             if (orderDeliveryStatus is null) throw new ArgumentException("OrderDeliveryStatusCouldNotBeFound");
+            IList<Shipment> orderShipments = GetOrCreateOrderShipments(orderId, orderDeliveryStatus, DeliveryStatus.OrderPreparationCompleted);
 
             foundOrder.ShippingStatusId = (int)ShippingStatus.Shipped;
             _orderService.UpdateOrder(foundOrder);
