@@ -1174,14 +1174,21 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
         }
 
         [HttpGet("request-tracking-update"), Authorize(Roles = "Cliente", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [GetRequestsErrorInterceptorActionFilter]
         public IActionResult UpdateOrderTracking([FromQuery, Required] int orderId)
         {
-            _notificationCenterService.SendDriverCoordinateTrackingUpdate(new DriverLocationInfoRequest
+            if (orderId <= 0)
+                return BadRequest(new { Message = "InvalidOrderId" });
+
+            var trackingUpdate = _notificationCenterService.SendDriverCoordinateTrackingUpdate(new DriverLocationInfoRequest
             {
                 OrderId = orderId,
             });
 
-            return NoContent();
+            if (trackingUpdate is null)
+                return NotFound(new { Message = "TrackingInformationNotAvailable" });
+
+            return Ok(trackingUpdate);
         }
 
         #endregion

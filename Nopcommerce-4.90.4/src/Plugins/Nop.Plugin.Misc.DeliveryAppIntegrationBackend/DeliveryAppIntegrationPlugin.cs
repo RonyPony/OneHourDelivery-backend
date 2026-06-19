@@ -72,6 +72,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend
         private readonly IRepository<Country> _countryRepository;
         private readonly IStoreService _storeService;
         private readonly ISpecificationAttributeService _specificationAttributeService;
+        private readonly IGenericAttributeService _genericAttributeService;
         private readonly IRepository<SpecificationAttribute> _specificationAttributeRepository;
         private readonly IRepository<SpecificationAttributeOption> _specificationAttributteOptionRepository;
         private readonly IRepository<ProductSpecificationAttribute> _productSpecificationAttributeRepository;
@@ -133,6 +134,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend
             IRepository<Country> countryRepository, 
             IStoreService storeService,
             ISpecificationAttributeService specificationAttributeService ,
+            IGenericAttributeService genericAttributeService,
             IRepository<SpecificationAttribute> specificationAttributeRepository ,
             IRepository<SpecificationAttributeOption> specificationAttributteOptionRepository,
             IRepository<ProductSpecificationAttribute> productSpecificationAttributeRepository)
@@ -161,6 +163,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend
             _countryRepository = countryRepository;
             _storeService = storeService;
             _specificationAttributeService = specificationAttributeService;
+            _genericAttributeService = genericAttributeService;
             _specificationAttributeRepository = specificationAttributeRepository;
             _specificationAttributteOptionRepository = specificationAttributteOptionRepository;
             _productSpecificationAttributeRepository = productSpecificationAttributeRepository;
@@ -629,6 +632,64 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend
 
             _productAttributeService.InsertProductAttribute(newAttribute);
         }
+
+
+        //private async Task InsertOtherGeneralAttributes()
+        //{
+        //    var pageIndex = 0;
+        //    const int pageSize = 500;
+
+        //    while (true)
+        //    {
+        //        var customers = await _customerService.GetAllCustomersAsync(
+        //            pageIndex: pageIndex,
+        //            pageSize: pageSize);
+
+        //        if (!customers.Any())
+        //            break;
+
+        //        foreach (var customer in customers)
+        //        {
+        //            var firstName = await _genericAttributeService.GetAttributeAsync<string>(
+        //                customer,
+        //                "FirstName");
+
+        //            var lastName = await _genericAttributeService.GetAttributeAsync<string>(
+        //                customer,
+        //                "LastName");
+
+        //            var phone = await _genericAttributeService.GetAttributeAsync<string>(
+        //                customer,
+        //                "Phone");
+
+        //            if (firstName == null)
+        //            {
+        //                await _genericAttributeService.SaveAttributeAsync(
+        //                    customer,
+        //                    "FirstName",
+        //                    string.Empty);
+        //            }
+
+        //            if (lastName == null)
+        //            {
+        //                await _genericAttributeService.SaveAttributeAsync(
+        //                    customer,
+        //                    "LastName",
+        //                    string.Empty);
+        //            }
+
+        //            if (phone == null)
+        //            {
+        //                await _genericAttributeService.SaveAttributeAsync(
+        //                    customer,
+        //                    "Phone",
+        //                    string.Empty);
+        //            }
+        //        }
+
+        //        pageIndex++;
+        //    }
+        //}
 
         private void InsertVendorAttributes()
         {

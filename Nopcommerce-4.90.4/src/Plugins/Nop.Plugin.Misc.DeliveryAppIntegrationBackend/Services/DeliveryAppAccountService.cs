@@ -1,4 +1,4 @@
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Media;
@@ -103,16 +103,14 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             {
                 pictureUrl = _pictureService.GetPictureUrl(_genericAttributeService.GetAttribute<int>(customer, NopCustomerDefaults.AvatarPictureIdAttribute));
             }
-                                                     
-
             return new CustomerAccount
             {
                 CustomerId = customer.Id,
                 Email = customer.Email,
-                FirstName = _genericAttributeService.GetAttribute<string>(customer, "FirstName"),
-                LastName = _genericAttributeService.GetAttribute<string>(customer, "LastName"),
-                Birthday = GetCustomerDateOfBirthAsString(customer),
-                Phone = _genericAttributeService.GetAttribute<string>(customer, "Phone"),
+                FirstName = _genericAttributeService.GetAttribute<string>(customer, "FirstName") ?? customer.FirstName,
+                LastName = _genericAttributeService.GetAttribute<string>(customer, "LastName") ?? customer.LastName,
+                Birthday = GetCustomerDateOfBirthAsString(customer) ?? customer.DateOfBirth.ToString(),
+                Phone = _genericAttributeService.GetAttribute<string>(customer, "Phone") ?? customer.Phone,
                 PictureUrl = pictureUrl,
                 VendorId = customer.VendorId
             };

@@ -153,10 +153,12 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         }
 
         ///<inheritdoc/>
-        public void SendDriverCoordinateTrackingUpdate(DriverLocationInfoRequest driverRequest)
+        public object SendDriverCoordinateTrackingUpdate(DriverLocationInfoRequest driverRequest)
         {
             if (!_deliveryAppBackendConfigurationSettings.NotificationsEnabled)
-                return;
+                return null;
+
+            object trackingUpdate = null;
 
             try
             {
@@ -232,7 +234,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
                 using var _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
                 string notificationUrl = string.Format(_deliveryAppBackendConfigurationSettings.NotificationDriverTrackingUrl, driverRequest.OrderId, order.CustomerId);
 
-                var bodyContent = new StringContent(JsonConvert.SerializeObject(new
+                trackingUpdate = new
                 {
                     coordinates = containsCoordinates ? new
                     {
@@ -253,7 +255,8 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
                         canBeContactedByCustomer = driverRequest.CanContactDriver
                     }
 
-                }), Encoding.UTF8, "application/json");
+                };
+                var bodyContent = new StringContent(JsonConvert.SerializeObject(trackingUpdate), Encoding.UTF8, "application/json");
                 Task<HttpResponseMessage> result = _httpClient.PostAsync(notificationUrl, bodyContent);
                 result.Wait();
 
@@ -267,6 +270,8 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             {
                 _logger.Error(e.ToString(), e);
             }
+
+            return trackingUpdate;
         }
 
         ///<inheritdoc/>

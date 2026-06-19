@@ -17,7 +17,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         /// Consume notificacion Api to send notification of driver coordinate.
         /// </summary>
         /// <param name="driverRequest">the driver request info</param>
-        void SendDriverCoordinateTrackingUpdate(DriverLocationInfoRequest driverRequest);
+        object SendDriverCoordinateTrackingUpdate(DriverLocationInfoRequest driverRequest);
 
         /// <summary>
         /// Consume notificacion Api send a notification to change the status.
