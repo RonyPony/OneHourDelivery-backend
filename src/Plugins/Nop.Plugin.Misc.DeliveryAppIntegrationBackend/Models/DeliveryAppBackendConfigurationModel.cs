@@ -104,6 +104,12 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models
         [NopResourceDisplayName("Plugin.Misc.DeliveryAppIntegrationBackend.Generics.MaxMoneyAmountDriverCanCarry")]
         public decimal MaxMoneyAmountDriverCanCarry { get; set; }
 
+        /// <summary>
+        /// Indicates the maximum number of stores returned by the near you section.
+        /// </summary>
+        [NopResourceDisplayName("Plugin.Misc.DeliveryAppIntegrationBackend.Generics.NearYouMaxStores")]
+        public int NearYouMaxStores { get; set; } = 15;
+
         #endregion
     }
 }

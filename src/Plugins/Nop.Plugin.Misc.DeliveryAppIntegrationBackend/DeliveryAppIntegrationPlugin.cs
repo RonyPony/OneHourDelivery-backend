@@ -11,6 +11,7 @@ using Nop.Core.Domain.Tasks;
 using Nop.Core.Domain.Tax;
 using Nop.Core.Domain.Vendors;
 using Nop.Data;
+using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domain;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains.Enums;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
@@ -688,6 +689,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend
             InsertRecalculateVendorReviewScheduleTask();
             InsertDefaultsShippingMethods();
             InsertDeliveryAppRoles();
+            _settingService.SaveSetting(new DeliveryAppBackendConfigurationSettings());
 
             InsertAddressAttributes();
             InsertCheckoutAttributes();
@@ -711,6 +713,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend
         {
             DeleteRecalculateVendorReviewsScheduleTask();
             RemoveAppDeliveryShippingSetting();
+            _settingService.DeleteSetting<DeliveryAppBackendConfigurationSettings>();
 
             DeleteDeliveryAppRoles();
 

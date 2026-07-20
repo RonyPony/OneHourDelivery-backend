@@ -93,5 +93,10 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domain
         /// Indicate max money a driver can have
         /// </summary>
         public int MaxMoneyAmountDriverCanCarry { get;set; }
+
+        /// <summary>
+        /// Indicates the maximum number of stores returned by the near you section.
+        /// </summary>
+        public int NearYouMaxStores { get; set; } = 15;
     }
 }

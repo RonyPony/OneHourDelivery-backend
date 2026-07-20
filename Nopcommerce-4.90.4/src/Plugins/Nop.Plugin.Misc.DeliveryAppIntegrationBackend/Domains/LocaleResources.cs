@@ -98,6 +98,9 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains
             [$"{Defaults.LocaleResourcesPrefix}.Generics.MaxMoneyAmountDriverCanCarry.Hint"] = "The max money amount the driver can carry with him.",
             [$"{Defaults.LocaleResourcesPrefix}.Generics.MaxMoneyAmountDriverCanCarry.Required"] = "The max money amount the driver can carry is required.",
 
+            [$"{Defaults.LocaleResourcesPrefix}.Generics.NearYouMaxStores"] = "Near You maximum restaurants and stores",
+            [$"{Defaults.LocaleResourcesPrefix}.Generics.NearYouMaxStores.Hint"] = "Maximum number of restaurants and stores returned by the Near You section. Values less than 1 use 15.",
+
             #endregion
 
             #endregion
@@ -305,6 +308,9 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains
             [$"{Defaults.LocaleResourcesPrefix}.Generics.MaxMoneyAmountDriverCanCarry"] = "Cant. máxima de dinero que el mensajero puede llevar",
             [$"{Defaults.LocaleResourcesPrefix}.Generics.MaxMoneyAmountDriverCanCarry.Hint"] = "Cantidad máxima de dinero en efectivo que el mensajero puede llevar.",
             [$"{Defaults.LocaleResourcesPrefix}.Generics.MaxMoneyAmountDriverCanCarry.Required"] = "La cantidad máxima de dinero que el mensajero puede llevar es requerida.",
+
+            [$"{Defaults.LocaleResourcesPrefix}.Generics.NearYouMaxStores"] = "Cantidad máxima de restaurantes y comercios en Cerca de ti",
+            [$"{Defaults.LocaleResourcesPrefix}.Generics.NearYouMaxStores.Hint"] = "Cantidad máxima de restaurantes y comercios mostrados en la sección Cerca de ti. Los valores menores que 1 usan 15.",
 
             #endregion
 

@@ -1,0 +1,3840 @@
+{
+  "info": {
+    "_postman_id": "8e42fb67-10a4-4d19-bf93-6e129cbb8190",
+    "name": "DeliveryApp API - nopCommerce 4.90",
+    "description": "Colección generada exclusivamente desde rutas encontradas en el código. JWT heredado a nivel de colección; las solicitudes anónimas sobrescriben auth.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+          "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:5001"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "vendorId",
+      "value": ""
+    },
+    {
+      "key": "warehouseId",
+      "value": ""
+    },
+    {
+      "key": "deliveryOrderId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "addressId",
+      "value": ""
+    },
+    {
+      "key": "driverId",
+      "value": ""
+    },
+    {
+      "key": "latitude",
+      "value": "18.4861"
+    },
+    {
+      "key": "longitude",
+      "value": "-69.9312"
+    },
+    {
+      "key": "deviceToken",
+      "value": ""
+    },
+    {
+      "key": "phoneNumber",
+      "value": ""
+    },
+    {
+      "key": "categoryName",
+      "value": ""
+    },
+    {
+      "key": "shoppingCartItemId",
+      "value": ""
+    },
+    {
+      "key": "creditCardId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Obtener token JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j=pm.response.json(); if(j.access_token) pm.collectionVariables.set(\"accessToken\",j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/token?username=customer@example.com&password=Password123!",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "customer@example.com"
+                },
+                {
+                  "key": "password",
+                  "value": "Password123!"
+                }
+              ]
+            },
+            "description": "Obtener token JWT. Usuario: Cliente / Comercio / Repartidor. Entrada: TokenRequest (query). Salida inferida: TokenResponse. Fuente: src/Plugins/Nop.Plugin.Api/Controllers/TokenController.cs:46. El servidor también reescribe /api/token a /token. No implementa refresh token.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Registro de clientes",
+      "item": [
+        {
+          "name": "Registrar cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients"
+              ],
+              "query": []
+            },
+            "description": "Registrar cliente. Usuario: Cliente. Entrada: RegisterCustomerRequest. Salida inferida: CustomerData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:291.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Ana\",\n  \"lastName\": \"Cliente\",\n  \"phoneNumber\": \"8095550101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ],
+              "query": []
+            },
+            "description": "Registrar repartidor. Usuario: Repartidor. Entrada: RegisterDriverRequest. Salida inferida: CustomerData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/DriverController.cs:111.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"driver@example.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Luis\",\n  \"lastName\": \"Driver\",\n  \"phoneNumber\": \"8095550102\",\n  \"driverIdentificationNumber\": \"00100000001\",\n  \"vehicleType\": \"Motorcycle\",\n  \"brand\": \"Honda\",\n  \"model\": \"CG\",\n  \"licensePlate\": \"A123456\",\n  \"color\": \"Black\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Comprobar teléfono duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{phoneNumber}}/check-phone-duplicated",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "{{phoneNumber}}",
+                "check-phone-duplicated"
+              ],
+              "query": []
+            },
+            "description": "Comprobar teléfono duplicado. Usuario: Cliente / Repartidor. Entrada: phoneNumber (route). Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:337.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recuperación y cambio de contraseña",
+      "item": [
+        {
+          "name": "Enviar código de verificación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/verification-code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "verification-code"
+              ],
+              "query": []
+            },
+            "description": "Enviar código de verificación. Usuario: Cliente / Repartidor. Entrada: string. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:209.",
+            "body": {
+              "mode": "raw",
+              "raw": "\"customer@example.com\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar contraseña olvidada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/change-forgotten-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "change-forgotten-password"
+              ],
+              "query": []
+            },
+            "description": "Cambiar contraseña olvidada. Usuario: Cliente / Repartidor. Entrada: ChangeForgottenPasswordRequest. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:239.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmNewPassword\": \"NewPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar contraseña de cuenta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{customerId}}/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "{{customerId}}",
+                "password"
+              ],
+              "query": []
+            },
+            "description": "Cambiar contraseña de cuenta. Usuario: Cliente / Repartidor. Entrada: ChangePasswordRequestModel. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:160.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmNewPassword\": \"NewPassword123!\",\n  \"validateRequest\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar contraseña desde perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{customerId}}/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{customerId}}",
+                "password"
+              ],
+              "query": []
+            },
+            "description": "Cambiar contraseña desde perfil. Usuario: Cliente. Entrada: ChangePasswordRequestModel. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:247.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmNewPassword\": \"NewPassword123!\",\n  \"validateRequest\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar validación de email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/send-email-validation/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "send-email-validation",
+                "{{customerId}}"
+              ],
+              "query": []
+            },
+            "description": "Enviar validación de email. Usuario: Cliente. Entrada: —. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:308.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Perfil del cliente",
+      "item": [
+        {
+          "name": "Obtener cuenta de cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/customers?email=customer@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "customer@example.com"
+                }
+              ]
+            },
+            "description": "Obtener cuenta de cliente. Usuario: Cliente. Entrada: email (query). Salida inferida: CustomerAccount. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:81."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener cuenta de repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/drivers?email=driver@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "drivers"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "driver@example.com"
+                }
+              ]
+            },
+            "description": "Obtener cuenta de repartidor. Usuario: Repartidor. Entrada: email (query). Salida inferida: CustomerAccount. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:98."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener cuenta de comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/commerces?email=vendor@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "commerces"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "vendor@example.com"
+                }
+              ]
+            },
+            "description": "Obtener cuenta de comercio. Usuario: Comercio. Entrada: email (query). Salida inferida: CustomerAccount. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:116."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{customerId}}"
+              ],
+              "query": []
+            },
+            "description": "Obtener perfil. Usuario: Cliente. Entrada: customerId (route). Salida inferida: CustomerData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:461."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{customerId}}"
+              ],
+              "query": []
+            },
+            "description": "Actualizar perfil. Usuario: Cliente. Entrada: UpdateCustomerRequest. Salida inferida: CustomerData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:398.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ana\",\n  \"lastName\": \"Cliente\",\n  \"phoneNumber\": \"8095550101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{customerId}}/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{customerId}}",
+                "avatar"
+              ],
+              "query": []
+            },
+            "description": "Actualizar avatar. Usuario: Cliente. Entrada: multipart: uploadedFile. Salida inferida: CustomerData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:198.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "uploadedFile",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Repartidores",
+      "item": [
+        {
+          "name": "Actualizar repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers/{{driverId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driverId}}"
+              ],
+              "query": []
+            },
+            "description": "Actualizar repartidor. Usuario: Repartidor. Entrada: UpdateCustomerRequest. Salida inferida: CustomerData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/DriverController.cs:345.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Luis\",\n  \"lastName\": \"Driver\",\n  \"phoneNumber\": \"8095550102\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar avatar de repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers/{{driverId}}/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driverId}}",
+                "avatar"
+              ],
+              "query": []
+            },
+            "description": "Actualizar avatar de repartidor. Usuario: Repartidor. Entrada: multipart: uploadedFile. Salida inferida: CustomerData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/DriverController.cs:294.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "uploadedFile",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Revisar",
+      "item": [
+        {
+          "name": "Eliminar cuenta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/deleteAccount/{{customerId}}?customerId={{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "deleteAccount",
+                "{{customerId}}"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                }
+              ]
+            },
+            "description": "Eliminar cuenta. Usuario: Cliente. Entrada: customerId (ruta y query discordantes). Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AccountController.cs:133. Authorize está comentado y la acción lee FromQuery aunque la plantilla usa ruta.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Direcciones",
+      "item": [
+        {
+          "name": "Listar direcciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "addresses"
+              ],
+              "query": []
+            },
+            "description": "Listar direcciones. Usuario: Cliente. Entrada: customerId (route). Salida inferida: AddressData[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:83."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear dirección",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/address",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "address"
+              ],
+              "query": []
+            },
+            "description": "Crear dirección. Usuario: Cliente. Entrada: DeliveryAppAddressModel. Salida inferida: AddressData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:107.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ana\",\n  \"lastName\": \"Cliente\",\n  \"email\": \"customer@example.com\",\n  \"address1\": \"Av. Principal 1\",\n  \"city\": \"Santo Domingo\",\n  \"countryId\": 1,\n  \"phoneNumber\": \"8095550101\",\n  \"latitude\": \"{{latitude}}\",\n  \"longitude\": \"{{longitude}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar dirección",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/address/{{addressId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "address",
+                "{{addressId}}"
+              ],
+              "query": []
+            },
+            "description": "Actualizar dirección. Usuario: Cliente. Entrada: DeliveryAppAddressModel. Salida inferida: AddressData. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:131.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address1\": \"Av. Principal 2\",\n  \"city\": \"Santo Domingo\",\n  \"latitude\": \"{{latitude}}\",\n  \"longitude\": \"{{longitude}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Seleccionar dirección de envío",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/address?shippingAddressId={{addressId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "address"
+              ],
+              "query": [
+                {
+                  "key": "shippingAddressId",
+                  "value": "{{addressId}}"
+                }
+              ]
+            },
+            "description": "Seleccionar dirección de envío. Usuario: Cliente. Entrada: shippingAddressId (query). Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:246."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comercios",
+      "item": [
+        {
+          "name": "Marcar comercio favorito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/favorite-vendor?vendorId={{vendorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "favorite-vendor"
+              ],
+              "query": [
+                {
+                  "key": "vendorId",
+                  "value": "{{vendorId}}"
+                }
+              ]
+            },
+            "description": "Marcar comercio favorito. Usuario: Cliente. Entrada: vendorId (query). Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:156."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar comercios favoritos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/favorites-vendors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "favorites-vendors"
+              ],
+              "query": []
+            },
+            "description": "Listar comercios favoritos. Usuario: Cliente. Entrada: customerId (route). Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:178."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar anuncios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/advertisements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "advertisements"
+              ],
+              "query": []
+            },
+            "description": "Listar anuncios. Usuario: Cliente. Entrada: —. Salida inferida: Advertisement[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/AdvertisementsController.cs:32."
+          },
+          "response": []
+        },
+        {
+          "name": "Detalle de comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores/{{vendorId}}?customerId={{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores",
+                "{{vendorId}}"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                }
+              ]
+            },
+            "description": "Detalle de comercio. Usuario: Cliente. Entrada: vendorId + customerId. Salida inferida: DeliveryAppVendor. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:98."
+          },
+          "response": []
+        },
+        {
+          "name": "Comercios por categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores/categories/{{categoryName}}?latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores",
+                "categories",
+                "{{categoryName}}"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Comercios por categoría. Usuario: Cliente. Entrada: categoryName + coordinates. Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:122."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Calificaciones y reseñas",
+      "item": [
+        {
+          "name": "Reseñas pendientes del cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "reviews"
+              ],
+              "query": []
+            },
+            "description": "Reseñas pendientes del cliente. Usuario: Cliente. Entrada: customerId (route). Salida inferida: CustomerPendingReviewsModel[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:201."
+          },
+          "response": []
+        },
+        {
+          "name": "Calificar cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/rate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "rate"
+              ],
+              "query": []
+            },
+            "description": "Calificar cliente. Usuario: Cliente. Entrada: CustomerRatingMappingRequest. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:61.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"creatorCustomerId\": \"{{driverId}}\",\n  \"ratedCustomerId\": \"{{customerId}}\",\n  \"rate\": 5,\n  \"comment\": \"Excelente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar reseñas de vendor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}",
+                "reviews"
+              ],
+              "query": []
+            },
+            "description": "Listar reseñas de vendor. Usuario: Cliente. Entrada: vendorId. Salida inferida: VendorReviewModel[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:62."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear reseña de vendor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}",
+                "reviews"
+              ],
+              "query": []
+            },
+            "description": "Crear reseña de vendor. Usuario: Cliente. Entrada: VendorReviewModel. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:86.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"{{vendorId}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 5,\n  \"comment\": \"Muy bueno\",\n  \"reviewStatus\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar reseña de vendor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}",
+                "reviews"
+              ],
+              "query": []
+            },
+            "description": "Actualizar reseña de vendor. Usuario: Cliente. Entrada: VendorReviewMapping. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:109.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"{{vendorId}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 4,\n  \"comment\": \"Actualizada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Calificar orden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/rate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "rate"
+              ],
+              "query": []
+            },
+            "description": "Calificar orden. Usuario: Cliente. Entrada: OrderRatingModel. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:873.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Entrega rápida\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar valoración de repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers/valoration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "valoration"
+              ],
+              "query": []
+            },
+            "description": "Registrar valoración de repartidor. Usuario: Repartidor. Entrada: DriverRatingMappingRequest. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/DriverController.cs:429.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"{{driverId}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 0,\n  \"ratingType\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "item": [
+        {
+          "name": "Categorías de comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/vendor/{{vendorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "vendor",
+                "{{vendorId}}"
+              ],
+              "query": []
+            },
+            "description": "Categorías de comercio. Usuario: Cliente. Entrada: vendorId (route). Salida inferida: CategoryData[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CategoryController.cs:46."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Listar productos públicos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?category_id={{categoryId}}&limit=50&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category_id",
+                  "value": "{{categoryId}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Listar productos públicos. Usuario: Cliente. Entrada: ProductsParametersModel (query). Salida inferida: ProductsRootObjectDto. Fuente: src/Plugins/Nop.Plugin.Api/Controllers/ProductsController.cs:84.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}?fields=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ],
+              "query": [
+                {
+                  "key": "fields",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Obtener producto. Usuario: Cliente. Entrada: id + fields. Salida inferida: ProductsRootObjectDto. Fuente: src/Plugins/Nop.Plugin.Api/Controllers/ProductsController.cs:154."
+          },
+          "response": []
+        },
+        {
+          "name": "Productos de comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores/{{vendorId}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores",
+                "{{vendorId}}",
+                "products"
+              ],
+              "query": []
+            },
+            "description": "Productos de comercio. Usuario: Cliente. Entrada: vendorId (route). Salida inferida: DeliveryAppProduct[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:60."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comercios cercanos",
+      "item": [
+        {
+          "name": "Comercios por ubicación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores?latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Comercios por ubicación. Usuario: Cliente. Entrada: latitude, longitude. Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:76.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Comercios nuevos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores/new?customerId={{customerId}}&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores",
+                "new"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Comercios nuevos. Usuario: Cliente. Entrada: customerId + coordinates. Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:148."
+          },
+          "response": []
+        },
+        {
+          "name": "Comercios populares",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores/populars?customerId={{customerId}}&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores",
+                "populars"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Comercios populares. Usuario: Cliente. Entrada: customerId + coordinates. Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:176."
+          },
+          "response": []
+        },
+        {
+          "name": "Comercios cercanos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores/near?customerId={{customerId}}&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores",
+                "near"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Comercios cercanos. Usuario: Cliente. Entrada: customerId + coordinates. Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:203."
+          },
+          "response": []
+        },
+        {
+          "name": "Comercios con promociones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-stores/promotions-store?customerId={{customerId}}&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-stores",
+                "promotions-store"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Comercios con promociones. Usuario: Cliente. Entrada: customerId + coordinates. Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/StoreController.cs:226."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Búsqueda",
+      "item": [
+        {
+          "name": "Buscar comercios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/search?searchText=pizza&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "searchText",
+                  "value": "pizza"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Buscar comercios. Usuario: Cliente. Entrada: searchText + coordinates. Salida inferida: DeliveryAppVendor[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:201."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vendors",
+      "item": [
+        {
+          "name": "Obtener vendor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}"
+              ],
+              "query": []
+            },
+            "description": "Obtener vendor. Usuario: Cliente. Entrada: vendorId. Salida inferida: DeliveryAppVendor. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:218."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Carrito de compras",
+      "item": [
+        {
+          "name": "Listar carrito del cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/shopping_cart_items/{{customerId}}?limit=50&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shopping_cart_items",
+                "{{customerId}}"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Listar carrito del cliente. Usuario: Cliente. Entrada: customerId + paging. Salida inferida: ShoppingCartItemsRootObject. Fuente: src/Plugins/Nop.Plugin.Api/Controllers/ShoppingCartItemsController.cs:134."
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar al carrito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shopping_cart_items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shopping_cart_items"
+              ],
+              "query": []
+            },
+            "description": "Agregar al carrito. Usuario: Cliente. Entrada: ShoppingCartItemDto. Salida inferida: ShoppingCartItemsRootObject. Fuente: src/Plugins/Nop.Plugin.Api/Controllers/ShoppingCartItemsController.cs:183.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": \"{{customerId}}\",\n  \"product_id\": \"{{productId}}\",\n  \"quantity\": 1,\n  \"shopping_cart_type\": \"ShoppingCart\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar ítem de carrito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shopping_cart_items/{{shoppingCartItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shopping_cart_items",
+                "{{shoppingCartItemId}}"
+              ],
+              "query": []
+            },
+            "description": "Actualizar ítem de carrito. Usuario: Cliente. Entrada: ShoppingCartItemDto. Salida inferida: ShoppingCartItemsRootObject. Fuente: src/Plugins/Nop.Plugin.Api/Controllers/ShoppingCartItemsController.cs:258.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{shoppingCartItemId}}\",\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar ítem de carrito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/shopping_cart_items/{{shoppingCartItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shopping_cart_items",
+                "{{shoppingCartItemId}}"
+              ],
+              "query": []
+            },
+            "description": "Eliminar ítem de carrito. Usuario: Cliente. Entrada: id. Salida inferida: {}. Fuente: src/Plugins/Nop.Plugin.Api/Controllers/ShoppingCartItemsController.cs:327."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Métodos de pago",
+      "item": [
+        {
+          "name": "Listar tarjetas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{customerId}}/credit-cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{customerId}}",
+                "credit-cards"
+              ],
+              "query": []
+            },
+            "description": "Listar tarjetas. Usuario: Cliente. Entrada: customerId. Salida inferida: CreditCard[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:498."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar tarjeta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{customerId}}/credit-cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{customerId}}",
+                "credit-cards"
+              ],
+              "query": []
+            },
+            "description": "Registrar tarjeta. Usuario: Cliente. Entrada: RegisterCreditCardRequest. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:521.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardNumber\": \"4111111111111111\",\n  \"expirationMonth\": \"12\",\n  \"expirationYear\": \"2030\",\n  \"cardholderName\": \"Ana Cliente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar tarjeta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{customerId}}/credit-cards/{{creditCardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{customerId}}",
+                "credit-cards",
+                "{{creditCardId}}"
+              ],
+              "query": []
+            },
+            "description": "Eliminar tarjeta. Usuario: Cliente. Entrada: customerId, creditCardId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/ClientController.cs:537."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar tokens de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-customer/{{customerId}}/payment-tokens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-customer",
+                "{{customerId}}",
+                "payment-tokens"
+              ],
+              "query": []
+            },
+            "description": "Listar tokens de pago. Usuario: Cliente. Entrada: customerId. Salida inferida: CustomerPaymentTokenModel[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/CustomerController.cs:223."
+          },
+          "response": []
+        },
+        {
+          "name": "Generar token de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/tokens?creditCardId={{creditCardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "tokens"
+              ],
+              "query": [
+                {
+                  "key": "creditCardId",
+                  "value": "{{creditCardId}}"
+                }
+              ]
+            },
+            "description": "Generar token de pago. Usuario: Cliente. Entrada: creditCardId (query). Salida inferida: Payment token. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/PaymentController.cs:34."
+          },
+          "response": []
+        },
+        {
+          "name": "Abrir registro de tarjeta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/credit-cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "credit-cards"
+              ],
+              "query": []
+            },
+            "description": "Abrir registro de tarjeta. Usuario: Cliente. Entrada: —. Salida inferida: Redirect/form response. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/PaymentController.cs:51."
+          },
+          "response": []
+        },
+        {
+          "name": "Calcular envío por distancia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/shipping-method-by-distance?fromVendorId={{vendorId}}&toLatitude={{latitude}}&toLongitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "shipping-method-by-distance"
+              ],
+              "query": [
+                {
+                  "key": "fromVendorId",
+                  "value": "{{vendorId}}"
+                },
+                {
+                  "key": "toLatitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "toLongitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Calcular envío por distancia. Usuario: Cliente. Entrada: vendor + destination. Salida inferida: OrderDistanceModel. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:830."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar método de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}?paymentMethod=Payments.CashOnDelivery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}"
+              ],
+              "query": [
+                {
+                  "key": "paymentMethod",
+                  "value": "Payments.CashOnDelivery"
+                }
+              ]
+            },
+            "description": "Actualizar método de pago. Usuario: Cliente. Entrada: paymentMethod (query). Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1059."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Creación de órdenes",
+      "item": [
+        {
+          "name": "Crear orden delivery",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders"
+              ],
+              "query": []
+            },
+            "description": "Crear orden delivery. Usuario: Cliente. Entrada: OrderDto. Salida inferida: DeliveryAppOrderRootObject. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:228.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": \"{{customerId}}\",\n  \"billing_address\": {\n    \"id\": \"{{addressId}}\"\n  },\n  \"shipping_address\": {\n    \"id\": \"{{addressId}}\"\n  },\n  \"payment_method_system_name\": \"Payments.CashOnDelivery\",\n  \"order_items\": [\n    {\n      \"product_id\": \"{{productId}}\",\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar orden en creación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders"
+              ],
+              "query": []
+            },
+            "description": "Actualizar orden en creación. Usuario: Cliente. Entrada: OrderDto (incluye id). Salida inferida: DeliveryAppOrderRootObject. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1011.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{orderId}}\",\n  \"customer_id\": \"{{customerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Calcular impuestos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/tax-amount",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "tax-amount"
+              ],
+              "query": []
+            },
+            "description": "Calcular impuestos. Usuario: Cliente / Repartidor. Entrada: GetOrderTotalTaxRequest. Salida inferida: Tax response. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1092.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"orderProducts\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Consulta de órdenes",
+      "item": [
+        {
+          "name": "Órdenes entregadas del cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/customer/{{customerId}}/delivered",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "customer",
+                "{{customerId}}",
+                "delivered"
+              ],
+              "query": []
+            },
+            "description": "Órdenes entregadas del cliente. Usuario: Cliente. Entrada: customer_id. Salida inferida: OrderDeliveryAppDto[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1033.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Órdenes asignadas al repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/assigned-to-messenger?driverId={{driverId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "assigned-to-messenger"
+              ],
+              "query": [
+                {
+                  "key": "driverId",
+                  "value": "{{driverId}}"
+                }
+              ]
+            },
+            "description": "Órdenes asignadas al repartidor. Usuario: Repartidor. Entrada: driverId. Salida inferida: OrderDeliveryAppDto[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:785."
+          },
+          "response": []
+        },
+        {
+          "name": "Órdenes entregadas por repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/delivered-by-messenger?driverId={{driverId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "delivered-by-messenger"
+              ],
+              "query": [
+                {
+                  "key": "driverId",
+                  "value": "{{driverId}}"
+                }
+              ]
+            },
+            "description": "Órdenes entregadas por repartidor. Usuario: Repartidor. Entrada: driverId. Salida inferida: OrderDeliveryAppDto[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:810."
+          },
+          "response": []
+        },
+        {
+          "name": "Órdenes pendientes del comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}/pending-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}",
+                "pending-orders"
+              ],
+              "query": []
+            },
+            "description": "Órdenes pendientes del comercio. Usuario: Comercio. Entrada: vendorId. Salida inferida: OrderDto[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:127."
+          },
+          "response": []
+        },
+        {
+          "name": "Órdenes procesando del comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}/processing-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}",
+                "processing-orders"
+              ],
+              "query": []
+            },
+            "description": "Órdenes procesando del comercio. Usuario: Comercio. Entrada: vendorId. Salida inferida: OrderDto[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:147."
+          },
+          "response": []
+        },
+        {
+          "name": "Histórico del comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}/historic-order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}",
+                "historic-order"
+              ],
+              "query": []
+            },
+            "description": "Histórico del comercio. Usuario: Comercio. Entrada: vendorId. Salida inferida: HistoricOrdersByVendorDto[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:167."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Asignación de repartidores",
+      "item": [
+        {
+          "name": "Órdenes pendientes para repartir",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/pending-to-deliver?driverId={{driverId}}&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "pending-to-deliver"
+              ],
+              "query": [
+                {
+                  "key": "driverId",
+                  "value": "{{driverId}}"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Órdenes pendientes para repartir. Usuario: Repartidor. Entrada: driverId + coordinates. Salida inferida: OrderDeliveryAppDto[]. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:666."
+          },
+          "response": []
+        },
+        {
+          "name": "Aceptar por repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/accepted-by-messenger/{{driverId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "accepted-by-messenger",
+                "{{driverId}}"
+              ],
+              "query": []
+            },
+            "description": "Aceptar por repartidor. Usuario: Repartidor. Entrada: orderId, driverId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:709."
+          },
+          "response": []
+        },
+        {
+          "name": "Rechazar por repartidor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/declined-by-messenger/{{driverId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "declined-by-messenger",
+                "{{driverId}}"
+              ],
+              "query": []
+            },
+            "description": "Rechazar por repartidor. Usuario: Repartidor. Entrada: DeclineOrderRequest. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:764.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"declineReason\": \"Fuera de zona\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Estados de órdenes",
+      "item": [
+        {
+          "name": "Marcar lista para recoger",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/set-ready-to-pickup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "set-ready-to-pickup"
+              ],
+              "query": []
+            },
+            "description": "Marcar lista para recoger. Usuario: Comercio. Entrada: orderId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:686."
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar recogida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/set-retrieved-by-messenger",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "set-retrieved-by-messenger"
+              ],
+              "query": []
+            },
+            "description": "Marcar recogida. Usuario: Repartidor. Entrada: orderId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:725."
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar entregada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/set-delivered",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "set-delivered"
+              ],
+              "query": []
+            },
+            "description": "Marcar entregada. Usuario: Repartidor. Entrada: orderId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:741."
+          },
+          "response": []
+        },
+        {
+          "name": "Aceptar por comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/status/accepted-by-store?vendorId={{vendorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "status",
+                "accepted-by-store"
+              ],
+              "query": [
+                {
+                  "key": "vendorId",
+                  "value": "{{vendorId}}"
+                }
+              ]
+            },
+            "description": "Aceptar por comercio. Usuario: Comercio. Entrada: orderId + vendorId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:857."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cancelaciones",
+      "item": [
+        {
+          "name": "Cancelar por comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/cancel-order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "cancel-order"
+              ],
+              "query": []
+            },
+            "description": "Cancelar por comercio. Usuario: Comercio. Entrada: DeclinedOrderByStore. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:890.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"{{vendorId}}\",\n  \"message\": \"Producto no disponible\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar por cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "cancel"
+              ],
+              "query": []
+            },
+            "description": "Cancelar por cliente. Usuario: Cliente. Entrada: orderId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:906."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Seguimiento de órdenes",
+      "item": [
+        {
+          "name": "Coordenadas de orden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/coordinates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "coordinates"
+              ],
+              "query": []
+            },
+            "description": "Coordenadas de orden. Usuario: Cliente / Repartidor. Entrada: orderId. Salida inferida: Coordinate response. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:922."
+          },
+          "response": []
+        },
+        {
+          "name": "Información del repartidor asignado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/driver-info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "driver-info"
+              ],
+              "query": []
+            },
+            "description": "Información del repartidor asignado. Usuario: Cliente. Entrada: orderId. Salida inferida: DriverInfoModel. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:938."
+          },
+          "response": []
+        },
+        {
+          "name": "Información de entrega",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/delivery-info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "delivery-info"
+              ],
+              "query": []
+            },
+            "description": "Información de entrega. Usuario: Cliente / Repartidor. Entrada: orderId. Salida inferida: DriverInfoModel. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1075."
+          },
+          "response": []
+        },
+        {
+          "name": "Solicitar actualización de tracking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/request-tracking-update?orderId={{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "request-tracking-update"
+              ],
+              "query": [
+                {
+                  "key": "orderId",
+                  "value": "{{orderId}}"
+                }
+              ]
+            },
+            "description": "Solicitar actualización de tracking. Usuario: Cliente. Entrada: orderId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1176."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Geolocalización",
+      "item": [
+        {
+          "name": "Indicaciones de ruta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/route-destination-indications?orderId={{orderId}}&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "route-destination-indications"
+              ],
+              "query": [
+                {
+                  "key": "orderId",
+                  "value": "{{orderId}}"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            },
+            "description": "Indicaciones de ruta. Usuario: Repartidor. Entrada: GoogleDirecctionRequest (query). Salida inferida: DistanceRouteInfo. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:954."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ubicación del repartidor",
+      "item": [
+        {
+          "name": "Consultar ubicación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/{{orderId}}/messenger-location-info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "{{orderId}}",
+                "messenger-location-info"
+              ],
+              "query": []
+            },
+            "description": "Consultar ubicación. Usuario: Cliente / Repartidor. Entrada: orderId. Salida inferida: DriverLocationInfo. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:977."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar ubicación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/messenger-location-info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "messenger-location-info"
+              ],
+              "query": []
+            },
+            "description": "Actualizar ubicación. Usuario: Repartidor. Entrada: DriverLocationInfoRequest. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:994.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"latitude\": \"{{latitude}}\",\n  \"longitude\": \"{{longitude}}\",\n  \"canContactDriver\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cupones y descuentos",
+      "item": [
+        {
+          "name": "Validar cupón",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/discount-coupon?code=WELCOME&customerId={{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "discount-coupon"
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "WELCOME"
+                },
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                }
+              ]
+            },
+            "description": "Validar cupón. Usuario: Cliente. Entrada: code, customerId. Salida inferida: CouponModel. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1110."
+          },
+          "response": []
+        },
+        {
+          "name": "Validar descuento de producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/validateProductDiscount?productId={{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "validateProductDiscount"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "{{productId}}"
+                }
+              ]
+            },
+            "description": "Validar descuento de producto. Usuario: Cliente. Entrada: productId. Salida inferida: CustomerDiscountModel. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1126."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Endpoints internos",
+      "item": [
+        {
+          "name": "Notificar orden pagada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery-orders/notify-paid-order?orderId={{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery-orders",
+                "notify-paid-order"
+              ],
+              "query": [
+                {
+                  "key": "orderId",
+                  "value": "{{orderId}}"
+                }
+              ]
+            },
+            "description": "Notificar orden pagada. Usuario: Servicio interno. Entrada: orderId. Salida inferida: BasicOperationResult. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/OrderController.cs:1162. Callback/operación con efectos expuesta mediante GET y sin Authorize.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        {
+          "name": "Ganancias del comercio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors/{{vendorId}}/vendor-profit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendors",
+                "{{vendorId}}",
+                "vendor-profit"
+              ],
+              "query": []
+            },
+            "description": "Ganancias del comercio. Usuario: Comercio. Entrada: vendorId. Salida inferida: ProfitVendorModel. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/VendorController.cs:184."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ganancias del repartidor",
+      "item": [
+        {
+          "name": "Consultar ganancias",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers/{{driverId}}/profit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driverId}}",
+                "profit"
+              ],
+              "query": []
+            },
+            "description": "Consultar ganancias. Usuario: Repartidor. Entrada: driverId. Salida inferida: DriverProfitModel. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/DriverController.cs:408."
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar cobros en efectivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP válido\",()=>pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,400,401,403,404,409,422]));",
+                  "const ct=pm.response.headers.get(\"Content-Type\")||\"\"; if(pm.response.text()) pm.test(\"Respuesta JSON cuando se declara JSON\",()=>{if(ct.includes(\"json\")) pm.response.to.be.json;});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers/{{driverId}}/payments-collection",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driverId}}",
+                "payments-collection"
+              ],
+              "query": []
+            },
+            "description": "Consultar cobros en efectivo. Usuario: Repartidor. Entrada: driverId. Salida inferida: DriverPaymentCollection. Fuente: src/Plugins/Nop.Plugin.Misc.DeliveryAppIntegrationBackend/Controllers/DriverController.cs:451."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

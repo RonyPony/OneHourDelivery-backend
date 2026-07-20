@@ -7,6 +7,7 @@ using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Shipping;
 using Nop.Core.Domain.Vendors;
 using Nop.Data;
+using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domain;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Helpers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
@@ -35,6 +36,12 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
     /// </summary>
     public class DeliveryAppVendorService : IVendorDeliveryAppService
     {
+        #region Constants
+
+        private const int DefaultNearYouMaxStores = 15;
+
+        #endregion
+
         #region Fields
 
         private readonly IRepository<Vendor> _vendorRepository;
@@ -839,9 +846,22 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         public List<StoreResponseModel> GetAllNearStore(decimal latitud, decimal longitud)
         {
             var closestStores = GetClosestStores(latitud, longitud);
-            const int firstFifteenStores = 15;
+            int nearYouMaxStores = GetNearYouMaxStores();
 
-            return closestStores.Take(firstFifteenStores).ToList();
+            return closestStores
+                .OrderByDescending(store => store.IsOpen)
+                .ThenBy(store => store.ProximityInMeters)
+                .ThenByDescending(store => store.Rating)
+                .ThenBy(store => store.Name)
+                .Take(nearYouMaxStores)
+                .ToList();
+        }
+
+        private int GetNearYouMaxStores()
+        {
+            var settings = _settingService.LoadSetting<DeliveryAppBackendConfigurationSettings>();
+
+            return settings?.NearYouMaxStores > 0 ? settings.NearYouMaxStores : DefaultNearYouMaxStores;
         }
 
         ///<inheritdoc/>
