@@ -79,7 +79,7 @@
     <Value>The specified email could not be found</Value>
   </LocaleResource>
   <LocaleResource Name="Account.ChangePassword.Errors.OldPasswordDoesntMatch">
-    <Value>Old password doesn't match</Value>
+    <Value>La contraseña antigua no coincide</Value>
   </LocaleResource>
   <LocaleResource Name="Account.ChangePassword.Errors.PasswordIsNotProvided">
     <Value>Password is not entered</Value>

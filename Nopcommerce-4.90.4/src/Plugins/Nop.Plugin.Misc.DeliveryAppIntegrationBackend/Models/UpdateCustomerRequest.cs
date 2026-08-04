@@ -74,5 +74,10 @@
         /// Indicates the customer address longitude.
         /// </summary>
         public decimal Longitude { get; set; }
+        
+         /// <summary>
+        /// Indicates the customer date of birth.
+        /// </summary>
+        public DateTime? DateOfBirth { get; set; }
     }
 }

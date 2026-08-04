@@ -346,50 +346,85 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         //[SwaggerResponse((int)HttpStatusCode.OK, "Exposes the  UpdateCustomer functionality", typeof(UpdateCustomerResponse))]
         //[SwaggerResponse((int)HttpStatusCode.BadRequest, "Exposes UpdateCustomer functionality", typeof(ErrorMessage))]
-        public IActionResult UpdateDriver(int id, [FromBody] UpdateCustomerRequest request)
+        public async Task<IActionResult> UpdateDriver(int id, [FromBody] UpdateCustomerRequest request)
         {
             try
             {
-                Customer customer = _customerService.GetCustomerById(id);
+                // Customer customer = _customerService.GetCustomerById(id);
+
+                // if (customer == null)
+                // {
+                //     throw new ArgumentException("CustomerDoesNotExists");
+                // }
+
+                // string keygroup = customer.GetType().Name;
+                // customer.Email = request.Email;
+
+                // // Update customer attributes
+                // var firstNameAttribute = _genericAttributeService.GetAttributesForEntity(customer.Id, keygroup)
+                //                                                  .FirstOrDefault(x => x.Key == "FirstName");
+                // firstNameAttribute.Value = request.FirstName;
+
+                // var lastNameAttribute = _genericAttributeService.GetAttributesForEntity(customer.Id, keygroup)
+                //                                                 .FirstOrDefault(x => x.Key == "LastName");
+                // lastNameAttribute.Value = request.LastName;
+
+                // var phoneAttribute = _genericAttributeService.GetAttributesForEntity(customer.Id, keygroup)
+                //                                              .FirstOrDefault(x => x.Key == "Phone");
+
+                // if ((!customer.Email.Equals(request.Email)) && _customerAddressGeocodingServices.EmailIsAlreadyRegistered(request.Email))
+                // {
+                //     throw new ArgumentException("EmailAlreadyRegistered");
+                // }
+
+                // if ((!phoneAttribute.Value.Equals(request.PhoneNumber)) && _customerAddressGeocodingServices.PhoneNumberIsAlreadyRegistered(request.PhoneNumber))
+                // {
+                //     throw new ArgumentException("PhoneAlreadyRegistered");
+                // }
+
+
+                // phoneAttribute.Value = request.PhoneNumber;
+
+                // _genericAttributeService.UpdateAttribute(firstNameAttribute);
+                // _genericAttributeService.UpdateAttribute(lastNameAttribute);
+                // _genericAttributeService.UpdateAttribute(phoneAttribute);
+
+                // _customerService.UpdateCustomer(customer);
+
+                // return Ok(new UpdateCustomerResponse { CustomerId = customer.Id });
+
+
+                var customer = await _customerService.GetCustomerByIdAsync(id);
 
                 if (customer == null)
                 {
                     throw new ArgumentException("CustomerDoesNotExists");
                 }
 
-                string keygroup = customer.GetType().Name;
-                customer.Email = request.Email;
-
-                // Update customer attributes
-                var firstNameAttribute = _genericAttributeService.GetAttributesForEntity(customer.Id, keygroup)
-                                                                 .FirstOrDefault(x => x.Key == "FirstName");
-                firstNameAttribute.Value = request.FirstName;
-
-                var lastNameAttribute = _genericAttributeService.GetAttributesForEntity(customer.Id, keygroup)
-                                                                .FirstOrDefault(x => x.Key == "LastName");
-                lastNameAttribute.Value = request.LastName;
-
-                var phoneAttribute = _genericAttributeService.GetAttributesForEntity(customer.Id, keygroup)
-                                                             .FirstOrDefault(x => x.Key == "Phone");
-
-                if ((!customer.Email.Equals(request.Email)) && _customerAddressGeocodingServices.EmailIsAlreadyRegistered(request.Email))
+                if (!string.Equals(customer.Email, request.Email, StringComparison.OrdinalIgnoreCase)
+                    && _customerAddressGeocodingServices.EmailIsAlreadyRegistered(request.Email))
                 {
                     throw new ArgumentException("EmailAlreadyRegistered");
                 }
 
-                if ((!phoneAttribute.Value.Equals(request.PhoneNumber)) && _customerAddressGeocodingServices.PhoneNumberIsAlreadyRegistered(request.PhoneNumber))
+                var phone = await _genericAttributeService.GetAttributeAsync<string>(customer, "Phone");
+                if (!string.Equals(phone, request.PhoneNumber, StringComparison.Ordinal)
+                    && _customerAddressGeocodingServices.PhoneNumberIsAlreadyRegistered(request.PhoneNumber))
                 {
                     throw new ArgumentException("PhoneAlreadyRegistered");
                 }
 
+                customer.Email = request.Email;
+                customer.Phone = request.PhoneNumber;
+                customer.FirstName = request.FirstName;
+                customer.LastName = request.LastName;
+                customer.DateOfBirth = request.DateOfBirth;
 
-                phoneAttribute.Value = request.PhoneNumber;
-
-                _genericAttributeService.UpdateAttribute(firstNameAttribute);
-                _genericAttributeService.UpdateAttribute(lastNameAttribute);
-                _genericAttributeService.UpdateAttribute(phoneAttribute);
-
-                _customerService.UpdateCustomer(customer);
+                await _genericAttributeService.SaveAttributeAsync(customer, "FirstName", request.FirstName);
+                await _genericAttributeService.SaveAttributeAsync(customer, "LastName", request.LastName);
+                await _genericAttributeService.SaveAttributeAsync(customer, "Phone", request.PhoneNumber);
+                await _genericAttributeService.SaveAttributeAsync(customer, "DateOfBirth", request.DateOfBirth);
+                await _customerService.UpdateCustomerAsync(customer);
 
                 return Ok(new UpdateCustomerResponse { CustomerId = customer.Id });
             }
