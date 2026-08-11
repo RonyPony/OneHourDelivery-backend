@@ -1,5 +1,6 @@
 ﻿using Nop.Core.Domain.Customers;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
 {
@@ -23,12 +24,12 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         string GetCustomerDateOfBirthAsString(Customer customer);
 
         /// <summary>
-        /// Inserts an email with verification code to the email's queue.
+        /// Inserts an email with a verification code into the outgoing message queue.
         /// </summary>
         /// <param name="customer">The customer who receives the message.</param>
         /// <param name="verificationCode">The verification code.</param>
         /// <returns>An instance of <see cref="SendEmailResult"/>.</returns>
-        SendEmailResult SendVerificationCode(Customer customer, int verificationCode);
+        Task<SendEmailResult> SendVerificationCodeAsync(Customer customer, int verificationCode);
 
         /// <summary>
         /// Retrieves a value that indicates if a given phone number is already registered.
