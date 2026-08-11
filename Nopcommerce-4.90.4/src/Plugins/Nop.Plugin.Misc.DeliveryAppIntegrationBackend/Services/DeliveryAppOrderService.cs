@@ -54,6 +54,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         private readonly IRepository<OrderItem> _orderItemRepository;
         private readonly IRepository<OrderRatingMapping> _orderRatingRepository;
         private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<Shipment> _shipmentRepository;
         private readonly IRepository<VendorWarehouseMapping> _vendorWarehouseMappingRepository;
         private readonly IRepository<Warehouse> _warehouseRepository;
         private readonly IProductService _productService;
@@ -99,6 +100,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         /// <param name="orderItemRepository">An implementation of <see cref="IRepository{T}"/> where T is <see cref="OrderItem"/>.</param>
         /// <param name="orderRatingRepository">An implementation of <see cref="IRepository{T}"/> where T is <see cref="OrderRatingMapping"/>.</param>
         /// <param name="productRepository">An implementation of <see cref="IRepository{T}"/> where T is <see cref="Product"/>.</param>
+        /// <param name="shipmentRepository">An implementation of <see cref="IRepository{T}"/> where T is <see cref="Shipment"/>.</param>
         /// <param name="vendorWarehouseMappingRepository">An implementation of <see cref="IRepository{T}"/> where T is <see cref="VendorWarehouseMapping"/>.</param>
         /// <param name="warehouseRepository">An implementation of <see cref="IRepository{T}"/> where T is <see cref="Warehouse"/>.</param>
         /// <param name="productService">An implementation of <see cref="IRepository{T}"/> where T is <see cref="Product"/>.</param>
@@ -136,6 +138,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             IRepository<OrderItem> orderItemRepository,
             IRepository<OrderRatingMapping> orderRatingRepository,
             IRepository<Product> productRepository,
+            IRepository<Shipment> shipmentRepository,
             IRepository<VendorWarehouseMapping> vendorWarehouseMappingRepository,
             IRepository<Warehouse> warehouseRepository,
             IProductService productService,
@@ -174,6 +177,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             _orderItemRepository = orderItemRepository;
             _orderRatingRepository = orderRatingRepository;
             _productRepository = productRepository;
+            _shipmentRepository = shipmentRepository;
             _vendorWarehouseMappingRepository = vendorWarehouseMappingRepository;
             _warehouseRepository = warehouseRepository;
             _productService = productService;
@@ -797,27 +801,65 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
             if (vendor is null)
                 throw new ArgumentException("VendorNotFound");
 
-            return (from o in _orderRepository.Table
-                    join oi in _orderItemRepository.Table on o.Id equals oi.OrderId
-                    join p in _productRepository.Table on oi.ProductId equals p.Id
-                    where p.VendorId == vendorId &&
-                    (o.OrderStatusId == (int)OrderStatus.Complete ||
-                    o.OrderStatusId == (int)OrderStatus.Cancelled) &&
-                    !o.Deleted
-                    select o)
-                          .Select(order => new HistoricOrdersByVendorDto
-                          {
-                              Id = order.Id,
-                              VendorName = vendor.Name,
-                              OrderStatus = order.OrderStatusId,
-                              OrderItemsLength = GetOrderItemCount(order.Id),
-                              OrderSubtotalInclTax = order.OrderSubtotalInclTax,
-                              DeliveryDateUtc = GetShipmentsByOrderId(order.Id)
-                          })
-                          .DistinctBy(x => x.Id)
-                          .OrderByDescending(x => x.DeliveryDateUtc)
-                          .Take(Configurations.DefaultLimit)
-                          .ToList();
+            // Keep this query limited to expressions that LINQ to DB can translate. Using Any
+            // avoids producing one row per matching order item, so every order is returned once.
+            var orders = _orderRepository.Table
+                .Where(order => !order.Deleted &&
+                    (order.OrderStatusId == (int)OrderStatus.Complete ||
+                     order.OrderStatusId == (int)OrderStatus.Cancelled) &&
+                    (from orderItem in _orderItemRepository.Table
+                     join product in _productRepository.Table on orderItem.ProductId equals product.Id
+                     where orderItem.OrderId == order.Id && product.VendorId == vendorId
+                     select orderItem.Id).Any())
+                .Select(order => new
+                {
+                    order.Id,
+                    order.OrderStatusId,
+                    order.OrderSubtotalInclTax
+                })
+                .ToList();
+
+            if (orders.Count == 0)
+                return new List<HistoricOrdersByVendorDto>();
+
+            var orderIds = orders.Select(order => order.Id).ToList();
+
+            // These are batch queries; DTO enrichment below therefore doesn't cause N+1 calls.
+            var orderItemCounts = _orderItemRepository.Table
+                .Where(orderItem => orderIds.Contains(orderItem.OrderId))
+                .GroupBy(orderItem => orderItem.OrderId)
+                .Select(group => new { OrderId = group.Key, Count = group.Count() })
+                .ToDictionary(item => item.OrderId, item => item.Count);
+
+            var deliveryDates = _shipmentRepository.Table
+                .Where(shipment => orderIds.Contains(shipment.OrderId))
+                .Select(shipment => new
+                {
+                    shipment.OrderId,
+                    shipment.CreatedOnUtc,
+                    shipment.DeliveryDateUtc
+                })
+                .ToList()
+                .GroupBy(shipment => shipment.OrderId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.OrderByDescending(shipment => shipment.CreatedOnUtc)
+                        .First().DeliveryDateUtc);
+
+            return orders.Select(order => new HistoricOrdersByVendorDto
+                {
+                    Id = order.Id,
+                    VendorName = vendor.Name,
+                    OrderStatus = order.OrderStatusId,
+                    OrderItemsLength = orderItemCounts.TryGetValue(order.Id, out var count) ? count : 0,
+                    OrderSubtotalInclTax = order.OrderSubtotalInclTax,
+                    DeliveryDateUtc = deliveryDates.TryGetValue(order.Id, out var deliveryDate)
+                        ? deliveryDate
+                        : null
+                })
+                .OrderByDescending(order => order.DeliveryDateUtc)
+                .Take(Configurations.DefaultLimit)
+                .ToList();
         }
 
         public DateTime? GetShipmentsByOrderId(int orderId)
@@ -1241,4 +1283,3 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         #endregion
     }
 }
-

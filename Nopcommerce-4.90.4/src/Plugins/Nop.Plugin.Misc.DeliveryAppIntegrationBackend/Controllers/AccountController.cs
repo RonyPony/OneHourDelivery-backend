@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.Attributes;
@@ -15,6 +16,8 @@ using Nop.Services.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
 {
@@ -204,23 +207,43 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
         /// <summary>
         /// Sends verification code to costumer email.
         /// </summary>
-        /// <param name="customerEmail">The email of a customer</param>
+        /// <param name="requestBody">A JSON string containing the email, or an object with an email property.</param>
         /// <returns>An implementation of <see cref="IActionResult"/>.</returns>
         [HttpPost("verification-code")]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult SendVerificationCode([FromBody] string customerEmail)
+        public async Task<IActionResult> SendVerificationCode([FromBody] JToken requestBody)
         {
             try
             {
-                var random = new Random();
-                int codeValue = random.Next(1000, 9999);
+                var customerEmail = requestBody?.Type switch
+                {
+                    JTokenType.String => requestBody.Value<string>(),
+                    JTokenType.Object => ((JObject)requestBody)
+                        .GetValue("email", StringComparison.OrdinalIgnoreCase)?.Value<string>()
+                        ?? ((JObject)requestBody)
+                            .GetValue("customerEmail", StringComparison.OrdinalIgnoreCase)?.Value<string>(),
+                    _ => null
+                };
+
+                if (string.IsNullOrWhiteSpace(customerEmail))
+                    return BadRequest(new { message = "CustomerEmailIsEmpty" });
+
+                customerEmail = customerEmail.Trim();
+                int codeValue = RandomNumberGenerator.GetInt32(1000, 10000);
 
                 Customer currentCustomer = _customerService.GetCustomerByEmail(customerEmail);
 
                 if (currentCustomer == null)
                     return NotFound(new { message = "CustomerNotFound" });
 
-                _deliveryAppAccountService.SendVerificationCode(currentCustomer, codeValue);
+                var sendResult = await _deliveryAppAccountService.SendVerificationCodeAsync(currentCustomer, codeValue);
+
+                if (!sendResult.Success)
+                {
+                    _logger.Error($"There was an error queuing the verification code email for customer {currentCustomer.Id}. {sendResult.Message}");
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new { message = "VerificationCodeEmailCouldNotBeQueued" });
+                }
 
                 return Ok(codeValue);
             }

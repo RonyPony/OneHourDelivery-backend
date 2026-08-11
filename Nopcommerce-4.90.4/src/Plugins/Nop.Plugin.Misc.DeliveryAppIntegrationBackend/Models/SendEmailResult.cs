@@ -1,7 +1,7 @@
 ﻿namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models
 {
     /// <summary>
-    /// Represents a send validation email operation result.
+    /// Represents a queue validation email operation result.
     /// </summary>
     public sealed class SendEmailResult
     {

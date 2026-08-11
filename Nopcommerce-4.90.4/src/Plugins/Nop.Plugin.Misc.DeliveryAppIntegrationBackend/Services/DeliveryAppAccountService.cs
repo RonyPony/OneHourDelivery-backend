@@ -15,6 +15,7 @@ using Nop.Services.Messages;
 using Nop.Services.Vendors;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
 {
@@ -50,7 +51,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         /// <param name="mediaSettings">An instance of <see cref="MediaSettings"/>.</param>
         /// <param name="emailAccountService">An implementation of <see cref="IEmailAccountService"/>..</param>
         /// <param name="localizationService">An implementation of <see cref="ILocalizationService"/>..</param>
-        /// <param name="queuedEmailService">An implementation of <see cref="IQueuedEmailService"/>..</param>
+        /// <param name="queuedEmailService">An implementation of <see cref="IQueuedEmailService"/>.</param>
         /// <param name="emailAccountSettings">An instance of <see cref="EmailAccountSettings"/>..</param>
         /// <param name="genericAttributeRepository">An instance of <see cref="IRepository{GenericAttribute}"/>..</param>
         /// <param name="vendorService">An instance of <see cref="IVendorService"/>..</param>
@@ -125,12 +126,12 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         }
 
         /// <summary>
-        /// Inserts an email with verification code to the email's queue
+        /// Inserts an email with a verification code into the outgoing message queue.
         /// </summary>
         /// <param name="customer">The customer who receives the message.</param>
         /// <param name="codeValue">The verification code that is sent in the message.</param>
         /// <returns>An instance of <see cref="SendEmailResult"/>.</returns>
-        public SendEmailResult SendVerificationCode(Customer customer, int codeValue)
+        public async Task<SendEmailResult> SendVerificationCodeAsync(Customer customer, int codeValue)
         {
             try
             {
@@ -156,11 +157,11 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
                     ToName = _customerService.GetCustomerFullName(customer),
                     To = customer.Email,
                     Subject = _localizationService.GetResource(Defaults.VerificationCodeMessageSubject),
-                    Body = string.Format(codeValue.ToString()),
+                    Body = codeValue.ToString(),
                     CreatedOnUtc = DateTime.UtcNow
                 };
 
-                _queuedEmailService.InsertQueuedEmail(email);
+                await _queuedEmailService.InsertQueuedEmailAsync(email);
 
                 return new SendEmailResult { Success = true };
             }
