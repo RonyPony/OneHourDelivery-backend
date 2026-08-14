@@ -18,6 +18,7 @@ using Nop.Services.Media;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
 {
@@ -291,12 +292,15 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
         /// <param name="id">Driver id. </param>
         /// <param name="uploadedFile">Represents the new avatar file. An instance of <see cref="IFormFile"/></param>
         /// <returns>An instance of <see cref="IActionResult"/>.</returns>
-        [HttpPatch("{id}/avatar"), Authorize(Roles = "Mensajero", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPatch("{id}/avatar"), Authorize(Roles = "Registered, Mensajero", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [GetRequestsErrorInterceptorActionFilter]
         //[SwaggerResponse((int)HttpStatusCode.BadRequest, "Exposes CreateClient functionality", typeof(ErrorMessage))]
         public IActionResult UpdateAvatar(int id, IFormFile uploadedFile)
         {
             Customer customer = _customerService.GetCustomerById(id);
+
+            if (!IsAvatarOwner(customer))
+                return Forbid(JwtBearerDefaults.AuthenticationScheme);
 
             try
             {
@@ -306,7 +310,8 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
                 var avatarMaxSize = _customerSettings.AvatarMaximumSizeBytes;
                 if (uploadedFile.Length > avatarMaxSize)
                 {
-                    return BadRequest(new { message = "MaximumUploadedFileSizeExceded" });
+                    // return BadRequest(new { message = "MaximumUploadedFileSizeExceded" });
+                    return BadRequest(new { message = "MaximumUploadedFileSizeExceded(" + uploadedFile.Length.ToString() + ">" + avatarMaxSize.ToString() });
                 }
 
                 byte[] customerPictureBinary = _downloadService.GetDownloadBits(uploadedFile);
@@ -508,10 +513,25 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
         /// <exception cref="ArgumentException"></exception>
         private void ValidateChangeAvatarRequest(IFormFile uploadedFile, Customer customer)
         {
+            if (customer == null) throw new ArgumentException("ClientDoesNotExists");
             if (!_customerService.IsRegistered(customer)) throw new ArgumentException("ClientNotRegistered");
+            // if (!_customerService.IsInCustomerRole(customer, "Mensajero")) throw new ArgumentException("CustomerIsNotDriver");
             if (!_customerSettings.AllowCustomersToUploadAvatars) throw new ArgumentException("AllowCustomersToUploadAvatarsIsDisabled");
             if (uploadedFile == null) throw new ArgumentException("WasNotFoundUploadedFileFormValue");
             if (string.IsNullOrEmpty(uploadedFile.FileName)) throw new ArgumentException("WasNotFoundUploadedFileName");
+        }
+
+        private bool IsAvatarOwner(Customer customer)
+        {
+            // TokenController emits ClaimTypes.NameIdentifier, which the JWT handler
+            // serializes as "nameid". Inbound claim mapping is disabled in ApiStartup,
+            // so accept both representations for compatibility with existing tokens.
+            var authenticatedCustomerGuid = User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                User.FindFirstValue("nameid");
+
+            return customer != null &&
+                Guid.TryParse(authenticatedCustomerGuid, out var customerGuid) &&
+                customer.CustomerGuid == customerGuid;
         }
 
         #endregion

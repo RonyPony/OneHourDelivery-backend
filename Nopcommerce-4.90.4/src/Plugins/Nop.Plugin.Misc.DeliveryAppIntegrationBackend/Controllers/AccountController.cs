@@ -1,4 +1,4 @@
-﻿    using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -63,8 +63,8 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
             ICustomerService customerService,
             CustomerSettings customerSettings,
             ICustomerRegistrationService customerRegistrationService,
-            IEncryptionService encryptionService, 
-            IWorkflowMessageService workflowMessageService, 
+            IEncryptionService encryptionService,
+            IWorkflowMessageService workflowMessageService,
             IWorkContext workContext)
         {
             _deliveryAppAccountService = deliveryAppAccountService;
@@ -150,7 +150,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
                     return Ok("Deleted Successfully");
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError);
-                
+
             }
             catch (Exception e)
             {
@@ -290,7 +290,7 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
 
 
 
-                if (model.NewPassword!=model.ConfirmNewPassword)
+                if (model.NewPassword != model.ConfirmNewPassword)
                 {
                     return BadRequest("PasswordsDoesntMatch");
                 }
@@ -303,15 +303,15 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
                     CreatedOnUtc = DateTime.UtcNow,
                     PasswordSalt = "Account Password reseted by customer"
                 };
-                IList<CustomerPassword>previousPasswords = _customerService.GetCustomerPasswords(currentCustomer.Id);
+                IList<CustomerPassword> previousPasswords = _customerService.GetCustomerPasswords(currentCustomer.Id);
                 IEnumerable<CustomerPassword> previusPass = previousPasswords.Where(e => e.Password == customerPassword.Password);
-                if (previusPass.Count()>=1)
+                if (previusPass.Count() >= 1)
                 {
-                    return BadRequest("passCanNotBeDuplicated");
+                    return BadRequest("Clave no puede estar duplicada");
                 }
                 _customerService.InsertCustomerPassword(customerPassword);
 
-                
+
 
                 return Ok();
             }

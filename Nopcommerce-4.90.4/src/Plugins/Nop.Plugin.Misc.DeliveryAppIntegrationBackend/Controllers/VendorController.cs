@@ -1,15 +1,23 @@
 ﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Nop.Core;
+using Nop.Core.Domain.Customers;
+using Nop.Core.Domain.Media;
+using Nop.Core.Domain.Vendors;
 using Nop.Plugin.Api.DTO.Orders;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Attributes;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Domains;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Models;
 using Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services;
 using Nop.Services.Logging;
+using Nop.Services.Media;
+using Nop.Services.Vendors;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
 {
@@ -26,6 +34,11 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
         private readonly IVendorReviewsService _vendorReviewsService;
         private readonly ILogger _logger;
         private readonly IVendorDeliveryAppService _vendorDeliveryAppService;
+        private readonly IVendorService _vendorService;
+        private readonly IPictureService _pictureService;
+        private readonly IDownloadService _downloadService;
+        private readonly CustomerSettings _customerSettings;
+        private readonly IWorkContext _workContext;
 
         #endregion
 
@@ -42,17 +55,90 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Controllers
             IDeliveryAppOrderService deliveryAppOrderService,
             IVendorReviewsService vendorReviewsService,
             ILogger logger,
-            IVendorDeliveryAppService vendorDeliveryAppService)
+            IVendorDeliveryAppService vendorDeliveryAppService,
+            IVendorService vendorService,
+            IPictureService pictureService,
+            IDownloadService downloadService,
+            CustomerSettings customerSettings,
+            IWorkContext workContext)
         {
             _deliveryAppOrderService = deliveryAppOrderService;
             _vendorReviewsService = vendorReviewsService;
             _logger = logger;
             _vendorDeliveryAppService = vendorDeliveryAppService;
+            _vendorService = vendorService;
+            _pictureService = pictureService;
+            _downloadService = downloadService;
+            _customerSettings = customerSettings;
+            _workContext = workContext;
         }
 
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Updates the logo/avatar of the vendor owned by the authenticated commerce account.
+        /// </summary>
+        /// <param name="id">Vendor identifier.</param>
+        /// <param name="uploadedFile">New vendor image.</param>
+        [HttpPatch("{id}/avatar"), Authorize(Roles = "Comercio", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public async Task<IActionResult> UpdateAvatar(int id, IFormFile uploadedFile)
+        {
+            try
+            {
+                var currentCustomer = await _workContext.GetCurrentCustomerAsync();
+                if (currentCustomer?.VendorId != id)
+                    return Forbid(JwtBearerDefaults.AuthenticationScheme);
+
+                var vendor = await _vendorService.GetVendorByIdAsync(id);
+                if (vendor == null || vendor.Deleted)
+                    return NotFound(new { message = "VendorNotFound" });
+
+                if (uploadedFile == null)
+                    return BadRequest(new { message = "WasNotFoundUploadedFileFormValue" });
+                if (string.IsNullOrWhiteSpace(uploadedFile.FileName))
+                    return BadRequest(new { message = "WasNotFoundUploadedFileName" });
+                if (!uploadedFile.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { message = "UploadedFileMustBeAnImage" });
+                if (uploadedFile.Length > _customerSettings.AvatarMaximumSizeBytes)
+                    return BadRequest(new
+                    {
+                        message = $"MaximumUploadedFileSizeExceded({uploadedFile.Length}>{_customerSettings.AvatarMaximumSizeBytes})"
+                    });
+
+                var pictureBinary = _downloadService.GetDownloadBits(uploadedFile);
+                Picture vendorPicture;
+                if (vendor.PictureId > 0)
+                {
+                    vendorPicture = _pictureService.UpdatePicture(vendor.PictureId, pictureBinary,
+                        uploadedFile.ContentType, null);
+                }
+                else
+                {
+                    vendorPicture = _pictureService.InsertPicture(pictureBinary,
+                        uploadedFile.ContentType, null);
+                }
+
+                if (vendorPicture == null)
+                    throw new InvalidOperationException("VendorPictureCouldNotBeSaved");
+
+                vendor.PictureId = vendorPicture.Id;
+                await _vendorService.UpdateVendorAsync(vendor);
+
+                return Ok(new
+                {
+                    vendorId = vendor.Id,
+                    pictureUrl = _pictureService.GetPictureUrl(vendor.PictureId)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"There was an error updating vendor avatar. {ex.Message}", ex);
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
         /// <summary>
         /// Gets all vendor's reviews.
