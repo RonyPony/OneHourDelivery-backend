@@ -1099,12 +1099,27 @@ namespace Nop.Plugin.Misc.DeliveryAppIntegrationBackend.Services
         ///<inheritdoc/>
         public IList<StoreResponseModel> GetVendorsBySearchText(string searchText, decimal latitude, decimal longitude)
         {
+            var normalizedSearchText = searchText?.Trim();
 
-            IList<Vendor> foundVendorsWithProductsOrVendorNameMatchSearchText = (from vendors in _vendorRepository.Table
-                                                                                 join products in _productRepository.Table on vendors.Id equals products.VendorId
-                                                                                 where (products.Name.Contains(searchText) || vendors.Name.Contains(searchText))
-                                                                                 && !products.Deleted && !vendors.Deleted
-                                                                                 select vendors).Distinct().ToList();
+            IList<Vendor> foundVendorsWithProductsOrVendorNameMatchSearchText = _vendorRepository.Table
+                .Where(vendor => !vendor.Deleted &&
+                    _productRepository.Table.Any(product =>
+                        product.VendorId == vendor.Id && !product.Deleted) &&
+                    (vendor.Name.Contains(normalizedSearchText) ||
+                     _productRepository.Table.Any(product =>
+                         product.VendorId == vendor.Id &&
+                         !product.Deleted &&
+                         product.Name.Contains(normalizedSearchText)) ||
+                     _productRepository.Table.Any(product =>
+                         product.VendorId == vendor.Id &&
+                         !product.Deleted &&
+                         _productCategoryRepository.Table.Any(productCategory =>
+                             productCategory.ProductId == product.Id &&
+                             _categoryRepository.Table.Any(category =>
+                                 category.Id == productCategory.CategoryId &&
+                                 !category.Deleted &&
+                                 category.Name.Contains(normalizedSearchText))))))
+                .ToList();
 
             IList<int> vendorIDs = foundVendorsWithProductsOrVendorNameMatchSearchText.Select(vendor => vendor.Id).ToList();
 
