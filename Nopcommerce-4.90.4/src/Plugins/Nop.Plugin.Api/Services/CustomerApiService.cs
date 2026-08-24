@@ -19,6 +19,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Web.Models.Customer;
 using static Nop.Plugin.Api.Infrastructure.Constants;
@@ -292,7 +293,7 @@ namespace Nop.Plugin.Api.Services
         }
 
         // Need to work with dto object so we can map the first and last name from generic attributes table.
-        public IList<CustomerDto> Search(string queryParams = "", string order = Configurations.DefaultOrder,
+        public async Task<IList<CustomerDto>> SearchAsync(string queryParams = "", string order = Configurations.DefaultOrder,
             int page = Configurations.DefaultPageValue, int limit = Configurations.DefaultLimit)
         {
             IList<CustomerDto> result = new List<CustomerDto>();
@@ -310,7 +311,7 @@ namespace Nop.Plugin.Api.Services
                     {
 
                         // @0 is a placeholder used by dynamic linq and it is used to prevent possible sql injections.
-                        query = query.Where(string.Format("{0} = @0 || {0}.Contains(@0)", searchParam.Key), searchParam.Value);
+                        query = query.Where(string.Format("{0} != null && ({0} == @0 || {0}.Contains(@0))", searchParam.Key), searchParam.Value);
 
 
                     }
@@ -321,23 +322,44 @@ namespace Nop.Plugin.Api.Services
                     //}
                 }
 
-                foreach (var item in query.ToList())
+                var customers = await query.ToListAsync();
+                var customerIds = customers.Select(customer => customer.Id).ToArray();
+                var customerAttributes = customerIds.Length == 0
+                    ? new List<GenericAttribute>()
+                    : await _genericAttributeRepository.Table
+                        .Where(attribute => attribute.KeyGroup == nameof(Customer)
+                            && customerIds.Contains(attribute.EntityId)
+                            && (attribute.Key == "FirstName" || attribute.Key == "LastName" || attribute.Key == "Phone"))
+                        .ToListAsync();
+
+                var attributesByCustomer = customerAttributes
+                    .GroupBy(attribute => attribute.EntityId)
+                    .ToDictionary(group => group.Key,
+                        group => group.GroupBy(attribute => attribute.Key, StringComparer.OrdinalIgnoreCase)
+                            .ToDictionary(attributes => attributes.Key, attributes => attributes.First().Value,
+                                StringComparer.OrdinalIgnoreCase));
+
+                foreach (var item in customers)
                 {
-                    var nameCustomerAttributes = _genericAttributeRepository.Table.FirstOrDefault(o => o.KeyGroup == nameof(Customer) && o.EntityId == item.Id && o.Key == "FirstName");
-                    var lastNameCustomerAttributes = _genericAttributeRepository.Table.FirstOrDefault(o => o.KeyGroup == nameof(Customer) && o.EntityId == item.Id && o.Key == "LastName");
-                    var phoneNumberCustomer = _genericAttributeRepository.Table.FirstOrDefault(o => o.KeyGroup == nameof(Customer) && o.EntityId == item.Id && o.Key == "Phone");
+                    attributesByCustomer.TryGetValue(item.Id, out var attributes);
+                    string firstName = null;
+                    string lastName = null;
+                    string phone = null;
+                    attributes?.TryGetValue("FirstName", out firstName);
+                    attributes?.TryGetValue("LastName", out lastName);
+                    attributes?.TryGetValue("Phone", out phone);
 
                     result.Add(new CustomerDto
                     {
                         Username = item.Username,
                         Email = item.Email,
-                        FirstName = nameCustomerAttributes.Value,
-                        LastName = lastNameCustomerAttributes.Value,
+                        FirstName = firstName,
+                        LastName = lastName,
                         Id = item.Id,
                         SystemName = item.SystemName,
                         Active = item.Active,
 
-                        CustomerInfo = new CustomerInfoModel { Phone = phoneNumberCustomer.Value }
+                        CustomerInfo = new CustomerInfoModel { Phone = phone }
                     });
                 }
 
