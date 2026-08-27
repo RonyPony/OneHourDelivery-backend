@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -66,7 +67,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetMappings(ProductManufacturerMappingsParametersModel parameters)
+        public async Task<IActionResult> GetMappings(ProductManufacturerMappingsParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -106,7 +107,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetMappingsCount(ProductManufacturerMappingsCountParametersModel parameters)
+        public async Task<IActionResult> GetMappingsCount(ProductManufacturerMappingsCountParametersModel parameters)
         {
             if (parameters.ProductId < 0)
             {
@@ -144,7 +145,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetMappingById(int id, string fields = "")
+        public async Task<IActionResult> GetMappingById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -173,7 +174,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateProductManufacturerMapping([ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))] Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
+        public async Task<IActionResult> CreateProductManufacturerMapping([ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))] Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -216,7 +217,7 @@ namespace Nop.Plugin.Api.Controllers
             var json = JsonFieldsSerializer.Serialize(productManufacturerMappingsRootObject, string.Empty);
 
             //activity log 
-            CustomerActivityService.InsertActivity("AddNewProductManufacturerMapping", LocalizationService.GetResource("ActivityLog.AddNewProductManufacturerMapping"), newProductManufacturer);
+            await CustomerActivityService.InsertActivityAsync("AddNewProductManufacturerMapping", await LocalizationService.GetResourceAsync("ActivityLog.AddNewProductManufacturerMapping"), newProductManufacturer);
 
             return new RawJsonActionResult(json);
         }
@@ -228,7 +229,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateProductManufacturerMapping([ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))] Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
+        public async Task<IActionResult> UpdateProductManufacturerMapping([ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))] Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -269,8 +270,8 @@ namespace Nop.Plugin.Api.Controllers
             _manufacturerService.UpdateProductManufacturer(productManufacturerEntityToUpdate);
 
             //activity log
-            CustomerActivityService.InsertActivity("UpdateProdutManufacturerMapping",
-                LocalizationService.GetResource("ActivityLog.UpdateProdutManufacturerMapping"), productManufacturerEntityToUpdate);
+            await CustomerActivityService.InsertActivityAsync("UpdateProdutManufacturerMapping",
+                await LocalizationService.GetResourceAsync("ActivityLog.UpdateProdutManufacturerMapping"), productManufacturerEntityToUpdate);
 
             var updatedProductManufacturerDto = productManufacturerEntityToUpdate.ToDto();
 
@@ -290,7 +291,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteProductManufacturerMapping(int id)
+        public async Task<IActionResult> DeleteProductManufacturerMapping(int id)
         {
             if (id <= 0)
             {
@@ -307,7 +308,7 @@ namespace Nop.Plugin.Api.Controllers
             _manufacturerService.DeleteProductManufacturer(productManufacturer);
 
             //activity log 
-            CustomerActivityService.InsertActivity("DeleteProductManufacturerMapping", LocalizationService.GetResource("ActivityLog.DeleteProductManufacturerMapping"), productManufacturer);
+            await CustomerActivityService.InsertActivityAsync("DeleteProductManufacturerMapping", await LocalizationService.GetResourceAsync("ActivityLog.DeleteProductManufacturerMapping"), productManufacturer);
 
             return new RawJsonActionResult("{}");
         }

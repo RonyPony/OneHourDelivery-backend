@@ -21,6 +21,7 @@ using Nop.Services.Stores;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -60,7 +61,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetSpecificationAttributes(SpecifcationAttributesParametersModel parameters)
+        public async Task<IActionResult> GetSpecificationAttributes(SpecifcationAttributesParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -97,7 +98,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetSpecificationAttributesCount(SpecifcationAttributesCountParametersModel parameters)
+        public async Task<IActionResult> GetSpecificationAttributesCount(SpecifcationAttributesCountParametersModel parameters)
         {
             var specificationAttributesCount = _specificationAttributeService.GetSpecificationAttributes().Count();
 
@@ -124,7 +125,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetSpecificationAttributeById(int id, string fields = "")
+        public async Task<IActionResult> GetSpecificationAttributeById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -155,7 +156,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateSpecificationAttribute([ModelBinder(typeof(JsonModelBinder<SpecificationAttributeDto>))] Delta<SpecificationAttributeDto> specificaitonAttributeDelta)
+        public async Task<IActionResult> CreateSpecificationAttribute([ModelBinder(typeof(JsonModelBinder<SpecificationAttributeDto>))] Delta<SpecificationAttributeDto> specificaitonAttributeDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -169,7 +170,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _specificationAttributeService.InsertSpecificationAttribute(specificationAttribute);
 
-            CustomerActivityService.InsertActivity("AddNewSpecAttribute", LocalizationService.GetResource("ActivityLog.AddNewSpecAttribute"), specificationAttribute);
+            await CustomerActivityService.InsertActivityAsync("AddNewSpecAttribute", await LocalizationService.GetResourceAsync("ActivityLog.AddNewSpecAttribute"), specificationAttribute);
 
             // Preparing the result dto of the new product
             var specificationAttributeDto = _dtoHelper.PrepareSpecificationAttributeDto(specificationAttribute);
@@ -189,7 +190,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult UpdateSpecificationAttribute([ModelBinder(typeof(JsonModelBinder<SpecificationAttributeDto>))] Delta<SpecificationAttributeDto> specificationAttributeDelta)
+        public async Task<IActionResult> UpdateSpecificationAttribute([ModelBinder(typeof(JsonModelBinder<SpecificationAttributeDto>))] Delta<SpecificationAttributeDto> specificationAttributeDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -210,7 +211,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _specificationAttributeService.UpdateSpecificationAttribute(specificationAttribute);
           
-            CustomerActivityService.InsertActivity("EditSpecAttribute", LocalizationService.GetResource("ActivityLog.EditSpecAttribute"), specificationAttribute);
+            await CustomerActivityService.InsertActivityAsync("EditSpecAttribute", await LocalizationService.GetResourceAsync("ActivityLog.EditSpecAttribute"), specificationAttribute);
 
             // Preparing the result dto of the new product attribute
             var specificationAttributeDto = _dtoHelper.PrepareSpecificationAttributeDto(specificationAttribute);
@@ -230,7 +231,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult DeleteSpecificationAttribute(int id)
+        public async Task<IActionResult> DeleteSpecificationAttribute(int id)
         {
             if (id <= 0)
             {
@@ -246,7 +247,7 @@ namespace Nop.Plugin.Api.Controllers
             _specificationAttributeService.DeleteSpecificationAttribute(specificationAttribute);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteSpecAttribute", LocalizationService.GetResource("ActivityLog.DeleteSpecAttribute"), specificationAttribute);
+            await CustomerActivityService.InsertActivityAsync("DeleteSpecAttribute", await LocalizationService.GetResourceAsync("ActivityLog.DeleteSpecAttribute"), specificationAttribute);
 
             return new RawJsonActionResult("{}");
         }

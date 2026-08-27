@@ -15,6 +15,7 @@ using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -64,9 +65,9 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetCurrentStore(string fields = "")
+        public async Task<IActionResult> GetCurrentStore(string fields = "")
         {
-            var store = _storeContext.CurrentStore;
+            var store = await _storeContext.GetCurrentStoreAsync();
 
             if (store == null)
             {
@@ -96,7 +97,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetAllStores(string fields = "")
+        public async Task<IActionResult> GetAllStores(string fields = "")
         {
             var allStores = StoreService.GetAllStores();
         

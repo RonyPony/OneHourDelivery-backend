@@ -15,6 +15,7 @@ using Nop.Services.Stores;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -54,7 +55,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetAllCustomerRoles(string fields = "")
+        public async Task<IActionResult> GetAllCustomerRoles(string fields = "")
         {
             var allCustomerRoles = CustomerService.GetAllCustomerRoles();
 
