@@ -1,0 +1,5 @@
+@model Nop.Plugin.Misc.Alanube.Models.DgiCatalogsModel
+@{ Layout = "_ConfigurePlugin"; }
+<div class="content-header clearfix"><h1 class="float-left">DGI Catalogs</h1></div>
+<div class="content-header clearfix"><div class="float-right"><form asp-controller="AlanubeAdmin" asp-action="SyncDgiCatalogs" method="post"><button type="submit" class="btn btn-primary">Sync DGI Catalogs</button></form></div></div>
+<div class="card card-default"><div class="card-body"><p>Last synchronization: @(Model.LastSynchronizationUtc?.ToString("u") ?? "Never")</p><table class="table table-hover table-bordered"><thead><tr><th>Catalog</th><th>Records</th><th>Last synchronization</th></tr></thead><tbody>@foreach (var catalog in Model.Catalogs){<tr><td>@catalog.CatalogType</td><td>@catalog.Count</td><td>@(catalog.LastSynchronizationUtc?.ToString("u") ?? "Never")</td></tr>}</tbody></table></div></div>

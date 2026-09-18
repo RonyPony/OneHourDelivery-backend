@@ -89,6 +89,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Widgets.GoogleMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Misc.DeliveryAppIntegrationBackend", "Plugins\Nop.Plugin.Misc.DeliveryAppIntegrationBackend\Nop.Plugin.Misc.DeliveryAppIntegrationBackend.csproj", "{845517D9-6EFE-9DB2-777C-A4E2CDCADE0F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Misc.Alanube", "Plugins\Nop.Plugin.Misc.Alanube\Nop.Plugin.Misc.Alanube.csproj", "{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -545,6 +547,18 @@ Global
 		{845517D9-6EFE-9DB2-777C-A4E2CDCADE0F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{845517D9-6EFE-9DB2-777C-A4E2CDCADE0F}.Release|x86.ActiveCfg = Release|Any CPU
 		{845517D9-6EFE-9DB2-777C-A4E2CDCADE0F}.Release|x86.Build.0 = Release|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Debug|x86.Build.0 = Debug|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Release|x86.ActiveCfg = Release|Any CPU
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -589,6 +603,7 @@ Global
 		{981A9CF5-AA78-95CC-E1A1-FE506903B693} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{96EA2437-3AAB-35CE-E03D-2AE341CD5CA4} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{845517D9-6EFE-9DB2-777C-A4E2CDCADE0F} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
+		{3B231D86-050D-DCCB-DB4B-D75B7A2ADDB1} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE72A8B2-332A-4175-9319-6726D36E9D25}

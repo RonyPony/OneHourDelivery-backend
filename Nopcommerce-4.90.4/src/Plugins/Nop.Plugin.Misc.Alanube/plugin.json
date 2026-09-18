@@ -1,0 +1,11 @@
+{
+  "Group": "Misc",
+  "FriendlyName": "Alanube Panamá",
+  "SystemName": "Misc.Alanube",
+  "Version": "4.90.0",
+  "SupportedVersions": [ "4.90" ],
+  "Author": "Ronel Cruz",
+  "DisplayOrder": 100,
+  "FileName": "Nop.Plugin.Misc.Alanube.dll",
+  "Description": "Integración de facturación electrónica de Alanube Panamá para nopCommerce."
+}

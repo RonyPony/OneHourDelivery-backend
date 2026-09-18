@@ -1,0 +1,22 @@
+@model Nop.Plugin.Misc.Alanube.Models.CompanyEditModel
+@{ Layout = "_ConfigurePlugin"; var isEdit = !string.IsNullOrWhiteSpace(Model.Id); }
+<div class="content-header clearfix"><h1 class="float-left">@(isEdit ? T("Admin.Common.Edit") : T("Admin.Common.AddNewRecord"))</h1></div>
+<form asp-controller="AlanubeAdmin" asp-action="@(isEdit ? "EditCompany" : "CreateCompany")" method="post">
+    <input asp-for="Id" type="hidden" />
+    @if (isEdit)
+    {
+        <input asp-for="TypeRuc" type="hidden" />
+        <input asp-for="Type" type="hidden" />
+    }
+    <div class="cards-group"><div class="card card-default"><div class="card-body">
+        <div asp-validation-summary="All"></div>
+        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="Ruc" /></div><div class="col-md-9"><nop-editor asp-for="Ruc" readonly="@(isEdit ? "readonly" : null)" /><span asp-validation-for="Ruc"></span></div></div>
+        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="TypeRuc" /></div><div class="col-md-9"><nop-editor asp-for="TypeRuc" readonly="@(isEdit ? "readonly" : null)" /><span asp-validation-for="TypeRuc"></span></div></div>
+        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="Type" /></div><div class="col-md-9"><nop-select asp-for="Type" asp-items="Html.GetEnumSelectList<Nop.Plugin.Misc.Alanube.Api.Companies.AlanubeCompanyType>()" disabled="@(isEdit ? "disabled" : null)" /><span asp-validation-for="Type"></span></div></div>
+        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="TradeName" /></div><div class="col-md-9"><nop-editor asp-for="TradeName" /><span asp-validation-for="TradeName"></span></div></div>
+        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="Qr" /></div><div class="col-md-9"><nop-editor asp-for="Qr" /><span asp-validation-for="Qr"></span></div></div>
+        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SignatureCertificate" /></div><div class="col-md-9"><nop-editor asp-for="SignatureCertificate" /><span asp-validation-for="SignatureCertificate"></span></div></div>
+        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="AuthenticationCertificate" /></div><div class="col-md-9"><nop-editor asp-for="AuthenticationCertificate" /><span asp-validation-for="AuthenticationCertificate"></span></div></div>
+        <div class="form-group row"><div class="col-md-9 offset-md-3"><button type="submit" class="btn btn-primary">@T("Admin.Common.Save")</button></div></div>
+    </div></div></div>
+</form>
