@@ -119,15 +119,35 @@ public sealed class AlanubeAdminController : BasePluginController
             SandboxApiToken = _settings.SandboxApiToken,
             ProductionApiToken = _settings.ProductionApiToken
         };
-        var companies = await _alanubeCompanyClient.GetCompaniesAsync(cancellationToken: HttpContext.RequestAborted);
-        model.Companies = companies.Body?.ToList() ?? new List<CompanyResponseDto>();
-        if (!string.IsNullOrWhiteSpace(model.CompanyId))
+        if (HasConfiguredApiToken())
         {
-            var offices = await _alanubeOfficeClient.GetOfficesAsync(model.CompanyId, HttpContext.RequestAborted);
-            model.Offices = offices.Body?.ToList() ?? new List<OfficeResponseDto>();
+            try
+            {
+                var companies = await _alanubeCompanyClient.GetCompaniesAsync(cancellationToken: HttpContext.RequestAborted);
+                if (companies.IsSuccessStatusCode)
+                    model.Companies = companies.Body?.ToList() ?? new List<CompanyResponseDto>();
+
+                if (!string.IsNullOrWhiteSpace(model.CompanyId))
+                {
+                    var offices = await _alanubeOfficeClient.GetOfficesAsync(model.CompanyId, HttpContext.RequestAborted);
+                    if (offices.IsSuccessStatusCode)
+                        model.Offices = offices.Body?.ToList() ?? new List<OfficeResponseDto>();
+                }
+            }
+            catch (AlanubeApiException)
+            {
+                // Configure must remain available while credentials or Alanube are unavailable.
+            }
         }
         return View("~/Plugins/Misc.Alanube/Views/Configure.cshtml", model);
     }
+
+    private bool HasConfiguredApiToken() => _settings.Environment switch
+    {
+        AlanubeEnvironment.Sandbox => !string.IsNullOrWhiteSpace(_settings.SandboxApiToken),
+        AlanubeEnvironment.Production => !string.IsNullOrWhiteSpace(_settings.ProductionApiToken),
+        _ => false
+    };
 
     [HttpGet]
     [CheckPermission(StandardPermission.Configuration.MANAGE_PLUGINS)]

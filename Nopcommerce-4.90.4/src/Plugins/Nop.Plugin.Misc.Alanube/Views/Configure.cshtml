@@ -1,73 +1,688 @@
+@using Nop.Plugin.Misc.Alanube.Configuration
 @model Nop.Plugin.Misc.Alanube.Models.ConfigurationModel
 
 @{
     Layout = "_ConfigurePlugin";
+
+    var companies = Model?.Companies;
+    var offices = Model?.Offices;
+
+    var testConnectionSucceeded = Model?.TestConnectionSucceeded;
+    var testConnectionMessage = Model?.TestConnectionMessage ?? string.Empty;
+    var testConnectionEnvironment = Model?.TestConnectionEnvironment ?? string.Empty;
+    var testConnectionStatusCode = Model?.TestConnectionStatusCode;
+    var testConnectionErrorCode = Model?.TestConnectionErrorCode ?? string.Empty;
 }
 
-<form asp-controller="AlanubeAdmin" asp-action="Configure" method="post">
+<form asp-controller="AlanubeAdmin"
+      asp-action="Configure"
+      method="post"
+      id="alanube-config-form">
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
     <div class="cards-group">
         <div class="card card-default">
             <div class="card-body">
+
                 <div class="form-group row">
-                    <div class="col-md-3"><nop-label asp-for="Enabled" /></div>
-                    <div class="col-md-9"><nop-editor asp-for="Enabled" /></div>
+                    <div class="col-md-3">
+                        <nop-label asp-for="Enabled" />
+                    </div>
+
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Enabled" />
+                        <span asp-validation-for="Enabled"
+                              class="text-danger"></span>
+                    </div>
                 </div>
+
                 <div class="form-group row">
                     <div class="col-md-9 offset-md-3">
-                        <button type="submit" name="test-connection" class="btn bg-blue">
-                            @T("Plugins.Misc.Alanube.TestConnection")
+                        <button type="submit"
+                                name="test-connection"
+                                value="true"
+                                class="btn bg-blue"
+                                formnovalidate>
+                            Probar conexión
                         </button>
                     </div>
                 </div>
-                @if (Model.TestConnectionSucceeded.HasValue)
+
+                @if (testConnectionSucceeded.HasValue)
                 {
                     <div class="form-group row">
                         <div class="col-md-9 offset-md-3">
-                            <div class="alert @(Model.TestConnectionSucceeded.Value ? "alert-success" : "alert-danger")">
-                                <strong>@T("Plugins.Misc.Alanube.TestConnection.Result")</strong><br />
-                                @Model.TestConnectionMessage<br />
-                                @T("Plugins.Misc.Alanube.TestConnection.Environment"): @Model.TestConnectionEnvironment<br />
-                                @if (Model.TestConnectionStatusCode.HasValue)
+
+                            <div class="alert @(testConnectionSucceeded.Value ? "alert-success" : "alert-danger")">
+
+                                <strong>
+                                    Resultado de conexión
+                                </strong>
+
+                                @if (!string.IsNullOrWhiteSpace(testConnectionMessage))
                                 {
-                                    @T("Plugins.Misc.Alanube.TestConnection.Status"): @Model.TestConnectionStatusCode<br />
+                                    <br />
+                                    @testConnectionMessage
                                 }
-                                @if (!string.IsNullOrWhiteSpace(Model.TestConnectionErrorCode))
+
+                                @if (!string.IsNullOrWhiteSpace(testConnectionEnvironment))
                                 {
-                                    @T("Plugins.Misc.Alanube.TestConnection.ErrorCode"): @Model.TestConnectionErrorCode
+                                    <br />
+                                    <span>
+                                        Ambiente:
+                                        @testConnectionEnvironment
+                                    </span>
                                 }
+
+                                @if (testConnectionStatusCode.HasValue)
+                                {
+                                    <br />
+                                    <span>
+                                        Estado:
+                                        @testConnectionStatusCode.Value
+                                    </span>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(testConnectionErrorCode))
+                                {
+                                    <br />
+                                    <span>
+                                        Código de error:
+                                        @testConnectionErrorCode
+                                    </span>
+                                }
+
                             </div>
+
                         </div>
                     </div>
                 }
-                <div class="form-group row"><div class="col-md-3"><nop-label asp-for="CompanyId" /></div><div class="col-md-9"><select asp-for="CompanyId" class="form-control"><option value="">@T("Plugins.Misc.Alanube.SelectCompany")</option>@foreach (var company in Model.Companies){<option value="@company.Id">@company.TradeName (@company.Ruc)</option>}</select></div></div>
-                <div class="form-group row"><div class="col-md-3"><nop-label asp-for="OfficeId" /></div><div class="col-md-9"><select asp-for="OfficeId" class="form-control"><option value="">@T("Plugins.Misc.Alanube.SelectOffice")</option>@foreach (var office in Model.Offices){<option value="@office.Id">@office.Code - @office.Address</option>}</select></div></div>
+
                 <div class="form-group row">
-                    <div class="col-md-3"><nop-label asp-for="Environment" /></div>
+
+                    <div class="col-md-3">
+                        <nop-label asp-for="CompanyId" />
+                    </div>
+
                     <div class="col-md-9">
-                        <nop-select asp-for="Environment" asp-items="Html.GetEnumSelectList<Nop.Plugin.Misc.Alanube.Configuration.AlanubeEnvironment>()" />
-                        <span asp-validation-for="Environment"></span>
+
+                        <select asp-for="CompanyId"
+                                class="form-control"
+                                id="CompanyId">
+
+                            <option value="">
+                                Seleccione una compañía
+                            </option>
+
+                            @if (companies != null)
+                            {
+                                foreach (var company in companies)
+                                {
+                                    if (company == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    var companyId = company.Id?.ToString() ?? string.Empty;
+                                    var tradeName = company.TradeName?.ToString() ?? string.Empty;
+                                    var ruc = company.Ruc?.ToString() ?? string.Empty;
+
+                                    if (string.IsNullOrWhiteSpace(companyId))
+                                    {
+                                        continue;
+                                    }
+
+                                    var companyDisplayName = companyId;
+
+                                    if (!string.IsNullOrWhiteSpace(tradeName) &&
+                                        !string.IsNullOrWhiteSpace(ruc))
+                                    {
+                                        companyDisplayName = $"{tradeName} ({ruc})";
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(tradeName))
+                                    {
+                                        companyDisplayName = tradeName;
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(ruc))
+                                    {
+                                        companyDisplayName = ruc;
+                                    }
+
+                                    <option value="@companyId">
+                                        @companyDisplayName
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                        <span asp-validation-for="CompanyId"
+                              class="text-danger"></span>
+
+                        <span id="CompanyIdValidation"
+                              class="text-danger"
+                              style="display:none;">
+                            Debe seleccionar una compañía.
+                        </span>
+
                     </div>
                 </div>
+
                 <div class="form-group row">
-                    <div class="col-md-3"><nop-label asp-for="SandboxApiToken" /></div>
+
+                    <div class="col-md-3">
+                        <nop-label asp-for="OfficeId" />
+                    </div>
+
                     <div class="col-md-9">
-                        <nop-editor asp-for="SandboxApiToken" html-attributes="@(new { autocomplete = "new-password" })" />
-                        <span asp-validation-for="SandboxApiToken"></span>
+
+                        <select asp-for="OfficeId"
+                                class="form-control"
+                                id="OfficeId">
+
+                            <option value="">
+                                Seleccione una oficina
+                            </option>
+
+                            @if (offices != null)
+                            {
+                                foreach (var office in offices)
+                                {
+                                    if (office == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    var officeId = office.Id?.ToString() ?? string.Empty;
+                                    var code = office.Code?.ToString() ?? string.Empty;
+                                    var address = office.Address?.ToString() ?? string.Empty;
+
+                                    if (string.IsNullOrWhiteSpace(officeId))
+                                    {
+                                        continue;
+                                    }
+
+                                    var officeDisplayName = officeId;
+
+                                    if (!string.IsNullOrWhiteSpace(code) &&
+                                        !string.IsNullOrWhiteSpace(address))
+                                    {
+                                        officeDisplayName = $"{code} - {address}";
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(code))
+                                    {
+                                        officeDisplayName = code;
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(address))
+                                    {
+                                        officeDisplayName = address;
+                                    }
+
+                                    <option value="@officeId">
+                                        @officeDisplayName
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                        <span asp-validation-for="OfficeId"
+                              class="text-danger"></span>
+
+                        <span id="OfficeIdValidation"
+                              class="text-danger"
+                              style="display:none;">
+                            Debe seleccionar una oficina.
+                        </span>
+
                     </div>
                 </div>
+
                 <div class="form-group row">
-                    <div class="col-md-3"><nop-label asp-for="ProductionApiToken" /></div>
+
+                    <div class="col-md-3">
+                        <nop-label asp-for="Environment" />
+                    </div>
+
                     <div class="col-md-9">
-                        <nop-editor asp-for="ProductionApiToken" html-attributes="@(new { autocomplete = "new-password" })" />
-                        <span asp-validation-for="ProductionApiToken"></span>
+
+                        <nop-select asp-for="Environment"
+                                    asp-items="Html.GetEnumSelectList<AlanubeEnvironment>()" />
+
+                        <span asp-validation-for="Environment"
+                              class="text-danger"></span>
+
+                        <span id="EnvironmentValidation"
+                              class="text-danger"
+                              style="display:none;">
+                            Debe seleccionar un ambiente válido.
+                        </span>
+
                     </div>
                 </div>
+
                 <div class="form-group row">
+
+                    <div class="col-md-3">
+                        <nop-label asp-for="SandboxApiToken" />
+                    </div>
+
+                    <div class="col-md-9">
+
+                        <nop-editor asp-for="SandboxApiToken"
+                                    html-attributes="@(new
+                                    {
+                                        autocomplete = "new-password"
+                                    })" />
+
+                        <span asp-validation-for="SandboxApiToken"
+                              class="text-danger"></span>
+
+                        <span id="SandboxApiTokenValidation"
+                              class="text-danger"
+                              style="display:none;">
+                            Debe especificar el API Token de Sandbox.
+                        </span>
+
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
+                    <div class="col-md-3">
+                        <nop-label asp-for="ProductionApiToken" />
+                    </div>
+
+                    <div class="col-md-9">
+
+                        <nop-editor asp-for="ProductionApiToken"
+                                    html-attributes="@(new
+                                    {
+                                        autocomplete = "new-password"
+                                    })" />
+
+                        <span asp-validation-for="ProductionApiToken"
+                              class="text-danger"></span>
+
+                        <span id="ProductionApiTokenValidation"
+                              class="text-danger"
+                              style="display:none;">
+                            Debe especificar el API Token de producción.
+                        </span>
+
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
                     <div class="col-md-9 offset-md-3">
-                        <button type="submit" class="btn btn-primary">@T("Admin.Common.Save")</button>
+
+                        <button type="submit"
+                                class="btn btn-primary"
+                                id="save-configuration">
+                            Guardar
+                        </button>
+
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
+
 </form>
+
+<script asp-location="Footer">
+
+    $(document).ready(function () {
+
+        var $form = $('#alanube-config-form');
+
+        function getValue(selector) {
+
+            var $element = $(selector);
+
+            if (!$element.length) {
+                return '';
+            }
+
+            var value = $element.val();
+
+            if (value === null ||
+                value === undefined) {
+                return '';
+            }
+
+            return value.toString().trim();
+        }
+
+        function getEnabled() {
+
+            var $enabled = $('#Enabled');
+
+            if (!$enabled.length) {
+                return false;
+            }
+
+            if ($enabled.is(':checkbox')) {
+                return $enabled.is(':checked');
+            }
+
+            var value = $enabled.val();
+
+            if (value === null ||
+                value === undefined) {
+                return false;
+            }
+
+            value = value
+                .toString()
+                .trim()
+                .toLowerCase();
+
+            return value === 'true' ||
+                   value === '1' ||
+                   value === 'on';
+        }
+
+        function hideValidationMessages() {
+
+            $('#CompanyIdValidation').hide();
+            $('#OfficeIdValidation').hide();
+            $('#EnvironmentValidation').hide();
+            $('#SandboxApiTokenValidation').hide();
+            $('#ProductionApiTokenValidation').hide();
+
+            $('#CompanyId')
+                .removeClass('input-validation-error');
+
+            $('#OfficeId')
+                .removeClass('input-validation-error');
+
+            $('#Environment')
+                .removeClass('input-validation-error');
+
+            $('#SandboxApiToken')
+                .removeClass('input-validation-error');
+
+            $('#ProductionApiToken')
+                .removeClass('input-validation-error');
+        }
+
+        function showValidation(
+            selector,
+            validationSelector) {
+
+            $(selector)
+                .addClass('input-validation-error');
+
+            $(validationSelector)
+                .show();
+        }
+
+        function getEnvironmentText() {
+
+            var $environment = $('#Environment');
+
+            if (!$environment.length) {
+                return '';
+            }
+
+            var selectedText = $environment
+                .find('option:selected')
+                .text();
+
+            if (selectedText === null ||
+                selectedText === undefined) {
+                return '';
+            }
+
+            return selectedText
+                .toString()
+                .trim()
+                .toLowerCase();
+        }
+
+        function validateConfiguration() {
+
+            hideValidationMessages();
+
+            if (!getEnabled()) {
+                return true;
+            }
+
+            var isValid = true;
+
+            var companyId =
+                getValue('#CompanyId');
+
+            var officeId =
+                getValue('#OfficeId');
+
+            var environment =
+                getValue('#Environment');
+
+            var sandboxToken =
+                getValue('#SandboxApiToken');
+
+            var productionToken =
+                getValue('#ProductionApiToken');
+
+            if (!companyId) {
+
+                showValidation(
+                    '#CompanyId',
+                    '#CompanyIdValidation'
+                );
+
+                isValid = false;
+            }
+
+            if (!officeId) {
+
+                showValidation(
+                    '#OfficeId',
+                    '#OfficeIdValidation'
+                );
+
+                isValid = false;
+            }
+
+            if (!environment) {
+
+                showValidation(
+                    '#Environment',
+                    '#EnvironmentValidation'
+                );
+
+                isValid = false;
+            }
+
+            var environmentText =
+                getEnvironmentText();
+
+            var isSandbox =
+                environmentText.indexOf('sandbox') !== -1;
+
+            var isProduction =
+                environmentText.indexOf('production') !== -1 ||
+                environmentText.indexOf('producción') !== -1 ||
+                environmentText.indexOf('produccion') !== -1;
+
+            if (isSandbox &&
+                !sandboxToken) {
+
+                showValidation(
+                    '#SandboxApiToken',
+                    '#SandboxApiTokenValidation'
+                );
+
+                isValid = false;
+            }
+
+            if (isProduction &&
+                !productionToken) {
+
+                showValidation(
+                    '#ProductionApiToken',
+                    '#ProductionApiTokenValidation'
+                );
+
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        $form.on(
+            'submit',
+            function (event) {
+
+                var submitter = null;
+
+                if (event.originalEvent &&
+                    event.originalEvent.submitter) {
+
+                    submitter =
+                        event.originalEvent.submitter;
+                }
+
+                if (submitter) {
+
+                    var submitterName =
+                        $(submitter).attr('name');
+
+                    if (submitterName ===
+                        'test-connection') {
+
+                        return true;
+                    }
+                }
+
+                if (!validateConfiguration()) {
+
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+
+                    var $firstError =
+                        $('.input-validation-error')
+                            .first();
+
+                    if ($firstError.length) {
+                        $firstError.trigger('focus');
+                    }
+
+                    return false;
+                }
+
+                return true;
+            }
+        );
+
+        $('#CompanyId')
+            .on(
+                'change',
+                function () {
+
+                    if (getValue('#CompanyId')) {
+
+                        $('#CompanyIdValidation')
+                            .hide();
+
+                        $('#CompanyId')
+                            .removeClass(
+                                'input-validation-error'
+                            );
+                    }
+                }
+            );
+
+        $('#OfficeId')
+            .on(
+                'change',
+                function () {
+
+                    if (getValue('#OfficeId')) {
+
+                        $('#OfficeIdValidation')
+                            .hide();
+
+                        $('#OfficeId')
+                            .removeClass(
+                                'input-validation-error'
+                            );
+                    }
+                }
+            );
+
+        $('#Environment')
+            .on(
+                'change',
+                function () {
+
+                    $('#EnvironmentValidation')
+                        .hide();
+
+                    $('#Environment')
+                        .removeClass(
+                            'input-validation-error'
+                        );
+
+                    $('#SandboxApiTokenValidation')
+                        .hide();
+
+                    $('#ProductionApiTokenValidation')
+                        .hide();
+
+                    $('#SandboxApiToken')
+                        .removeClass(
+                            'input-validation-error'
+                        );
+
+                    $('#ProductionApiToken')
+                        .removeClass(
+                            'input-validation-error'
+                        );
+                }
+            );
+
+        $('#SandboxApiToken')
+            .on(
+                'input change',
+                function () {
+
+                    if (getValue('#SandboxApiToken')) {
+
+                        $('#SandboxApiTokenValidation')
+                            .hide();
+
+                        $('#SandboxApiToken')
+                            .removeClass(
+                                'input-validation-error'
+                            );
+                    }
+                }
+            );
+
+        $('#ProductionApiToken')
+            .on(
+                'input change',
+                function () {
+
+                    if (getValue('#ProductionApiToken')) {
+
+                        $('#ProductionApiTokenValidation')
+                            .hide();
+
+                        $('#ProductionApiToken')
+                            .removeClass(
+                                'input-validation-error'
+                            );
+                    }
+                }
+            );
+
+    });
+
+</script>
