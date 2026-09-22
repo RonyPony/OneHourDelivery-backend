@@ -36,6 +36,7 @@ public sealed class NopStartup : INopStartup
         services.AddScoped<IAlanubeReceiverMapper, AlanubeReceiverMapper>();
         services.AddScoped<IAlanubeOrderItemMapper, AlanubeOrderItemMapper>();
         services.AddScoped<IAlanubeDocumentService, AlanubeDocumentService>();
+        services.AddScoped<IAlanubeFiscalSequenceService, AlanubeFiscalSequenceService>();
         services.AddSingleton<IAlanubeRetryPolicy, AlanubeRetryPolicy>();
         services.AddScoped<IAlanubeDocumentLogService, AlanubeDocumentLogService>();
         services.AddScoped<IAlanubeWebhookService, AlanubeWebhookService>();

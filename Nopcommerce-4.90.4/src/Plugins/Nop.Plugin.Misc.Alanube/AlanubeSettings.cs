@@ -52,4 +52,16 @@ public class AlanubeSettings : ISettings
     /// Gets or sets the secret used to validate Alanube webhook requests.
     /// </summary>
     public string WebhookSecret { get; set; }
+
+    public string BillingPoint { get; set; } = "001";
+    public long NextFiscalNumber { get; set; } = 1;
+    public string IssueType { get; set; } = "01";
+    public string DocumentType { get; set; } = "01";
+    public string Nature { get; set; } = "01";
+    public int OperationType { get; set; } = 1;
+    public int Destination { get; set; } = 1;
+    public int ReceiverContainer { get; set; } = 1;
+    public int CafeFormat { get; set; } = 3;
+    public int CafeDelivery { get; set; } = 3;
+    public int SaleType { get; set; } = 1;
 }

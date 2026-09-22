@@ -102,7 +102,11 @@ public sealed class AlanubeAdminController : BasePluginController
     {
         var result = await _alanubeCatalogService.SyncCatalogsAsync(HttpContext.RequestAborted);
         var failed = result.Items.Count(x => !x.Succeeded);
-        _notificationService.SuccessNotification($"DGI catalogs synchronized: {result.Items.Sum(x => x.RecordsProcessed)} records. {failed} catalog(s) failed.");
+        var message = $"DGI catalogs synchronized: {result.Items.Sum(x => x.RecordsProcessed)} records. {failed} catalog(s) failed.";
+        if (failed > 0)
+            _notificationService.ErrorNotification(message);
+        else
+            _notificationService.SuccessNotification(message);
         return RedirectToRoute("Plugin.Alanube.DgiCatalogs");
     }
 
@@ -117,7 +121,21 @@ public sealed class AlanubeAdminController : BasePluginController
             CompanyId = _settings.CompanyId,
             OfficeId = _settings.OfficeId,
             SandboxApiToken = _settings.SandboxApiToken,
-            ProductionApiToken = _settings.ProductionApiToken
+            ProductionApiToken = _settings.ProductionApiToken,
+            InvoiceTrigger = _settings.InvoiceTrigger,
+            EnableWebhook = _settings.EnableWebhook,
+            WebhookSecret = _settings.WebhookSecret,
+            BillingPoint = _settings.BillingPoint,
+            NextFiscalNumber = _settings.NextFiscalNumber,
+            IssueType = _settings.IssueType,
+            DocumentType = _settings.DocumentType,
+            Nature = _settings.Nature,
+            OperationType = _settings.OperationType,
+            Destination = _settings.Destination,
+            ReceiverContainer = _settings.ReceiverContainer,
+            CafeFormat = _settings.CafeFormat,
+            CafeDelivery = _settings.CafeDelivery,
+            SaleType = _settings.SaleType
         };
         if (HasConfiguredApiToken())
         {
@@ -134,10 +152,15 @@ public sealed class AlanubeAdminController : BasePluginController
                         model.Offices = offices.Body?.ToList() ?? new List<OfficeResponseDto>();
                 }
             }
-            catch (AlanubeApiException)
+            catch (AlanubeApiException exception)
             {
-                // Configure must remain available while credentials or Alanube are unavailable.
+                model.CompaniesLoadError = Sanitize(exception.Error?.Message) ??
+                    "Alanube could not load companies. Verify the saved environment and API token.";
             }
+        }
+        else
+        {
+            model.CompaniesLoadError = "Save the API token for the selected environment, then reload this page to load companies.";
         }
         return View("~/Plugins/Misc.Alanube/Views/Configure.cshtml", model);
     }
@@ -148,6 +171,31 @@ public sealed class AlanubeAdminController : BasePluginController
         AlanubeEnvironment.Production => !string.IsNullOrWhiteSpace(_settings.ProductionApiToken),
         _ => false
     };
+
+    [HttpGet("Admin/Alanube/Companies/{companyId}/Offices")]
+    [CheckPermission(StandardPermission.Configuration.MANAGE_PLUGINS)]
+    public async Task<IActionResult> GetCompanyOffices(string companyId)
+    {
+        if (string.IsNullOrWhiteSpace(companyId))
+            return Json(Array.Empty<object>());
+
+        try
+        {
+            var response = await _alanubeOfficeClient.GetOfficesAsync(companyId, HttpContext.RequestAborted);
+            if (!response.IsSuccessStatusCode)
+                return BadRequest(new { error = Sanitize(response.Error?.Message) ?? "The offices could not be loaded." });
+
+            return Json((response.Body ?? []).Where(office => !string.IsNullOrWhiteSpace(office.Id)).Select(office => new
+            {
+                id = office.Id,
+                label = string.IsNullOrWhiteSpace(office.Code) ? office.Address ?? office.Id : $"{office.Code} - {office.Address}"
+            }));
+        }
+        catch (AlanubeApiException exception)
+        {
+            return BadRequest(new { error = Sanitize(exception.Error?.Message) ?? "The offices could not be loaded." });
+        }
+    }
 
     [HttpGet]
     [CheckPermission(StandardPermission.Configuration.MANAGE_PLUGINS)]
@@ -266,10 +314,31 @@ public sealed class AlanubeAdminController : BasePluginController
         if (!ModelState.IsValid)
             return View("~/Plugins/Misc.Alanube/Views/Configure.cshtml", model);
 
+        if (model.Enabled && !await IsOfficeValidAsync(model.CompanyId, model.OfficeId))
+        {
+            ModelState.AddModelError(nameof(model.OfficeId), "The selected office is not available for the selected Alanube company.");
+            return View("~/Plugins/Misc.Alanube/Views/Configure.cshtml", model);
+        }
+
         _settings.Enabled = model.Enabled;
         _settings.Environment = model.Environment;
         _settings.CompanyId = model.CompanyId;
         _settings.OfficeId = await IsOfficeValidAsync(model.CompanyId, model.OfficeId) ? model.OfficeId : string.Empty;
+        _settings.InvoiceTrigger = model.InvoiceTrigger;
+        _settings.EnableWebhook = model.EnableWebhook;
+        if (!string.IsNullOrWhiteSpace(model.WebhookSecret))
+            _settings.WebhookSecret = model.WebhookSecret;
+        _settings.BillingPoint = model.BillingPoint;
+        _settings.NextFiscalNumber = model.NextFiscalNumber;
+        _settings.IssueType = model.IssueType;
+        _settings.DocumentType = model.DocumentType;
+        _settings.Nature = model.Nature;
+        _settings.OperationType = model.OperationType;
+        _settings.Destination = model.Destination;
+        _settings.ReceiverContainer = model.ReceiverContainer;
+        _settings.CafeFormat = model.CafeFormat;
+        _settings.CafeDelivery = model.CafeDelivery;
+        _settings.SaleType = model.SaleType;
 
         if (!string.IsNullOrWhiteSpace(model.SandboxApiToken))
             _settings.SandboxApiToken = model.SandboxApiToken;

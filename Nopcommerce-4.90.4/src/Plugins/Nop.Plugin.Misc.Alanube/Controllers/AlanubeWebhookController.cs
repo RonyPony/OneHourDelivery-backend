@@ -27,9 +27,9 @@ public sealed class AlanubeWebhookController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Documents([FromBody] AlanubeDocumentWebhookDto payload, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_settings.WebhookSecret))
+        if (!_settings.Enabled || !_settings.EnableWebhook || string.IsNullOrWhiteSpace(_settings.WebhookSecret))
         {
-            await _logger.WarningAsync("Alanube webhook rejected because its secret is not configured.");
+            await _logger.WarningAsync("Alanube webhook rejected because webhooks are disabled or its secret is not configured.");
             return Unauthorized();
         }
 

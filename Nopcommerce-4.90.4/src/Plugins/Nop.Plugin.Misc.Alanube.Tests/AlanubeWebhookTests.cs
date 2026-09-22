@@ -31,6 +31,29 @@ public sealed class AlanubeWebhookTests
     }
 
     [Test]
+    public async Task DisabledWebhookIsRejectedEvenWhenTheSecretIsValid()
+    {
+        var controller = CreateController("correct", "correct", out var service);
+        Assert.That(await controller.Documents(new() { Id = "doc" }, CancellationToken.None), Is.TypeOf<UnauthorizedResult>());
+        service.Verify(x => x.ProcessEmissionFinishedAsync(It.IsAny<AlanubeDocumentWebhookDto>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task EnabledWebhookWithAValidSecretIsProcessed()
+    {
+        var service = new Mock<IAlanubeWebhookService>();
+        service.Setup(x => x.ProcessEmissionFinishedAsync(It.IsAny<AlanubeDocumentWebhookDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AlanubeWebhookResult { Succeeded = true, DocumentFound = true });
+        var logger = new Mock<ILogger>();
+        var controller = new AlanubeWebhookController(new AlanubeSettings { Enabled = true, EnableWebhook = true, WebhookSecret = "correct" }, service.Object, logger.Object)
+        { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
+        controller.Request.Headers[AlanubeDefaults.WebhookHeaderName] = "correct";
+
+        Assert.That(await controller.Documents(new() { Id = "doc" }, CancellationToken.None), Is.TypeOf<OkObjectResult>());
+        service.Verify(x => x.ProcessEmissionFinishedAsync(It.IsAny<AlanubeDocumentWebhookDto>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
     public async Task PayloadWithoutIdIsRejected()
     {
         var fixture = CreateService();

@@ -12,6 +12,7 @@
     var testConnectionEnvironment = Model?.TestConnectionEnvironment ?? string.Empty;
     var testConnectionStatusCode = Model?.TestConnectionStatusCode;
     var testConnectionErrorCode = Model?.TestConnectionErrorCode ?? string.Empty;
+    var companiesLoadError = Model?.CompaniesLoadError ?? string.Empty;
 }
 
 <form asp-controller="AlanubeAdmin"
@@ -34,6 +35,66 @@
                         <nop-editor asp-for="Enabled" />
                         <span asp-validation-for="Enabled"
                               class="text-danger"></span>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(companiesLoadError))
+                {
+                    <div class="form-group row">
+                        <div class="col-md-9 offset-md-3">
+                            <div class="alert alert-warning">@companiesLoadError</div>
+                        </div>
+                    </div>
+                }
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="InvoiceTrigger" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="InvoiceTrigger"
+                                    asp-items="Html.GetEnumSelectList<InvoiceTrigger>()" />
+                        <span asp-validation-for="InvoiceTrigger" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="EnableWebhook" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="EnableWebhook" />
+                        <span asp-validation-for="EnableWebhook" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row" id="webhook-secret-row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="WebhookSecret" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="WebhookSecret"
+                                    html-attributes="@(new { autocomplete = "new-password" })" />
+                        <span asp-validation-for="WebhookSecret" class="text-danger"></span>
+                        <span class="form-text">Configure this same value in Alanube as the X-Alanube-Webhook-Key header.</span>
+                    </div>
+                </div>
+
+                <div class="card card-default mt-3">
+                    <div class="card-header">Configuración fiscal de facturas</div>
+                    <div class="card-body">
+                        <p class="text-muted">La numeración es fiscal e independiente de los pedidos de nopCommerce. El próximo número solo inicializa una serie nueva; una serie ya usada no se reinicia desde esta pantalla.</p>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="BillingPoint" /></div><div class="col-md-9"><nop-editor asp-for="BillingPoint" /><span asp-validation-for="BillingPoint" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="NextFiscalNumber" /></div><div class="col-md-9"><nop-editor asp-for="NextFiscalNumber" /><span asp-validation-for="NextFiscalNumber" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="IssueType" /></div><div class="col-md-9"><select asp-for="IssueType" class="form-control"><option value="01">01 — Normal previa</option><option value="02">02 — Contingencia previa</option><option value="03">03 — Normal posterior</option><option value="04">04 — Contingencia posterior</option></select></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="DocumentType" /></div><div class="col-md-9"><select asp-for="DocumentType" class="form-control"><option value="01">01 — Factura interna</option><option value="02">02 — Importación</option><option value="03">03 — Exportación</option><option value="08">08 — Zona franca</option><option value="09">09 — Reembolso</option></select></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="Nature" /></div><div class="col-md-9"><nop-editor asp-for="Nature" /><span asp-validation-for="Nature" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="OperationType" /></div><div class="col-md-9"><select asp-for="OperationType" class="form-control"><option value="1">1 — Salida o venta</option><option value="2">2 — Entrada o compra</option></select></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="Destination" /></div><div class="col-md-9"><select asp-for="Destination" class="form-control"><option value="1">1 — Panamá</option><option value="2">2 — Extranjero</option></select></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="ReceiverContainer" /></div><div class="col-md-9"><select asp-for="ReceiverContainer" class="form-control"><option value="1">1 — Normal</option><option value="2">2 — Exento de contenedor</option></select></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="CafeFormat" /></div><div class="col-md-9"><select asp-for="CafeFormat" class="form-control"><option value="1">1 — Sin CAFE</option><option value="2">2 — Cinta</option><option value="3">3 — Carta</option></select></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="CafeDelivery" /></div><div class="col-md-9"><select asp-for="CafeDelivery" class="form-control"><option value="1">1 — Sin CAFE</option><option value="2">2 — Papel</option><option value="3">3 — Electrónico</option></select></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SaleType" /></div><div class="col-md-9"><select asp-for="SaleType" class="form-control"><option value="1">1 — Giro normal</option><option value="2">2 — Activo fijo</option><option value="3">3 — Bienes raíces</option><option value="4">4 — Servicios</option></select></div></div>
                     </div>
                 </div>
 
@@ -386,6 +447,31 @@
                    value === 'on';
         }
 
+        function updateWebhookSecretVisibility() {
+            var $enabled = $('#EnableWebhook');
+            var isEnabled = $enabled.is(':checkbox') ? $enabled.is(':checked') : $enabled.val() === 'true';
+            $('#webhook-secret-row').toggle(isEnabled);
+        }
+
+        function loadOffices(companyId) {
+            var $office = $('#OfficeId');
+            $office.empty().append($('<option>', { value: '', text: 'Seleccione una oficina' }));
+
+            if (!companyId) {
+                return;
+            }
+
+            $.getJSON('/Admin/Alanube/Companies/' + encodeURIComponent(companyId) + '/Offices')
+                .done(function (offices) {
+                    $.each(offices, function (_, office) {
+                        $office.append($('<option>', { value: office.id, text: office.label }));
+                    });
+                })
+                .fail(function () {
+                    $office.append($('<option>', { value: '', text: 'No se pudieron cargar las oficinas' }));
+                });
+        }
+
         function hideValidationMessages() {
 
             $('#CompanyIdValidation').hide();
@@ -595,8 +681,13 @@
                                 'input-validation-error'
                             );
                     }
+
+                    loadOffices(getValue('#CompanyId'));
                 }
             );
+
+        $('#EnableWebhook').on('change', updateWebhookSecretVisibility);
+        updateWebhookSecretVisibility();
 
         $('#OfficeId')
             .on(
