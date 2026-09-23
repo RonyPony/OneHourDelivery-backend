@@ -23,6 +23,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -66,7 +67,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetMappings(ProductCategoryMappingsParametersModel parameters)
+        public async Task<IActionResult> GetMappings(ProductCategoryMappingsParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -106,7 +107,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetMappingsCount(ProductCategoryMappingsCountParametersModel parameters)
+        public async Task<IActionResult> GetMappingsCount(ProductCategoryMappingsCountParametersModel parameters)
         {
             if (parameters.ProductId < 0)
             {
@@ -144,7 +145,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetMappingById(int id, string fields = "")
+        public async Task<IActionResult> GetMappingById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -174,7 +175,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [AllowAnonymous]
-        public IActionResult CreateProductCategoryMapping(ProductCategoryMappingDto productCategoryDelta)
+        public async Task<IActionResult> CreateProductCategoryMapping(ProductCategoryMappingDto productCategoryDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -217,7 +218,7 @@ namespace Nop.Plugin.Api.Controllers
             var json = JsonFieldsSerializer.Serialize(productCategoryMappingsRootObject, string.Empty);
 
             //activity log 
-            CustomerActivityService.InsertActivity("AddNewProductCategoryMapping", LocalizationService.GetResource("ActivityLog.AddNewProductCategoryMapping"), newProductCategory);
+            await CustomerActivityService.InsertActivityAsync("AddNewProductCategoryMapping", await LocalizationService.GetResourceAsync("ActivityLog.AddNewProductCategoryMapping"), newProductCategory);
 
             return new RawJsonActionResult(json);
         }
@@ -229,7 +230,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateProductCategoryMapping([ModelBinder(typeof(JsonModelBinder<ProductCategoryMappingDto>))] Delta<ProductCategoryMappingDto> productCategoryDelta)
+        public async Task<IActionResult> UpdateProductCategoryMapping([ModelBinder(typeof(JsonModelBinder<ProductCategoryMappingDto>))] Delta<ProductCategoryMappingDto> productCategoryDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -270,7 +271,7 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.UpdateProductCategory(productCategoryEntityToUpdate);
 
             //activity log
-            CustomerActivityService.InsertActivity("UpdateProdutCategoryMapping", LocalizationService.GetResource("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate);
+            await CustomerActivityService.InsertActivityAsync("UpdateProdutCategoryMapping", await LocalizationService.GetResourceAsync("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate);
 
             var updatedProductCategoryDto = productCategoryEntityToUpdate.ToDto();
 
@@ -291,7 +292,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
         [AllowAnonymous]
-        public IActionResult DeleteProductCategoryMapping(int id)
+        public async Task<IActionResult> DeleteProductCategoryMapping(int id)
         {
             if (id <= 0)
             {
@@ -311,7 +312,7 @@ namespace Nop.Plugin.Api.Controllers
                 var productCategory = _categoryService.GetProductCategoryById(productCategoryMappingDto.Id);
                 _categoryService.DeleteProductCategory(productCategory);
                 //activity log 
-                CustomerActivityService.InsertActivity("DeleteProductCategoryMapping", LocalizationService.GetResource("ActivityLog.DeleteProductCategoryMapping"), productCategory);
+                await CustomerActivityService.InsertActivityAsync("DeleteProductCategoryMapping", await LocalizationService.GetResourceAsync("ActivityLog.DeleteProductCategoryMapping"), productCategory);
             }
 
 
@@ -325,7 +326,7 @@ namespace Nop.Plugin.Api.Controllers
             //_categoryService.DeleteProductCategory(productCategory);
 
             ////activity log 
-            //CustomerActivityService.InsertActivity("DeleteProductCategoryMapping", LocalizationService.GetResource("ActivityLog.DeleteProductCategoryMapping"), productCategory);
+            //await CustomerActivityService.InsertActivityAsync("DeleteProductCategoryMapping", await LocalizationService.GetResourceAsync("ActivityLog.DeleteProductCategoryMapping"), productCategory);
 
             return new RawJsonActionResult("{}");
         }

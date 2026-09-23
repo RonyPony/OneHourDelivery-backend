@@ -19,6 +19,7 @@ using Nop.Services.Security;
 using Nop.Services.Stores;
 using System;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -59,7 +60,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ProductPicturesRootObjectDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult UpdateProductPicture([ModelBinder(typeof(JsonModelBinder<ImageMappingDto>))] Delta<ImageMappingDto> productPictureDelta)
+        public async Task<IActionResult> UpdateProductPicture([ModelBinder(typeof(JsonModelBinder<ImageMappingDto>))] Delta<ImageMappingDto> productPictureDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -100,7 +101,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ProductPicturesRootObjectDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateProductPicture([ModelBinder(typeof(JsonModelBinder<ImageMappingDto>))] Delta<ImageMappingDto> productPictureDelta)
+        public async Task<IActionResult> CreateProductPicture([ModelBinder(typeof(JsonModelBinder<ImageMappingDto>))] Delta<ImageMappingDto> productPictureDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -108,7 +109,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            CustomerActivityService.InsertActivity("APIService", string.Format("Attempting to create picture with name {0}.", productPictureDelta.Dto.SeoFilename), null);
+            await CustomerActivityService.InsertActivityAsync("APIService", string.Format("Attempting to create picture with name {0}.", productPictureDelta.Dto.SeoFilename), null);
 
             var newPicture = PictureService.InsertPicture(Convert.FromBase64String(productPictureDelta.Dto.Attachment), productPictureDelta.Dto.MimeType, productPictureDelta.Dto.SeoFilename);
 
@@ -129,7 +130,7 @@ namespace Nop.Plugin.Api.Controllers
             
             var json = JsonFieldsSerializer.Serialize(productImagesRootObject, string.Empty);
 
-            CustomerActivityService.InsertActivity("APIService", string.Format("Successfully created and returned image {0}.", productPictureDelta.Dto.SeoFilename), null);
+            await CustomerActivityService.InsertActivityAsync("APIService", string.Format("Successfully created and returned image {0}.", productPictureDelta.Dto.SeoFilename), null);
 
             return new RawJsonActionResult(json);
         }
@@ -141,14 +142,14 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeletePicture(int id)
+        public async Task<IActionResult> DeletePicture(int id)
         {
             if (id <= 0)
             {
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            CustomerActivityService.InsertActivity("APIService", string.Format("Attempting delete of picture {0}.", id), null);
+            await CustomerActivityService.InsertActivityAsync("APIService", string.Format("Attempting delete of picture {0}.", id), null);
 
             var productPicture = _productService.GetProductPictureById(id);
             if (productPicture == null)
@@ -163,7 +164,7 @@ namespace Nop.Plugin.Api.Controllers
             PictureService.DeletePicture(picture);
             
 
-            CustomerActivityService.InsertActivity("APIService", string.Format("Deleted picture {0}.", picture.Id), picture);
+            await CustomerActivityService.InsertActivityAsync("APIService", string.Format("Deleted picture {0}.", picture.Id), picture);
 
             return new RawJsonActionResult("{}");
         }

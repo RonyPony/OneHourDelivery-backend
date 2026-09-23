@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -73,7 +74,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ManufacturersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetManufacturers(ManufacturersParametersModel parameters)
+        public async Task<IActionResult> GetManufacturers(ManufacturersParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -114,7 +115,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetManufacturersCount(ManufacturersCountParametersModel parameters)
+        public async Task<IActionResult> GetManufacturersCount(ManufacturersCountParametersModel parameters)
         {
             var allManufacturersCount = _manufacturerApiService.GetManufacturersCount(parameters.CreatedAtMin, parameters.CreatedAtMax,
                                                                             parameters.UpdatedAtMin, parameters.UpdatedAtMax,
@@ -142,7 +143,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetManufacturerById(int id, string fields = "")
+        public async Task<IActionResult> GetManufacturerById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -173,7 +174,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult CreateManufacturer([ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))] Delta<ManufacturerDto> manufacturerDelta)
+        public async Task<IActionResult> CreateManufacturer([ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))] Delta<ManufacturerDto> manufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -212,7 +213,7 @@ namespace Nop.Plugin.Api.Controllers
             var seName = _urlRecordService.ValidateSeName(manufacturer, manufacturerDelta.Dto.SeName, manufacturer.Name, true);
             _urlRecordService.SaveSlug(manufacturer, seName, 0);
             
-            CustomerActivityService.InsertActivity("AddNewManufacturer", LocalizationService.GetResource("ActivityLog.AddNewManufacturer"), manufacturer);
+            await CustomerActivityService.InsertActivityAsync("AddNewManufacturer", await LocalizationService.GetResourceAsync("ActivityLog.AddNewManufacturer"), manufacturer);
 
             // Preparing the result dto of the new manufacturer
             var newManufacturerDto = _dtoHelper.PrepareManufacturerDto(manufacturer);
@@ -233,7 +234,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateManufacturer([ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))] Delta<ManufacturerDto> manufacturerDelta)
+        public async Task<IActionResult> UpdateManufacturer([ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))] Delta<ManufacturerDto> manufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -272,8 +273,8 @@ namespace Nop.Plugin.Api.Controllers
 
             _manufacturerService.UpdateManufacturer(manufacturer);
 
-            CustomerActivityService.InsertActivity("UpdateManufacturer",
-                LocalizationService.GetResource("ActivityLog.UpdateManufacturer"), manufacturer);
+            await CustomerActivityService.InsertActivityAsync("UpdateManufacturer",
+                await LocalizationService.GetResourceAsync("ActivityLog.UpdateManufacturer"), manufacturer);
 
             var manufacturerDto = _dtoHelper.PrepareManufacturerDto(manufacturer);
 
@@ -293,7 +294,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteManufacturer(int id)
+        public async Task<IActionResult> DeleteManufacturer(int id)
         {
             if (id <= 0)
             {
@@ -310,7 +311,7 @@ namespace Nop.Plugin.Api.Controllers
             _manufacturerService.DeleteManufacturer(manufacturerToDelete);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteManufacturer", LocalizationService.GetResource("ActivityLog.DeleteManufacturer"), manufacturerToDelete);
+            await CustomerActivityService.InsertActivityAsync("DeleteManufacturer", await LocalizationService.GetResourceAsync("ActivityLog.DeleteManufacturer"), manufacturerToDelete);
 
             return new RawJsonActionResult("{}");
         }
