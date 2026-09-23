@@ -5,8 +5,9 @@ using Nop.Plugin.Misc.Alanube.Domain;
 
 namespace Nop.Plugin.Misc.Alanube.Data.Migrations;
 
-[NopMigration("2026/09/22 12:00:00", "Nop.Plugin.Misc.Alanube fiscal sequence schema", MigrationProcessType.Installation)]
-public sealed class AlanubeFiscalSequenceMigration : Migration
+/// <summary>Repairs the fiscal sequence schema when a previous installation was partial.</summary>
+[NopMigration("2026/09/23 12:00:00", "Nop.Plugin.Misc.Alanube repair fiscal sequence schema", MigrationProcessType.Update)]
+public sealed class RepairAlanubeFiscalSequenceMigration : Migration
 {
     public override void Up()
     {
@@ -25,8 +26,6 @@ public sealed class AlanubeFiscalSequenceMigration : Migration
 
     public override void Down()
     {
-        // SQL Server removes the table's indexes automatically. Do not issue a
-        // separate Delete.Index because partially installed databases may not have it.
         if (Schema.Table(nameof(AlanubeFiscalSequence)).Exists())
             Delete.Table(nameof(AlanubeFiscalSequence));
     }
