@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 using Nop.Plugin.Misc.Alanube.Api;
 using Nop.Plugin.Misc.Alanube.Api.Companies;
 using Nop.Plugin.Misc.Alanube.Api.Offices;
@@ -26,7 +25,6 @@ public sealed class AlanubeAdminController : BasePluginController
     private readonly ILocalizationService _localizationService;
     private readonly ISettingService _settingService;
     private readonly INotificationService _notificationService;
-    private readonly IAlanubeClient _alanubeClient;
     private readonly IAlanubeCompanyClient _alanubeCompanyClient;
     private readonly IAlanubeOfficeClient _alanubeOfficeClient;
     private readonly IAlanubeCatalogService _alanubeCatalogService;
@@ -37,7 +35,6 @@ public sealed class AlanubeAdminController : BasePluginController
         ILocalizationService localizationService,
         ISettingService settingService,
         INotificationService notificationService,
-        IAlanubeClient alanubeClient,
         IAlanubeCompanyClient alanubeCompanyClient,
         IAlanubeOfficeClient alanubeOfficeClient,
         IAlanubeCatalogService alanubeCatalogService,
@@ -47,7 +44,6 @@ public sealed class AlanubeAdminController : BasePluginController
         _localizationService = localizationService;
         _settingService = settingService;
         _notificationService = notificationService;
-        _alanubeClient = alanubeClient;
         _alanubeCompanyClient = alanubeCompanyClient;
         _alanubeOfficeClient = alanubeOfficeClient;
         _alanubeCatalogService = alanubeCatalogService;
@@ -308,22 +304,18 @@ public sealed class AlanubeAdminController : BasePluginController
     }
 
     [HttpPost]
+    [ActionName("Configure")]
+    [FormValueRequired("save-configuration")]
     [CheckPermission(StandardPermission.Configuration.MANAGE_PLUGINS)]
     public async Task<IActionResult> Configure(ConfigurationModel model)
     {
         if (!ModelState.IsValid)
             return View("~/Plugins/Misc.Alanube/Views/Configure.cshtml", model);
 
-        if (model.Enabled && !await IsOfficeValidAsync(model.CompanyId, model.OfficeId))
-        {
-            ModelState.AddModelError(nameof(model.OfficeId), "The selected office is not available for the selected Alanube company.");
-            return View("~/Plugins/Misc.Alanube/Views/Configure.cshtml", model);
-        }
-
         _settings.Enabled = model.Enabled;
         _settings.Environment = model.Environment;
         _settings.CompanyId = model.CompanyId;
-        _settings.OfficeId = await IsOfficeValidAsync(model.CompanyId, model.OfficeId) ? model.OfficeId : string.Empty;
+        _settings.OfficeId = model.OfficeId;
         _settings.InvoiceTrigger = model.InvoiceTrigger;
         _settings.EnableWebhook = model.EnableWebhook;
         if (!string.IsNullOrWhiteSpace(model.WebhookSecret))
@@ -423,33 +415,37 @@ public sealed class AlanubeAdminController : BasePluginController
     public async Task<IActionResult> TestConnection(ConfigurationModel model)
     {
         model.TestConnectionEnvironment = _settings.Environment.ToString();
+        var correlationId = Guid.NewGuid().ToString("N")[..8];
+        var result = await _alanubeCompanyClient.TestConnectionAsync(correlationId, HttpContext.RequestAborted);
 
-        try
-        {
-            var response = await HttpClientTestAsync();
-            model.TestConnectionSucceeded = response.IsSuccessStatusCode;
-            model.TestConnectionStatusCode = response.StatusCode;
-            model.TestConnectionErrorCode = Sanitize(response.Error?.Code);
-            model.TestConnectionMessage = response.IsSuccessStatusCode
-                ? await _localizationService.GetResourceAsync("Plugins.Misc.Alanube.TestConnection.Success")
-                : Sanitize(response.Error?.Message) ?? await _localizationService.GetResourceAsync("Plugins.Misc.Alanube.TestConnection.Failed");
-        }
-        catch (AlanubeApiException exception)
-        {
-            model.TestConnectionSucceeded = false;
-            model.TestConnectionStatusCode = exception.StatusCode;
-            model.TestConnectionErrorCode = Sanitize(exception.Error?.Code);
-            model.TestConnectionMessage = Sanitize(exception.Error?.Message) ??
-                Sanitize(exception.Message) ??
-                await _localizationService.GetResourceAsync("Plugins.Misc.Alanube.TestConnection.Failed");
-        }
+        model.TestConnectionSucceeded = result.Success;
+        model.TestConnectionStatusCode = result.StatusCode;
+        model.TestConnectionReasonPhrase = Sanitize(result.ReasonPhrase);
+        model.TestConnectionEndpoint = result.Endpoint;
+        model.TestConnectionResponseBody = SanitizeLong(result.ResponseBody);
+        model.TestConnectionCorrelationId = result.CorrelationId;
+        model.TestConnectionElapsedMilliseconds = result.ElapsedMilliseconds;
+        model.TestConnectionMessage = result.Success
+            ? await _localizationService.GetResourceAsync("Plugins.Misc.Alanube.TestConnection.Success")
+            : Sanitize(result.ErrorMessage) ?? await _localizationService.GetResourceAsync("Plugins.Misc.Alanube.TestConnection.Failed");
+        model.Companies = result.Companies?.ToList() ?? new List<CompanyResponseDto>();
+        model.TestConnectionCompanies = model.Companies
+            .Select(GetCompanyDisplayName)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .ToList();
 
         return View("~/Plugins/Misc.Alanube/Views/Configure.cshtml", model);
     }
 
-    private Task<AlanubeApiResponse<JsonElement>> HttpClientTestAsync()
+    private static string GetCompanyDisplayName(CompanyResponseDto company)
     {
-        return _alanubeClient.GetAsync<JsonElement>("companies", cancellationToken: HttpContext.RequestAborted);
+        if (company == null)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(company.TradeName) && !string.IsNullOrWhiteSpace(company.Ruc))
+            return $"{company.TradeName} ({company.Ruc})";
+
+        return company.TradeName ?? company.Ruc ?? company.Id;
     }
 
     private static string Sanitize(string value)
@@ -459,5 +455,14 @@ public sealed class AlanubeAdminController : BasePluginController
 
         var sanitized = value.Replace("\r", " ").Replace("\n", " ").Trim();
         return sanitized.Length <= 500 ? sanitized : sanitized[..500];
+    }
+
+    private static string SanitizeLong(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        var sanitized = value.Replace("\r", " ").Replace("\n", " ").Trim();
+        return sanitized.Length <= 4000 ? sanitized : sanitized[..4000];
     }
 }

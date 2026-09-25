@@ -12,6 +12,11 @@ public sealed class AlanubeApiResponse<T>
     public int StatusCode { get; set; }
 
     /// <summary>
+    /// Gets or sets the HTTP reason phrase returned by Alanube.
+    /// </summary>
+    public string ReasonPhrase { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the HTTP response was successful.
     /// </summary>
     public bool IsSuccessStatusCode { get; set; }

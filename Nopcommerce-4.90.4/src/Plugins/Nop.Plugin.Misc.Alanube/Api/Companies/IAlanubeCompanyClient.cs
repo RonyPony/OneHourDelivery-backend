@@ -18,6 +18,10 @@ public interface IAlanubeCompanyClient
         AlanubeCompanyType? type = null,
         CancellationToken cancellationToken = default);
 
+    Task<AlanubeConnectionTestResult> TestConnectionAsync(
+        string correlationId,
+        CancellationToken cancellationToken = default);
+
     Task<AlanubeApiResponse<CompanyResponseDto>> CreateCompanyAsync(
         CreateCompanyRequestDto request,
         CancellationToken cancellationToken = default);

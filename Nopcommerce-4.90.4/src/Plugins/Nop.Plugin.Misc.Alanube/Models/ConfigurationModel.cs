@@ -27,6 +27,18 @@ public record ConfigurationModel : BaseNopModel
 
     public string TestConnectionEnvironment { get; set; }
 
+    public string TestConnectionReasonPhrase { get; set; }
+
+    public string TestConnectionEndpoint { get; set; }
+
+    public string TestConnectionResponseBody { get; set; }
+
+    public string TestConnectionCorrelationId { get; set; }
+
+    public long? TestConnectionElapsedMilliseconds { get; set; }
+
+    public IList<string> TestConnectionCompanies { get; set; } = new List<string>();
+
     public string CompaniesLoadError { get; set; }
 
     [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.Enabled")]

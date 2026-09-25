@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Nop.Plugin.Misc.Alanube.Api.Companies;
 
 /// <summary>
@@ -5,33 +8,40 @@ namespace Nop.Plugin.Misc.Alanube.Api.Companies;
 /// </summary>
 public sealed class CompanyResponseDto
 {
-    /// <summary>
-    /// Gets or sets the Alanube company identifier.
-    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>
-    /// Gets or sets the taxpayer registration number.
-    /// </summary>
-    public string Ruc { get; set; }
+    public string Name { get; set; }
 
-    /// <summary>
-    /// Gets or sets the taxpayer type: 1 natural or 2 legal.
-    /// </summary>
-    public int? TypeRuc { get; set; }
-
-    /// <summary>
-    /// Gets or sets the trade name.
-    /// </summary>
     public string TradeName { get; set; }
 
-    /// <summary>
-    /// Gets or sets the DGI affiliation status.
-    /// </summary>
-    public string Affiliated { get; set; }
+    public string Identification { get; set; }
 
-    /// <summary>
-    /// Gets or sets the company type: main or associated.
-    /// </summary>
+    public string Address { get; set; }
+
+    public string Province { get; set; }
+
+    public string Municipality { get; set; }
+
     public AlanubeCompanyType? Type { get; set; }
+
+    public int CertificationStep { get; set; }
+
+    public Dictionary<string, JsonElement> Webhooks { get; set; }
+
+    public CompanyUrlsResponseDto CompanyUrls { get; set; }
+
+    [JsonIgnore]
+    public string Ruc => Identification;
+
+    [JsonIgnore]
+    public int? TypeRuc => null;
+}
+
+public sealed class CompanyUrlsResponseDto
+{
+    public string Reception { get; set; }
+
+    public string Approval { get; set; }
+
+    public string Authentication { get; set; }
 }

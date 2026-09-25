@@ -1,8 +1,10 @@
 using System.Net.Http.Headers;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Nop.Plugin.Misc.Alanube.Configuration;
+using Nop.Services.Logging;
 
 namespace Nop.Plugin.Misc.Alanube.Api;
 
@@ -20,6 +22,7 @@ public sealed class AlanubeClient : IAlanubeClient
     };
 
     private readonly HttpClient _httpClient;
+    private readonly ILogger _logger;
     private readonly AlanubeSettings _settings;
 
     /// <summary>
@@ -27,9 +30,10 @@ public sealed class AlanubeClient : IAlanubeClient
     /// </summary>
     /// <param name="httpClient">HTTP client managed by the HTTP client factory.</param>
     /// <param name="settings">Alanube plugin settings.</param>
-    public AlanubeClient(HttpClient httpClient, AlanubeSettings settings)
+    public AlanubeClient(HttpClient httpClient, ILogger logger, AlanubeSettings settings)
     {
         _httpClient = httpClient;
+        _logger = logger;
         _settings = settings;
     }
 
@@ -100,6 +104,8 @@ public sealed class AlanubeClient : IAlanubeClient
     {
         var requestUri = BuildRequestUri(relativeEndpoint, queryParameters);
         var token = GetApiToken();
+        var endpointForLog = GetEndpointForLog(requestUri);
+        var stopwatch = Stopwatch.StartNew();
 
         using var requestMessage = new HttpRequestMessage(method, requestUri);
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -131,15 +137,19 @@ public sealed class AlanubeClient : IAlanubeClient
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
         {
+            stopwatch.Stop();
+            await _logger.ErrorAsync($"Alanube API {method.Method} {endpointForLog} failed in {stopwatch.ElapsedMilliseconds} ms.", exception);
             throw new AlanubeApiException("The request to Alanube could not be completed.", innerException: exception);
         }
 
         using (httpResponse)
         {
             var rawResponse = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
+            stopwatch.Stop();
             var response = new AlanubeApiResponse<TResponse>
             {
                 StatusCode = (int)httpResponse.StatusCode,
+                ReasonPhrase = httpResponse.ReasonPhrase,
                 IsSuccessStatusCode = httpResponse.IsSuccessStatusCode,
                 RawResponse = rawResponse
             };
@@ -147,8 +157,11 @@ public sealed class AlanubeClient : IAlanubeClient
             if (!httpResponse.IsSuccessStatusCode)
             {
                 response.Error = DeserializeError(rawResponse, response.StatusCode, httpResponse.ReasonPhrase);
+                await _logger.ErrorAsync($"Alanube API {method.Method} {endpointForLog} -> HTTP {response.StatusCode} {response.ReasonPhrase} in {stopwatch.ElapsedMilliseconds} ms. Body: {Truncate(rawResponse, 4000)}");
                 return response;
             }
+
+            await _logger.InformationAsync($"Alanube API {method.Method} {endpointForLog} -> HTTP {response.StatusCode} {response.ReasonPhrase} in {stopwatch.ElapsedMilliseconds} ms. Body: {Truncate(rawResponse, 4000)}");
 
             if (string.IsNullOrWhiteSpace(rawResponse))
                 return response;
@@ -160,6 +173,7 @@ public sealed class AlanubeClient : IAlanubeClient
             }
             catch (JsonException exception)
             {
+                await _logger.ErrorAsync($"Alanube API {method.Method} {endpointForLog} deserialization failed after HTTP {response.StatusCode} {response.ReasonPhrase}. Body: {Truncate(rawResponse, 4000)}", exception);
                 throw new AlanubeApiException(
                     "The successful Alanube response could not be deserialized.",
                     response.StatusCode,
@@ -168,6 +182,25 @@ public sealed class AlanubeClient : IAlanubeClient
             }
         }
     }
+
+    private static string GetEndpointForLog(Uri requestUri)
+    {
+        if (requestUri is null)
+            return string.Empty;
+
+        var path = requestUri.AbsolutePath;
+        var marker = "/pan/v1";
+        var markerIndex = path.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (markerIndex >= 0)
+            path = path[(markerIndex + marker.Length)..];
+
+        if (string.IsNullOrWhiteSpace(path))
+            path = "/";
+
+        return string.IsNullOrWhiteSpace(requestUri.Query) ? path : $"{path}{requestUri.Query}";
+    }
+
+    private static string Truncate(string value, int length) => value?.Length > length ? value[..length] : value;
 
     private Uri BuildRequestUri(
         string relativeEndpoint,

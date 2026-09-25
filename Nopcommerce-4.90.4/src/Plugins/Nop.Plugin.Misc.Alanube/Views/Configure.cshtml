@@ -1,3 +1,4 @@
+@using Nop.Plugin.Misc.Alanube
 @using Nop.Plugin.Misc.Alanube.Configuration
 @model Nop.Plugin.Misc.Alanube.Models.ConfigurationModel
 
@@ -12,13 +13,21 @@
     var testConnectionEnvironment = Model?.TestConnectionEnvironment ?? string.Empty;
     var testConnectionStatusCode = Model?.TestConnectionStatusCode;
     var testConnectionErrorCode = Model?.TestConnectionErrorCode ?? string.Empty;
+    var testConnectionReasonPhrase = Model?.TestConnectionReasonPhrase ?? string.Empty;
+    var testConnectionEndpoint = Model?.TestConnectionEndpoint ?? string.Empty;
+    var testConnectionResponseBody = Model?.TestConnectionResponseBody ?? string.Empty;
+    var testConnectionCorrelationId = Model?.TestConnectionCorrelationId ?? string.Empty;
+    var testConnectionElapsedMilliseconds = Model?.TestConnectionElapsedMilliseconds;
+    var testConnectionCompanies = Model?.TestConnectionCompanies ?? new List<string>();
     var companiesLoadError = Model?.CompaniesLoadError ?? string.Empty;
 }
 
-<form asp-controller="AlanubeAdmin"
-      asp-action="Configure"
+<form asp-route="@AlanubeDefaults.ConfigurationRouteName"
       method="post"
+      asp-antiforgery="false"
       id="alanube-config-form">
+
+    @Html.AntiForgeryToken()
 
     <div asp-validation-summary="All" class="text-danger"></div>
 
@@ -118,7 +127,7 @@
                             <div class="alert @(testConnectionSucceeded.Value ? "alert-success" : "alert-danger")">
 
                                 <strong>
-                                    Resultado de conexión
+                                    @(testConnectionSucceeded.Value ? "Conexión exitosa" : "Conexión fallida")
                                 </strong>
 
                                 @if (!string.IsNullOrWhiteSpace(testConnectionMessage))
@@ -140,9 +149,44 @@
                                 {
                                     <br />
                                     <span>
-                                        Estado:
+                                        HTTP:
                                         @testConnectionStatusCode.Value
+                                        @testConnectionReasonPhrase
                                     </span>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(testConnectionEndpoint))
+                                {
+                                    <br />
+                                    <span>
+                                        Endpoint:
+                                        @testConnectionEndpoint
+                                    </span>
+                                }
+
+                                @if (testConnectionElapsedMilliseconds.HasValue)
+                                {
+                                    <br />
+                                    <span>
+                                        Tiempo:
+                                        @testConnectionElapsedMilliseconds.Value ms
+                                    </span>
+                                }
+
+                                <br />
+                                <span>
+                                    Empresas encontradas:
+                                    @testConnectionCompanies.Count
+                                </span>
+
+                                @if (testConnectionCompanies.Count > 0)
+                                {
+                                    <ul class="mb-0 mt-2">
+                                        @foreach (var company in testConnectionCompanies)
+                                        {
+                                            <li>@company</li>
+                                        }
+                                    </ul>
                                 }
 
                                 @if (!string.IsNullOrWhiteSpace(testConnectionErrorCode))
@@ -151,6 +195,24 @@
                                     <span>
                                         Código de error:
                                         @testConnectionErrorCode
+                                    </span>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(testConnectionResponseBody))
+                                {
+                                    <br />
+                                    <span>
+                                        Respuesta Alanube:
+                                    </span>
+                                    <pre class="mt-2 mb-0">@testConnectionResponseBody</pre>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(testConnectionCorrelationId))
+                                {
+                                    <br />
+                                    <span>
+                                        Correlation ID:
+                                        @testConnectionCorrelationId
                                     </span>
                                 }
 
@@ -210,9 +272,18 @@
                                         companyDisplayName = ruc;
                                     }
 
-                                    <option value="@companyId">
-                                        @companyDisplayName
-                                    </option>
+                                    if (companyId == Model.CompanyId)
+                                    {
+                                        <option value="@companyId" selected="selected">
+                                            @companyDisplayName
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@companyId">
+                                            @companyDisplayName
+                                        </option>
+                                    }
                                 }
                             }
 
@@ -280,9 +351,18 @@
                                         officeDisplayName = address;
                                     }
 
-                                    <option value="@officeId">
-                                        @officeDisplayName
-                                    </option>
+                                    if (officeId == Model.OfficeId)
+                                    {
+                                        <option value="@officeId" selected="selected">
+                                            @officeDisplayName
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@officeId">
+                                            @officeDisplayName
+                                        </option>
+                                    }
                                 }
                             }
 
@@ -381,6 +461,8 @@
 
                         <button type="submit"
                                 class="btn btn-primary"
+                                name="save-configuration"
+                                value="true"
                                 id="save-configuration">
                             Guardar
                         </button>
