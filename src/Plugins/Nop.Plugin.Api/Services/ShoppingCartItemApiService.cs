@@ -66,7 +66,7 @@ namespace Nop.Plugin.Api.Services
             }
 
             // items for the current store only
-            var currentStoreId = _storeContext.CurrentStore.Id;
+            var currentStoreId = _storeContext.GetCurrentStoreAsync().GetAwaiter().GetResult().Id;
             query = query.Where(c => c.StoreId == currentStoreId);
 
             query = query.OrderBy(shoppingCartItem => shoppingCartItem.Id);

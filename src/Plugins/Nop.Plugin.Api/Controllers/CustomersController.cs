@@ -30,6 +30,7 @@ using System;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -121,7 +122,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [AllowAnonymous]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetCustomers(CustomersParametersModel parameters)
+        public async Task<IActionResult> GetCustomers(CustomersParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -172,7 +173,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetCustomerById(int id, string fields = "")
+        public async Task<IActionResult> GetCustomerById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -205,7 +206,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(CustomersCountRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult GetCustomersCount()
+        public async Task<IActionResult> GetCustomersCount()
         {
             var allCustomersCount = _customerApiService.GetCustomersCount();
 
@@ -228,7 +229,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult Search(CustomersSearchParametersModel parameters)
+        public async Task<IActionResult> Search(CustomersSearchParametersModel parameters)
         {
             if (parameters.Limit <= Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -258,7 +259,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult CreateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
+        public async Task<IActionResult> CreateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -327,7 +328,7 @@ namespace Nop.Plugin.Api.Controllers
             newCustomerDto.LanguageId = customerDelta.Dto.LanguageId;
 
             //activity log
-            CustomerActivityService.InsertActivity("AddNewCustomer", LocalizationService.GetResource("ActivityLog.AddNewCustomer"), newCustomer);
+            await CustomerActivityService.InsertActivityAsync("AddNewCustomer", await LocalizationService.GetResourceAsync("ActivityLog.AddNewCustomer"), newCustomer);
 
             var customersRootObject = new CustomersRootObject();
 
@@ -345,7 +346,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult UpdateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
+        public async Task<IActionResult> UpdateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -441,7 +442,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             //activity log
-            CustomerActivityService.InsertActivity("UpdateCustomer", LocalizationService.GetResource("ActivityLog.UpdateCustomer"), currentCustomer);
+            await CustomerActivityService.InsertActivityAsync("UpdateCustomer", await LocalizationService.GetResourceAsync("ActivityLog.UpdateCustomer"), currentCustomer);
 
             var customersRootObject = new CustomersRootObject();
 
@@ -459,7 +460,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult DeleteCustomer(int id)
+        public async Task<IActionResult> DeleteCustomer(int id)
         {
             if (id <= 0)
             {
@@ -484,7 +485,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteCustomer", LocalizationService.GetResource("ActivityLog.DeleteCustomer"), customer);
+            await CustomerActivityService.InsertActivityAsync("DeleteCustomer", await LocalizationService.GetResourceAsync("ActivityLog.DeleteCustomer"), customer);
 
             return new RawJsonActionResult("{}");
         }

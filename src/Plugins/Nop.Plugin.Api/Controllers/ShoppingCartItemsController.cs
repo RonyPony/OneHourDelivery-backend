@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -86,7 +87,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetShoppingCartItems(ShoppingCartItemsParametersModel parameters)
+        public async Task<IActionResult> GetShoppingCartItems(ShoppingCartItemsParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -137,7 +138,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetShoppingCartItemsByCustomerId(int customerId, ShoppingCartItemsForCustomerParametersModel parameters)
+        public async Task<IActionResult> GetShoppingCartItemsByCustomerId(int customerId, ShoppingCartItemsForCustomerParametersModel parameters)
         {
             if (customerId <= Configurations.DefaultCustomerId)
             {
@@ -186,7 +187,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), 422)]
-        public IActionResult CreateShoppingCartItem(
+        public async Task<IActionResult> CreateShoppingCartItem(
             [ModelBinder(typeof(JsonModelBinder<ShoppingCartItemDto>))]
             Delta<ShoppingCartItemDto> shoppingCartItemDelta)
         {
@@ -225,7 +226,7 @@ namespace Nop.Plugin.Api.Controllers
 
             var attributesXml = _productAttributeConverter.ConvertToXml(shoppingCartItemDelta.Dto.Attributes, product.Id);
 
-            var currentStoreId = _storeContext.CurrentStore.Id;
+            var currentStoreId = (await _storeContext.GetCurrentStoreAsync()).Id;
 
             var warnings = _shoppingCartService.AddToCart(customer, product, shoppingCartType, currentStoreId, attributesXml, 0M,
                                                           newShoppingCartItem.RentalStartDateUtc, newShoppingCartItem.RentalEndDateUtc,
@@ -261,7 +262,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult UpdateShoppingCartItem(
+        public async Task<IActionResult> UpdateShoppingCartItem(
           [ModelBinder(typeof(JsonModelBinder<ShoppingCartItemDto>))]
             Delta<ShoppingCartItemDto> shoppingCartItemDelta)
         {
@@ -330,7 +331,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteShoppingCartItem(int id)
+        public async Task<IActionResult> DeleteShoppingCartItem(int id)
         {
             if (id <= 0)
             {
@@ -347,7 +348,7 @@ namespace Nop.Plugin.Api.Controllers
             _shoppingCartService.DeleteShoppingCartItem(shoppingCartItemForDelete);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteShoppingCartItem", LocalizationService.GetResource("ActivityLog.DeleteShoppingCartItem"), shoppingCartItemForDelete);
+            await CustomerActivityService.InsertActivityAsync("DeleteShoppingCartItem", await LocalizationService.GetResourceAsync("ActivityLog.DeleteShoppingCartItem"), shoppingCartItemForDelete);
 
             return new RawJsonActionResult("{}");
         }

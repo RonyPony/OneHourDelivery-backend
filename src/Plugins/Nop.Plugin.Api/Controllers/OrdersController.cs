@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -105,7 +106,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrders(OrdersParametersModel parameters)
+        public async Task<IActionResult> GetOrders(OrdersParametersModel parameters)
         {
             if (parameters.Page < Configurations.DefaultPageValue)
             {
@@ -117,7 +118,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
             }
 
-            var storeId = _storeContext.CurrentStore.Id;
+            var storeId = (await _storeContext.GetCurrentStoreAsync()).Id;
 
             var orders = _orderApiService.GetOrders(parameters.Ids, parameters.CreatedAtMin,
                 parameters.CreatedAtMax,
@@ -148,9 +149,9 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrdersCount(OrdersCountParametersModel parameters)
+        public async Task<IActionResult> GetOrdersCount(OrdersCountParametersModel parameters)
         {
-            var storeId = _storeContext.CurrentStore.Id;
+            var storeId = (await _storeContext.GetCurrentStoreAsync()).Id;
 
             var ordersCount = _orderApiService.GetOrdersCount(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Status,
                                                               parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId, storeId,
@@ -179,7 +180,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrderById(int id, string fields = "")
+        public async Task<IActionResult> GetOrderById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -214,7 +215,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrdersByCustomerId(int customer_id)
+        public async Task<IActionResult> GetOrdersByCustomerId(int customer_id)
         {
             IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customer_id).Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
 
@@ -237,7 +238,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrdersPendingToDeliveryByCustomerId(int customer_id)
+        public async Task<IActionResult> GetOrdersPendingToDeliveryByCustomerId(int customer_id)
         {
             IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customer_id)
                                                                 .Where( x => x.OrderStatus != OrderStatus.Cancelled && x.ShippingStatus == ShippingStatus.NotYetShipped ||
@@ -264,7 +265,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrdersShippedByCustomerId(int customer_id)
+        public async Task<IActionResult> GetOrdersShippedByCustomerId(int customer_id)
         {
             IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customer_id)
                                                                 .Where(x => x.ShippingStatus == ShippingStatus.Delivered)
@@ -286,7 +287,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
+        public async Task<IActionResult> CreateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -311,7 +312,7 @@ namespace Nop.Plugin.Api.Controllers
 
             if (orderDelta.Dto.OrderItems != null)
             {
-                var shouldReturnError = AddOrderItemsToCart(orderDelta.Dto.OrderItems, customer, orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id);
+                var shouldReturnError = AddOrderItemsToCart(orderDelta.Dto.OrderItems, customer, orderDelta.Dto.StoreId ?? (await _storeContext.GetCurrentStoreAsync()).Id);
                 if (shouldReturnError)
                 {
                     return Error(HttpStatusCode.BadRequest);
@@ -326,11 +327,11 @@ namespace Nop.Plugin.Api.Controllers
 
                 isValid &= SetShippingOption(orderDelta.Dto.ShippingRateComputationMethodSystemName,
                                              orderDelta.Dto.ShippingMethod,
-                                             orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id,
+                                             orderDelta.Dto.StoreId ?? (await _storeContext.GetCurrentStoreAsync()).Id,
                                              customer,
                                              BuildShoppingCartItemsFromOrderItemDtos(orderDelta.Dto.OrderItems.ToList(),
                                                                                      customer.Id,
-                                                                                     orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id));
+                                                                                     orderDelta.Dto.StoreId ?? (await _storeContext.GetCurrentStoreAsync()).Id));
 
                 if (!isValid)
                 {
@@ -351,7 +352,7 @@ namespace Nop.Plugin.Api.Controllers
             // The default value will be the currentStore.id, but if it isn't passed in the json we need to set it by hand.
             if (!orderDelta.Dto.StoreId.HasValue)
             {
-                newOrder.StoreId = _storeContext.CurrentStore.Id;
+                newOrder.StoreId = (await _storeContext.GetCurrentStoreAsync()).Id;
             }
 
             var placeOrderResult = PlaceOrder(newOrder, customer);
@@ -366,8 +367,8 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest);
             }
 
-            CustomerActivityService.InsertActivity("AddNewOrder",
-                                                   LocalizationService.GetResource("ActivityLog.AddNewOrder"), newOrder);
+            await CustomerActivityService.InsertActivityAsync("AddNewOrder",
+                                                   await LocalizationService.GetResourceAsync("ActivityLog.AddNewOrder"), newOrder);
 
             var ordersRootObject = new OrdersRootObject();
 
@@ -388,7 +389,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteOrder(int id)
+        public async Task<IActionResult> DeleteOrder(int id)
         {
             if (id <= 0)
             {
@@ -405,7 +406,7 @@ namespace Nop.Plugin.Api.Controllers
             _orderProcessingService.DeleteOrder(orderToDelete);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteOrder", LocalizationService.GetResource("ActivityLog.DeleteOrder"), orderToDelete);
+            await CustomerActivityService.InsertActivityAsync("DeleteOrder", await LocalizationService.GetResourceAsync("ActivityLog.DeleteOrder"), orderToDelete);
 
             return new RawJsonActionResult("{}");
         }
@@ -417,7 +418,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult UpdateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
+        public async Task<IActionResult> UpdateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -443,7 +444,7 @@ namespace Nop.Plugin.Api.Controllers
                 if (!string.IsNullOrEmpty(orderDelta.Dto.ShippingRateComputationMethodSystemName) ||
                     !string.IsNullOrEmpty(orderDelta.Dto.ShippingMethod))
                 {
-                    var storeId = orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id;
+                    var storeId = orderDelta.Dto.StoreId ?? (await _storeContext.GetCurrentStoreAsync()).Id;
 
                     isValid &= SetShippingOption(orderDelta.Dto.ShippingRateComputationMethodSystemName ?? currentOrder.ShippingRateComputationMethodSystemName,
                                                  orderDelta.Dto.ShippingMethod,
@@ -469,8 +470,8 @@ namespace Nop.Plugin.Api.Controllers
 
             _orderService.UpdateOrder(currentOrder);
 
-            CustomerActivityService.InsertActivity("UpdateOrder",
-                                                   LocalizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder);
+            await CustomerActivityService.InsertActivityAsync("UpdateOrder",
+                                                   await LocalizationService.GetResourceAsync("ActivityLog.UpdateOrder"), currentOrder);
 
             var ordersRootObject = new OrdersRootObject();
 

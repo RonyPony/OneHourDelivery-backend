@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -81,7 +82,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrderItems(int orderId, OrderItemsParametersModel parameters)
+        public async Task<IActionResult> GetOrderItems(int orderId, OrderItemsParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -121,7 +122,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrderItemsCount(int orderId)
+        public async Task<IActionResult> GetOrderItemsCount(int orderId)
         {
             var order = _orderApiService.GetOrderById(orderId);
 
@@ -147,7 +148,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrderItemByIdForOrder(int orderId, int orderItemId, string fields = "")
+        public async Task<IActionResult> GetOrderItemByIdForOrder(int orderId, int orderItemId, string fields = "")
         {
             var order = _orderApiService.GetOrderById(orderId);
 
@@ -182,7 +183,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult CreateOrderItem(
+        public async Task<IActionResult> CreateOrderItem(
              int orderId,
              [ModelBinder(typeof(JsonModelBinder<OrderItemDto>))]
             Delta<OrderItemDto> orderItemDelta)
@@ -237,8 +238,8 @@ namespace Nop.Plugin.Api.Controllers
 
             _orderService.UpdateOrder(order);
 
-            CustomerActivityService.InsertActivity("AddNewOrderItem",
-                                                   LocalizationService.GetResource("ActivityLog.AddNewOrderItem"), newOrderItem);
+            await CustomerActivityService.InsertActivityAsync("AddNewOrderItem",
+                                                   await LocalizationService.GetResourceAsync("ActivityLog.AddNewOrderItem"), newOrderItem);
 
             var orderItemsRootObject = new OrderItemsRootObject();
 
@@ -256,7 +257,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
-        public IActionResult UpdateOrderItem(int orderId, int orderItemId,
+        public async Task<IActionResult> UpdateOrderItem(int orderId, int orderItemId,
             [ModelBinder(typeof(JsonModelBinder<OrderItemDto>))]
             Delta<OrderItemDto> orderItemDelta)
         {
@@ -293,8 +294,8 @@ namespace Nop.Plugin.Api.Controllers
 
             _orderService.UpdateOrder(order);
 
-            CustomerActivityService.InsertActivity("UpdateOrderItem",
-                LocalizationService.GetResource("ActivityLog.UpdateOrderItem"), orderItemToUpdate);
+            await CustomerActivityService.InsertActivityAsync("UpdateOrderItem",
+                await LocalizationService.GetResourceAsync("ActivityLog.UpdateOrderItem"), orderItemToUpdate);
 
             var orderItemsRootObject = new OrderItemsRootObject();
 
@@ -312,7 +313,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteOrderItemById(int orderId, int orderItemId)
+        public async Task<IActionResult> DeleteOrderItemById(int orderId, int orderItemId)
         {
             var order = _orderApiService.GetOrderById(orderId);
 
@@ -334,7 +335,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteAllOrderItemsForOrder(int orderId)
+        public async Task<IActionResult> DeleteAllOrderItemsForOrder(int orderId)
         {
             var order = _orderApiService.GetOrderById(orderId);
 

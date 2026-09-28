@@ -15,6 +15,7 @@ using Nop.Services.Stores;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -61,7 +62,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetAllLanguages(string fields = "")
+        public async Task<IActionResult> GetAllLanguages(string fields = "")
         {
             var allLanguages = _languageService.GetAllLanguages();
 
