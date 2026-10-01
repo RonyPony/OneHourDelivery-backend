@@ -2,6 +2,7 @@ using System.Text.Json;
 using Nop.Plugin.Misc.Alanube.Api.Webhooks;
 using Nop.Plugin.Misc.Alanube.Domain;
 using Nop.Services.Logging;
+using Nop.Services.Orders;
 
 namespace Nop.Plugin.Misc.Alanube.Services;
 
@@ -11,12 +12,21 @@ public sealed class AlanubeWebhookService : IAlanubeWebhookService
     private readonly IAlanubeDocumentService _documentService;
     private readonly IAlanubeDocumentLogService _logService;
     private readonly ILogger _logger;
+    private readonly IOrderService _orderService;
+    private readonly AlanubeSettings _settings;
 
-    public AlanubeWebhookService(IAlanubeDocumentService documentService, IAlanubeDocumentLogService logService, ILogger logger)
+    public AlanubeWebhookService(
+        IAlanubeDocumentService documentService,
+        IAlanubeDocumentLogService logService,
+        ILogger logger,
+        IOrderService orderService,
+        AlanubeSettings settings)
     {
         _documentService = documentService;
         _logService = logService;
         _logger = logger;
+        _orderService = orderService;
+        _settings = settings;
     }
 
     public async Task<AlanubeWebhookResult> ProcessEmissionFinishedAsync(AlanubeDocumentWebhookDto payload, CancellationToken cancellationToken = default)
@@ -53,6 +63,7 @@ public sealed class AlanubeWebhookService : IAlanubeWebhookService
         }
 
         await _documentService.UpdateAsync(document);
+        await AddOrderNoteAsync(document, payload, transitionApplied);
 
         var unknownFinishedStatus = mappedStatus == ElectronicDocumentStatus.ManualReview;
         await _logService.InsertAsync(new AlanubeDocumentLog
@@ -90,6 +101,26 @@ public sealed class AlanubeWebhookService : IAlanubeWebhookService
     }
 
     private static AlanubeWebhookResult Failure(string message) => new() { ErrorMessage = message };
+
+    private async Task AddOrderNoteAsync(AlanubeDocument document, AlanubeDocumentWebhookDto payload, bool transitionApplied)
+    {
+        if (!_settings.AddAlanubeStatusOrderNotes)
+            return;
+
+        var status = document.DocumentStatus.ToString();
+        var legalStatus = Sanitize(payload.LegalStatus);
+        var alanubeStatus = Sanitize(payload.Status);
+        var documentNumber = Sanitize(document.DocumentNumber);
+        var transitionText = transitionApplied ? "actualizado" : "recibido sin cambio de estado";
+
+        await _orderService.InsertOrderNoteAsync(new Nop.Core.Domain.Orders.OrderNote
+        {
+            OrderId = document.OrderId,
+            DisplayToCustomer = false,
+            CreatedOnUtc = DateTime.UtcNow,
+            Note = $"Alanube webhook: estado {transitionText}. Estado interno: {status}. Estado Alanube: {alanubeStatus}. Estado legal: {legalStatus}. Comprobante: {documentNumber}."
+        });
+    }
 
     private static string GetErrorText(JsonElement? error) => error.HasValue && error.Value.ValueKind is not JsonValueKind.Null and not JsonValueKind.Undefined
         ? error.Value.GetRawText()

@@ -60,8 +60,14 @@ public record ConfigurationModel : BaseNopModel
     [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.InvoiceTrigger")]
     public InvoiceTrigger InvoiceTrigger { get; set; }
 
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.EmissionFlow")]
+    public AlanubeEmissionFlow EmissionFlow { get; set; }
+
     [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.EnableWebhook")]
     public bool EnableWebhook { get; set; }
+
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.AddAlanubeStatusOrderNotes")]
+    public bool AddAlanubeStatusOrderNotes { get; set; }
 
     [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.WebhookSecret")]
     [NoTrim]
@@ -72,6 +78,26 @@ public record ConfigurationModel : BaseNopModel
     public string BillingPoint { get; set; }
     [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.NextFiscalNumber")]
     public long NextFiscalNumber { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.FiscalReceiptPrefix")]
+    public string FiscalReceiptPrefix { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.FiscalReceiptNumberLength")]
+    public int FiscalReceiptNumberLength { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.SequenceDueDateUtc")]
+    public DateTime? SequenceDueDateUtc { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.DirectApiBaseUrl")]
+    public string DirectApiBaseUrl { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.SenderRnc")]
+    public string SenderRnc { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.SenderCompanyName")]
+    public string SenderCompanyName { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.SenderTradeName")]
+    public string SenderTradeName { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.SenderAddress")]
+    public string SenderAddress { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.SenderProvince")]
+    public string SenderProvince { get; set; }
+    [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.SenderMunicipality")]
+    public string SenderMunicipality { get; set; }
     [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.IssueType")]
     public string IssueType { get; set; }
     [NopResourceDisplayName("Plugins.Misc.Alanube.Fields.DocumentType")]

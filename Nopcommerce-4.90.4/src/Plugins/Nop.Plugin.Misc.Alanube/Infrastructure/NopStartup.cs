@@ -29,13 +29,14 @@ public sealed class NopStartup : INopStartup
         services.AddScoped<IAlanubeCompanyClient, AlanubeCompanyClient>();
         services.AddScoped<IAlanubeOfficeClient, AlanubeOfficeClient>();
         services.AddScoped<IAlanubeCatalogClient, AlanubeCatalogClient>();
-        services.AddScoped<IAlanubeInvoiceClient, AlanubeInvoiceClient>();
+        services.AddHttpClient<IAlanubeInvoiceClient, AlanubeInvoiceClient>().WithProxy();
         services.AddScoped<IAlanubeCatalogService, AlanubeCatalogService>();
         services.AddScoped<IAlanubeProductMappingService, AlanubeProductMappingService>();
         services.AddScoped<IAlanubeAddressMapper, AlanubeAddressMapper>();
         services.AddScoped<IAlanubeReceiverMapper, AlanubeReceiverMapper>();
         services.AddScoped<IAlanubeOrderItemMapper, AlanubeOrderItemMapper>();
         services.AddScoped<IAlanubeDocumentService, AlanubeDocumentService>();
+        services.AddScoped<AlanubeDirectInvoiceService>();
         services.AddScoped<IAlanubeFiscalSequenceService, AlanubeFiscalSequenceService>();
         services.AddSingleton<IAlanubeRetryPolicy, AlanubeRetryPolicy>();
         services.AddScoped<IAlanubeDocumentLogService, AlanubeDocumentLogService>();

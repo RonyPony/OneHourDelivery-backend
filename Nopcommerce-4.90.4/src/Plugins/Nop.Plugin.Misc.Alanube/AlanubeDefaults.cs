@@ -12,7 +12,7 @@ public static class AlanubeDefaults
     public const string WebhookRouteName = "Plugin.Alanube.Webhook.Documents";
     public const string WebhookHeaderName = "X-Alanube-Webhook-Key";
 
-    public const string SandboxApiBaseUrl = "https://sandbox-api.alanube.co/dom/v1/";
+    public const string SandboxApiBaseUrl = "https://sandbox-api.alanube.co/pan/v1/";
 
     public const string ProductionApiBaseUrl = "https://api.alanube.co/pan/v1/";
 }

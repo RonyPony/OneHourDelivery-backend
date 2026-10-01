@@ -43,10 +43,17 @@ public class AlanubeSettings : ISettings
     /// </summary>
     public InvoiceTrigger InvoiceTrigger { get; set; } = InvoiceTrigger.Manual;
 
+    public AlanubeEmissionFlow EmissionFlow { get; set; } = AlanubeEmissionFlow.Webhook;
+
     /// <summary>
     /// Gets or sets a value indicating whether the invoice webhook is enabled.
     /// </summary>
     public bool EnableWebhook { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Alanube status changes should be written to order notes.
+    /// </summary>
+    public bool AddAlanubeStatusOrderNotes { get; set; }
 
     /// <summary>
     /// Gets or sets the secret used to validate Alanube webhook requests.
@@ -55,6 +62,16 @@ public class AlanubeSettings : ISettings
 
     public string BillingPoint { get; set; } = "001";
     public long NextFiscalNumber { get; set; } = 1;
+    public string FiscalReceiptPrefix { get; set; } = "E31";
+    public int FiscalReceiptNumberLength { get; set; } = 10;
+    public DateTime? SequenceDueDateUtc { get; set; }
+    public string DirectApiBaseUrl { get; set; } = "https://sandbox.alanube.co/dom/v1/";
+    public string SenderRnc { get; set; }
+    public string SenderCompanyName { get; set; }
+    public string SenderTradeName { get; set; }
+    public string SenderAddress { get; set; }
+    public string SenderProvince { get; set; } = "010000";
+    public string SenderMunicipality { get; set; } = "010100";
     public string IssueType { get; set; } = "01";
     public string DocumentType { get; set; } = "01";
     public string Nature { get; set; } = "01";

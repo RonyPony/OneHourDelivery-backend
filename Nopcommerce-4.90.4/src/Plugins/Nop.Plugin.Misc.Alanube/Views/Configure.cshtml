@@ -69,11 +69,34 @@
 
                 <div class="form-group row">
                     <div class="col-md-3">
+                        <nop-label asp-for="EmissionFlow" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="EmissionFlow"
+                                    asp-items="Html.GetEnumSelectList<AlanubeEmissionFlow>()" />
+                        <span asp-validation-for="EmissionFlow" class="text-danger"></span>
+                        <span class="form-text">Use Webhook para recibir estado por callback o API directa para emitir al crear la factura.</span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-3">
                         <nop-label asp-for="EnableWebhook" />
                     </div>
                     <div class="col-md-9">
                         <nop-editor asp-for="EnableWebhook" />
                         <span asp-validation-for="EnableWebhook" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddAlanubeStatusOrderNotes" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AddAlanubeStatusOrderNotes" />
+                        <span asp-validation-for="AddAlanubeStatusOrderNotes" class="text-danger"></span>
+                        <span class="form-text">Agrega una nota en la orden cada vez que Alanube emite, rechaza o actualiza el estado del comprobante.</span>
                     </div>
                 </div>
 
@@ -95,6 +118,16 @@
                         <p class="text-muted">La numeración es fiscal e independiente de los pedidos de nopCommerce. El próximo número solo inicializa una serie nueva; una serie ya usada no se reinicia desde esta pantalla.</p>
                         <div class="form-group row"><div class="col-md-3"><nop-label asp-for="BillingPoint" /></div><div class="col-md-9"><nop-editor asp-for="BillingPoint" /><span asp-validation-for="BillingPoint" class="text-danger"></span></div></div>
                         <div class="form-group row"><div class="col-md-3"><nop-label asp-for="NextFiscalNumber" /></div><div class="col-md-9"><nop-editor asp-for="NextFiscalNumber" /><span asp-validation-for="NextFiscalNumber" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="FiscalReceiptPrefix" /></div><div class="col-md-9"><nop-editor asp-for="FiscalReceiptPrefix" /><span asp-validation-for="FiscalReceiptPrefix" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="FiscalReceiptNumberLength" /></div><div class="col-md-9"><nop-editor asp-for="FiscalReceiptNumberLength" /><span asp-validation-for="FiscalReceiptNumberLength" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SequenceDueDateUtc" /></div><div class="col-md-9"><nop-editor asp-for="SequenceDueDateUtc" /><span asp-validation-for="SequenceDueDateUtc" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="DirectApiBaseUrl" /></div><div class="col-md-9"><nop-editor asp-for="DirectApiBaseUrl" /><span asp-validation-for="DirectApiBaseUrl" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SenderRnc" /></div><div class="col-md-9"><nop-editor asp-for="SenderRnc" /><span asp-validation-for="SenderRnc" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SenderCompanyName" /></div><div class="col-md-9"><nop-editor asp-for="SenderCompanyName" /><span asp-validation-for="SenderCompanyName" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SenderTradeName" /></div><div class="col-md-9"><nop-editor asp-for="SenderTradeName" /><span asp-validation-for="SenderTradeName" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SenderAddress" /></div><div class="col-md-9"><nop-editor asp-for="SenderAddress" /><span asp-validation-for="SenderAddress" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SenderProvince" /></div><div class="col-md-9"><nop-editor asp-for="SenderProvince" /><span asp-validation-for="SenderProvince" class="text-danger"></span></div></div>
+                        <div class="form-group row"><div class="col-md-3"><nop-label asp-for="SenderMunicipality" /></div><div class="col-md-9"><nop-editor asp-for="SenderMunicipality" /><span asp-validation-for="SenderMunicipality" class="text-danger"></span></div></div>
                         <div class="form-group row"><div class="col-md-3"><nop-label asp-for="IssueType" /></div><div class="col-md-9"><select asp-for="IssueType" class="form-control"><option value="01">01 — Normal previa</option><option value="02">02 — Contingencia previa</option><option value="03">03 — Normal posterior</option><option value="04">04 — Contingencia posterior</option></select></div></div>
                         <div class="form-group row"><div class="col-md-3"><nop-label asp-for="DocumentType" /></div><div class="col-md-9"><select asp-for="DocumentType" class="form-control"><option value="01">01 — Factura interna</option><option value="02">02 — Importación</option><option value="03">03 — Exportación</option><option value="08">08 — Zona franca</option><option value="09">09 — Reembolso</option></select></div></div>
                         <div class="form-group row"><div class="col-md-3"><nop-label asp-for="Nature" /></div><div class="col-md-9"><nop-editor asp-for="Nature" /><span asp-validation-for="Nature" class="text-danger"></span></div></div>
