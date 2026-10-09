@@ -301,7 +301,7 @@ public sealed class AlanubeAdminController : BasePluginController
 
     private static CompanyEditModel ToModel(CompanyResponseDto company) => new()
     {
-        Id = company.Id, Ruc = company.Ruc, TypeRuc = company.TypeRuc ?? 2,
+        Id = company.Id, Ruc = company.TaxIdentifier, TypeRuc = company.TypeRucCode ?? 2,
         Type = company.Type ?? AlanubeCompanyType.Associated, TradeName = company.TradeName
     };
 
@@ -466,10 +466,10 @@ public sealed class AlanubeAdminController : BasePluginController
         if (company == null)
             return null;
 
-        if (!string.IsNullOrWhiteSpace(company.TradeName) && !string.IsNullOrWhiteSpace(company.Ruc))
-            return $"{company.TradeName} ({company.Ruc})";
+        if (!string.IsNullOrWhiteSpace(company.TradeName) && !string.IsNullOrWhiteSpace(company.TaxIdentifier))
+            return $"{company.TradeName} ({company.TaxIdentifier})";
 
-        return company.TradeName ?? company.Ruc ?? company.Id;
+        return company.TradeName ?? company.TaxIdentifier ?? company.Id;
     }
 
     private static string Sanitize(string value)

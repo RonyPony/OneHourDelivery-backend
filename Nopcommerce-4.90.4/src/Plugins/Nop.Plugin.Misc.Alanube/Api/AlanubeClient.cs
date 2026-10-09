@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Nop.Plugin.Misc.Alanube.Configuration;
 using Nop.Services.Logging;
 
@@ -157,11 +158,11 @@ public sealed class AlanubeClient : IAlanubeClient
             if (!httpResponse.IsSuccessStatusCode)
             {
                 response.Error = DeserializeError(rawResponse, response.StatusCode, httpResponse.ReasonPhrase);
-                await _logger.ErrorAsync($"Alanube API {method.Method} {endpointForLog} -> HTTP {response.StatusCode} {response.ReasonPhrase} in {stopwatch.ElapsedMilliseconds} ms. Body: {Truncate(rawResponse, 4000)}");
+                await _logger.ErrorAsync($"Alanube API {method.Method} {endpointForLog} -> HTTP {response.StatusCode} {response.ReasonPhrase} in {stopwatch.ElapsedMilliseconds} ms. Body: {Truncate(RedactSensitiveJson(rawResponse), 4000)}");
                 return response;
             }
 
-            await _logger.InformationAsync($"Alanube API {method.Method} {endpointForLog} -> HTTP {response.StatusCode} {response.ReasonPhrase} in {stopwatch.ElapsedMilliseconds} ms. Body: {Truncate(rawResponse, 4000)}");
+            await _logger.InformationAsync($"Alanube API {method.Method} {endpointForLog} -> HTTP {response.StatusCode} {response.ReasonPhrase} in {stopwatch.ElapsedMilliseconds} ms. Body: {Truncate(RedactSensitiveJson(rawResponse), 4000)}");
 
             if (string.IsNullOrWhiteSpace(rawResponse))
                 return response;
@@ -173,7 +174,7 @@ public sealed class AlanubeClient : IAlanubeClient
             }
             catch (JsonException exception)
             {
-                await _logger.ErrorAsync($"Alanube API {method.Method} {endpointForLog} deserialization failed after HTTP {response.StatusCode} {response.ReasonPhrase}. Body: {Truncate(rawResponse, 4000)}", exception);
+                await _logger.ErrorAsync($"Alanube API {method.Method} {endpointForLog} deserialization failed after HTTP {response.StatusCode} {response.ReasonPhrase}. Body: {Truncate(RedactSensitiveJson(rawResponse), 4000)}", exception);
                 throw new AlanubeApiException(
                     "The successful Alanube response could not be deserialized.",
                     response.StatusCode,
@@ -201,6 +202,18 @@ public sealed class AlanubeClient : IAlanubeClient
     }
 
     private static string Truncate(string value, int length) => value?.Length > length ? value[..length] : value;
+
+    private static string RedactSensitiveJson(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return value;
+
+        return Regex.Replace(
+            value,
+            "(\"(?:password|token|apiKey|api_key)\"\\s*:\\s*\")[^\"]*(\")",
+            "$1****$2",
+            RegexOptions.IgnoreCase);
+    }
 
     private Uri BuildRequestUri(
         string relativeEndpoint,

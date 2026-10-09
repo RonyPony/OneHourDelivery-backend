@@ -282,7 +282,7 @@
 
                                     var companyId = company.Id?.ToString() ?? string.Empty;
                                     var tradeName = company.TradeName?.ToString() ?? string.Empty;
-                                    var ruc = company.Ruc?.ToString() ?? string.Empty;
+                                    var ruc = company.TaxIdentifier?.ToString() ?? string.Empty;
 
                                     if (string.IsNullOrWhiteSpace(companyId))
                                     {

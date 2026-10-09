@@ -2,6 +2,8 @@ using Nop.Plugin.Misc.Alanube.Api;
 using Nop.Plugin.Misc.Alanube.Configuration;
 using Nop.Services.Logging;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Nop.Plugin.Misc.Alanube.Api.Companies;
 
@@ -11,6 +13,12 @@ namespace Nop.Plugin.Misc.Alanube.Api.Companies;
 public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
 {
     private const string CompaniesEndpoint = "companies";
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+    };
 
     private readonly IAlanubeClient _alanubeClient;
     private readonly AlanubeSettings _settings;
@@ -44,17 +52,24 @@ public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
             queryParameters.Add(new AlanubeQueryParameter("type", typeValue));
         }
 
-        var response = await _alanubeClient.GetAsync<CompanyResponseDto>(
+        var response = await _alanubeClient.GetAsync<JsonElement>(
             CompaniesEndpoint,
             queryParameters,
             cancellationToken);
+
+        var companies = response.IsSuccessStatusCode
+            ? ParseCompanies(response.Body)
+            : Array.Empty<CompanyResponseDto>();
+
+        if (response.IsSuccessStatusCode)
+            await _logger.InformationAsync($"Alanube companies deserialized successfully. Companies loaded: {companies.Count}.");
 
         return new AlanubeApiResponse<IReadOnlyList<CompanyResponseDto>>
         {
             StatusCode = response.StatusCode,
             ReasonPhrase = response.ReasonPhrase,
             IsSuccessStatusCode = response.IsSuccessStatusCode,
-            Body = response.Body is null ? Array.Empty<CompanyResponseDto>() : new[] { response.Body },
+            Body = companies,
             Error = response.Error,
             RawResponse = response.RawResponse
         };
@@ -96,12 +111,12 @@ public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
             result.Success = response.IsSuccessStatusCode;
 
             await _logger.InformationAsync($"{logPrefix} HTTP {response.StatusCode} {response.ReasonPhrase} in {stopwatch.ElapsedMilliseconds} ms.");
-            await _logger.InformationAsync($"{logPrefix} Response body: {Truncate(response.RawResponse, 4000)}");
+            await _logger.InformationAsync($"{logPrefix} Response body: {Truncate(RedactSensitiveJson(response.RawResponse), 4000)}");
 
             if (!response.IsSuccessStatusCode)
             {
                 result.ErrorMessage = response.Error?.Message ?? $"Alanube returned HTTP status {response.StatusCode}.";
-                await _logger.ErrorAsync($"{logPrefix} Alanube HTTP error: {response.StatusCode} {response.ReasonPhrase}. Body: {Truncate(response.RawResponse, 4000)}");
+                await _logger.ErrorAsync($"{logPrefix} Alanube HTTP error: {response.StatusCode} {response.ReasonPhrase}. Body: {Truncate(RedactSensitiveJson(response.RawResponse), 4000)}");
                 return result;
             }
 
@@ -113,7 +128,7 @@ public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
             }
 
             result.Companies = response.Body ?? Array.Empty<CompanyResponseDto>();
-            await _logger.InformationAsync($"{logPrefix} Deserialized DTO: CompanyResponseDto.");
+            await _logger.InformationAsync($"{logPrefix} Deserialized DTO: CompanyResponseDto flexible collection.");
             await _logger.InformationAsync($"{logPrefix} Companies returned: {result.Companies.Count}.");
 
             if (result.Companies.Count == 0)
@@ -124,7 +139,7 @@ public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
 
             foreach (var company in result.Companies)
             {
-                await _logger.InformationAsync($"{logPrefix} Company: Id={Sanitize(company.Id)}, Name={Sanitize(company.TradeName)}, RUC={Sanitize(company.Ruc)}.");
+                await _logger.InformationAsync($"{logPrefix} Company: Id={Sanitize(company.Id)}, Name={Sanitize(company.TradeName)}, RUC={Sanitize(company.TaxIdentifier)}.");
             }
 
             return result;
@@ -139,7 +154,7 @@ public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
             result.Success = false;
 
             if (exception.InnerException is System.Text.Json.JsonException)
-                await _logger.ErrorAsync($"{logPrefix} Alanube response deserialization failed. Body: {Truncate(exception.RawResponse, 4000)}", exception);
+                await _logger.ErrorAsync($"{logPrefix} Alanube response deserialization failed. Body: {Truncate(RedactSensitiveJson(exception.RawResponse), 4000)}", exception);
             else
                 await _logger.ErrorAsync($"{logPrefix} Alanube connection test failed.", exception);
 
@@ -181,7 +196,19 @@ public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
     {
         if (string.IsNullOrWhiteSpace(companyId))
             throw new ArgumentException("A company identifier is required.", nameof(companyId));
-        return await _alanubeClient.GetAsync<CompanyResponseDto>($"{CompaniesEndpoint}/{Uri.EscapeDataString(companyId)}", cancellationToken: cancellationToken);
+
+        var response = await _alanubeClient.GetAsync<JsonElement>($"{CompaniesEndpoint}/{Uri.EscapeDataString(companyId)}", cancellationToken: cancellationToken);
+        var companies = response.IsSuccessStatusCode ? ParseCompanies(response.Body) : Array.Empty<CompanyResponseDto>();
+
+        return new AlanubeApiResponse<CompanyResponseDto>
+        {
+            StatusCode = response.StatusCode,
+            ReasonPhrase = response.ReasonPhrase,
+            IsSuccessStatusCode = response.IsSuccessStatusCode,
+            Body = companies.FirstOrDefault(),
+            Error = response.Error,
+            RawResponse = response.RawResponse
+        };
     }
 
     public async Task<AlanubeApiResponse<CompanyResponseDto>> UpdateCompanyAsync(
@@ -228,4 +255,79 @@ public sealed class AlanubeCompanyClient : IAlanubeCompanyClient
         : Truncate(value.Replace("\r", " ").Replace("\n", " ").Trim(), 300);
 
     private static string Truncate(string value, int length) => value?.Length > length ? value[..length] : value;
+
+    private static IReadOnlyList<CompanyResponseDto> ParseCompanies(JsonElement root)
+    {
+        if (root.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+            return Array.Empty<CompanyResponseDto>();
+
+        if (root.ValueKind == JsonValueKind.Array)
+            return DeserializeCompanyArray(root);
+
+        if (root.ValueKind != JsonValueKind.Object)
+            return Array.Empty<CompanyResponseDto>();
+
+        foreach (var wrapperProperty in new[] { "data", "items", "results", "companies" })
+        {
+            if (!root.TryGetProperty(wrapperProperty, out var wrapped) || wrapped.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+                continue;
+
+            if (wrapped.ValueKind == JsonValueKind.Array)
+                return DeserializeCompanyArray(wrapped);
+
+            if (wrapped.ValueKind == JsonValueKind.Object)
+                return DeserializeCompanyObject(wrapped);
+        }
+
+        return DeserializeCompanyObject(root);
+    }
+
+    private static IReadOnlyList<CompanyResponseDto> DeserializeCompanyArray(JsonElement element)
+    {
+        var companies = new List<CompanyResponseDto>();
+        foreach (var item in element.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var company = DeserializeCompany(item);
+            if (company != null)
+                companies.Add(company);
+        }
+
+        return companies;
+    }
+
+    private static IReadOnlyList<CompanyResponseDto> DeserializeCompanyObject(JsonElement element)
+    {
+        var company = DeserializeCompany(element);
+        return company == null ? Array.Empty<CompanyResponseDto>() : new[] { company };
+    }
+
+    private static CompanyResponseDto DeserializeCompany(JsonElement element)
+    {
+        var company = JsonSerializer.Deserialize<CompanyResponseDto>(element.GetRawText(), _jsonSerializerOptions);
+        if (company == null)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(company.Ruc) && !string.IsNullOrWhiteSpace(company.Identification))
+            company.Ruc = company.Identification;
+
+        if (string.IsNullOrWhiteSpace(company.Identification) && !string.IsNullOrWhiteSpace(company.Ruc))
+            company.Identification = company.Ruc;
+
+        return company;
+    }
+
+    private static string RedactSensitiveJson(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return value;
+
+        return System.Text.RegularExpressions.Regex.Replace(
+            value,
+            "(\"(?:password|token|apiKey|api_key)\"\\s*:\\s*\")[^\"]*(\")",
+            "$1****$2",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    }
 }

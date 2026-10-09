@@ -1,4 +1,4 @@
-using Nop.Core.Configuration;
+﻿using Nop.Core.Configuration;
 using Nop.Plugin.Misc.Alanube.Configuration;
 
 namespace Nop.Plugin.Misc.Alanube;
@@ -65,7 +65,7 @@ public class AlanubeSettings : ISettings
     public string FiscalReceiptPrefix { get; set; } = "E31";
     public int FiscalReceiptNumberLength { get; set; } = 10;
     public DateTime? SequenceDueDateUtc { get; set; }
-    public string DirectApiBaseUrl { get; set; } = "https://sandbox.alanube.co/dom/v1/";
+    public string DirectApiBaseUrl { get; set; } = "https://sandbox-api.alanube.co/pan/v1/";
     public string SenderRnc { get; set; }
     public string SenderCompanyName { get; set; }
     public string SenderTradeName { get; set; }
