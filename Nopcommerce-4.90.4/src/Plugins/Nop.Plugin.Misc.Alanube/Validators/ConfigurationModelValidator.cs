@@ -46,14 +46,9 @@ public sealed class ConfigurationModelValidator : BaseNopValidator<Configuration
             .When(model => model.Enabled);
 
         RuleFor(model => model.OfficeId)
-            .NotEmpty()
-            .WithMessage("An Alanube office must be selected when the plugin is enabled.")
-            .When(model => model.Enabled);
-
-        RuleFor(model => model.OfficeId)
             .Length(26)
             .WithMessage("Alanube office ID must contain exactly 26 characters.")
-            .When(model => model.Enabled);
+            .When(model => model.Enabled && !string.IsNullOrWhiteSpace(model.OfficeId));
 
         RuleFor(model => model.WebhookSecret)
             .NotEmpty()
@@ -62,15 +57,7 @@ public sealed class ConfigurationModelValidator : BaseNopValidator<Configuration
 
         RuleFor(model => model.BillingPoint).Matches("^[0-9]{3}$").WithMessage("Billing point must contain exactly three digits.");
         RuleFor(model => model.NextFiscalNumber).InclusiveBetween(1, 9_999_999_999).WithMessage("The next fiscal number must be between 1 and 9999999999.");
-        RuleFor(model => model.FiscalReceiptPrefix).NotEmpty().MaximumLength(10).WithMessage("Fiscal receipt prefix is required and must not exceed 10 characters.");
-        RuleFor(model => model.FiscalReceiptNumberLength).InclusiveBetween(1, 20).WithMessage("Fiscal receipt number length must be between 1 and 20.");
-        RuleFor(model => model.SequenceDueDateUtc).NotEmpty().WithMessage("Sequence due date is required for direct API flow.").When(model => model.EmissionFlow == AlanubeEmissionFlow.DirectApi);
-        RuleFor(model => model.DirectApiBaseUrl).NotEmpty().Must(value => Uri.TryCreate(value, UriKind.Absolute, out _)).WithMessage("Direct API base URL must be a valid absolute URL.").When(model => model.EmissionFlow == AlanubeEmissionFlow.DirectApi);
-        RuleFor(model => model.SenderRnc).NotEmpty().WithMessage("Sender RNC is required for direct API flow.").When(model => model.EmissionFlow == AlanubeEmissionFlow.DirectApi);
-        RuleFor(model => model.SenderCompanyName).NotEmpty().WithMessage("Sender company name is required for direct API flow.").When(model => model.EmissionFlow == AlanubeEmissionFlow.DirectApi);
-        RuleFor(model => model.SenderAddress).NotEmpty().WithMessage("Sender address is required for direct API flow.").When(model => model.EmissionFlow == AlanubeEmissionFlow.DirectApi);
-        RuleFor(model => model.SenderProvince).NotEmpty().WithMessage("Sender province is required for direct API flow.").When(model => model.EmissionFlow == AlanubeEmissionFlow.DirectApi);
-        RuleFor(model => model.SenderMunicipality).NotEmpty().WithMessage("Sender municipality is required for direct API flow.").When(model => model.EmissionFlow == AlanubeEmissionFlow.DirectApi);
+        RuleFor(model => model.FiscalReceiptNumberLength).Equal(10).WithMessage("PAN fiscal numeration must contain exactly 10 digits.");
         RuleFor(model => model.IssueType).Must(value => value is "01" or "02" or "03" or "04").WithMessage("Issue type is invalid.");
         RuleFor(model => model.DocumentType).Must(value => value is "01" or "02" or "03" or "08" or "09").WithMessage("Document type is invalid for the invoices endpoint.");
         RuleFor(model => model.Nature).Must(value => value is "01" or "02" or "10" or "11" or "12" or "13" or "14" or "20" or "21").WithMessage("Nature is invalid.");

@@ -8,6 +8,9 @@ namespace Nop.Plugin.Misc.Alanube.Api.Invoices;
 /// </summary>
 public sealed class CreateInvoiceRequest
 {
+    [JsonPropertyName("idOffice")]
+    public string IdOffice { get; set; }
+
     [JsonPropertyName("information")]
     public JsonElement Information { get; set; }
 

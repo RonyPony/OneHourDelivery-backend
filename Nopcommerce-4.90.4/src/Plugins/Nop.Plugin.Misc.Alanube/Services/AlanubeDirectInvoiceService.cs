@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Orders;
@@ -80,14 +81,14 @@ public sealed class AlanubeDirectInvoiceService
         try
         {
             var currentNumber = _settings.NextFiscalNumber;
-            var encf = $"{_settings.FiscalReceiptPrefix}{currentNumber.ToString($"D{_settings.FiscalReceiptNumberLength}")}";
-            await _logger.InformationAsync($"Alanube direct invoice request building started for order {order.Id}. eNCF: {encf}.");
-            var request = await BuildRequestAsync(order, encf, cancellationToken);
+            var numeration = currentNumber.ToString("D10");
+            await _logger.InformationAsync($"Alanube PAN invoice request building started for order {order.Id}. Numeration: {numeration}.");
+            var request = await BuildRequestAsync(order, numeration, cancellationToken);
             var requestJson = JsonSerializer.Serialize(request);
-            var document = CreateDocument(order, encf);
+            var document = CreateDocument(order, numeration);
             await _documentService.InsertAsync(document);
 
-            var response = await _invoiceClient.CreateDirectFiscalInvoiceAsync(request, cancellationToken);
+            var response = await _invoiceClient.CreateInvoiceAsync(request, cancellationToken);
             document.DocumentStatus = response.IsSuccessStatusCode ? ElectronicDocumentStatus.Processing : ElectronicDocumentStatus.Failed;
             document.ErrorMessage = response.IsSuccessStatusCode ? null : response.Error?.Message;
             document.AlanubeId = ExtractString(response.Body?.Data, "id");
@@ -97,8 +98,8 @@ public sealed class AlanubeDirectInvoiceService
             await _documentLogService.InsertAsync(new AlanubeDocumentLog
             {
                 AlanubeDocumentId = document.Id,
-                Operation = "CreateDirectFiscalInvoice",
-                Endpoint = "/fiscal-invoices",
+                Operation = "CreateInvoice",
+                Endpoint = "/invoices",
                 HttpMethod = "POST",
                 RequestJson = requestJson,
                 ResponseJson = response.RawResponse,
@@ -111,13 +112,13 @@ public sealed class AlanubeDirectInvoiceService
             {
                 _settings.NextFiscalNumber = currentNumber + 1;
                 await _settingService.SaveSettingAsync(_settings);
-                await AddOrderNoteAsync(order.Id, $"Alanube: comprobante enviado correctamente. Estado: {document.DocumentStatus}. eNCF: {encf}. HTTP {response.StatusCode} {response.ReasonPhrase}.");
-                await _logger.InformationAsync($"Alanube direct invoice emitted for order {order.Id}. eNCF: {encf}. HTTP {response.StatusCode} {response.ReasonPhrase}.");
+                await AddOrderNoteAsync(order.Id, $"Alanube PAN: factura enviada correctamente. Estado: {document.DocumentStatus}. Numeración: {numeration}. HTTP {response.StatusCode} {response.ReasonPhrase}.");
+                await _logger.InformationAsync($"Alanube PAN invoice emitted for order {order.Id}. Numeration: {numeration}. HTTP {response.StatusCode} {response.ReasonPhrase}.");
             }
             else
             {
-                await AddOrderNoteAsync(order.Id, $"Alanube: comprobante rechazado o no emitido. Estado: {document.DocumentStatus}. eNCF: {encf}. HTTP {response.StatusCode} {response.ReasonPhrase}. Error: {Truncate(response.Error?.Message ?? response.RawResponse, 500)}");
-                await _logger.ErrorAsync($"Alanube direct invoice failed for order {order.Id}. eNCF: {encf}. HTTP {response.StatusCode} {response.ReasonPhrase}. Body: {response.RawResponse}");
+                await AddOrderNoteAsync(order.Id, $"Alanube PAN: factura rechazada o no emitida. Estado: {document.DocumentStatus}. Numeración: {numeration}. HTTP {response.StatusCode} {response.ReasonPhrase}. Error: {Truncate(response.Error?.Message ?? response.RawResponse, 500)}");
+                await _logger.ErrorAsync($"Alanube PAN invoice failed for order {order.Id}. Numeration: {numeration}. HTTP {response.StatusCode} {response.ReasonPhrase}. Body: {response.RawResponse}");
             }
         }
         finally
@@ -126,53 +127,87 @@ public sealed class AlanubeDirectInvoiceService
         }
     }
 
-    private async Task<DirectFiscalInvoiceRequest> BuildRequestAsync(Order order, string encf, CancellationToken cancellationToken)
+    private async Task<CreateInvoiceRequest> BuildRequestAsync(Order order, string numeration, CancellationToken cancellationToken)
     {
         var billingAddress = await _addressService.GetAddressByIdAsync(order.BillingAddressId);
         var items = await BuildItemsAsync(order, cancellationToken);
-        var taxableAmount = Round(order.OrderSubtotalExclTax - order.OrderSubTotalDiscountExclTax);
-        var tax = Round(order.OrderTax);
         var total = Round(order.OrderTotal);
 
-        return new DirectFiscalInvoiceRequest
+        var information = new
         {
-            IdDoc = new DirectFiscalInvoiceIdDoc
+            issueType = _settings.IssueType,
+            documentType = _settings.DocumentType,
+            numeration,
+            billingPoint = _settings.BillingPoint,
+            securityCode = GenerateSecurityCode(),
+            cafe = new
             {
-                Encf = encf,
-                SequenceDueDate = (_settings.SequenceDueDateUtc ?? DateTime.UtcNow.Date.AddYears(1)).ToString("yyyy-MM-dd")
+                format = _settings.CafeFormat,
+                delivery = _settings.CafeDelivery
             },
-            Sender = new DirectFiscalInvoiceSender
+            nature = _settings.Nature,
+            operationType = _settings.OperationType,
+            information = string.Empty,
+            destination = _settings.Destination,
+            receiverContainer = _settings.ReceiverContainer,
+            saleType = _settings.SaleType,
+            issueDate = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(-5)).ToString("yyyy-MM-ddTHH:mm:sszzz")
+        };
+
+        var receiverRuc = string.IsNullOrWhiteSpace(order.VatNumber) ? "000-00-00000" : order.VatNumber.Trim();
+        var receiver = new
+        {
+            type = "01",
+            ruc = new
             {
-                Rnc = _settings.SenderRnc,
-                CompanyName = _settings.SenderCompanyName,
-                Tradename = string.IsNullOrWhiteSpace(_settings.SenderTradeName) ? _settings.SenderCompanyName : _settings.SenderTradeName,
-                Address = _settings.SenderAddress,
-                Province = _settings.SenderProvince,
-                Municipality = _settings.SenderMunicipality,
-                StampDate = DateTime.UtcNow.ToString("yyyy-MM-dd")
+                type = 2,
+                ruc = receiverRuc
             },
-            Buyer = new DirectFiscalInvoiceBuyer
+            name = GetBuyerName(billingAddress),
+            address = Truncate(GetReceiverAddress(billingAddress), 250),
+            location = new
             {
-                Rnc = string.IsNullOrWhiteSpace(order.VatNumber) ? _settings.SenderRnc : order.VatNumber,
-                CompanyName = GetBuyerName(billingAddress)
+                code = "8-8-8",
+                correction = string.IsNullOrWhiteSpace(billingAddress?.City) ? "Pueblo Nuevo" : billingAddress.City,
+                district = "Panama",
+                province = "Panama"
             },
-            Totals = new DirectFiscalInvoiceTotals
+            telephones = string.IsNullOrWhiteSpace(billingAddress?.PhoneNumber) ? Array.Empty<string>() : new[] { billingAddress.PhoneNumber },
+            emails = string.IsNullOrWhiteSpace(billingAddress?.Email) ? Array.Empty<string>() : new[] { billingAddress.Email },
+            country = "PA"
+        };
+
+        var totals = new
+        {
+            change = 0,
+            transport = Round(order.OrderShippingExclTax),
+            insurance = 0,
+            paymentTime = 1,
+            paymentMethods = new[]
             {
-                TotalTaxedAmount = taxableAmount,
-                I1AmountTaxed = taxableAmount,
-                ItbisS1 = taxableAmount > 0 ? Round(tax / taxableAmount * 100) : 0,
-                ItbisTotal = tax,
-                Itbis1Total = tax,
-                TotalAmount = total
+                new
+                {
+                    type = "01",
+                    amount = total
+                }
             },
-            ItemDetails = items
+            otherExpenses = 0
+        };
+
+        return new CreateInvoiceRequest
+        {
+            IdOffice = string.IsNullOrWhiteSpace(_settings.OfficeId) ? null : _settings.OfficeId,
+            Information = JsonSerializer.SerializeToElement(information),
+            Receiver = JsonSerializer.SerializeToElement(receiver),
+            Items = JsonSerializer.SerializeToElement(items),
+            Totals = JsonSerializer.SerializeToElement(totals)
         };
     }
 
-    private async Task<IList<DirectFiscalInvoiceItem>> BuildItemsAsync(Order order, CancellationToken cancellationToken)
+    private async Task<IList<object>> BuildItemsAsync(Order order, CancellationToken cancellationToken)
     {
         var orderItems = await _orderService.GetOrderItemsAsync(order.Id);
-        var result = new List<DirectFiscalInvoiceItem>();
+        var result = new List<object>();
         var lineNumber = 1;
 
         foreach (var orderItem in orderItems)
@@ -180,15 +215,39 @@ public sealed class AlanubeDirectInvoiceService
             cancellationToken.ThrowIfCancellationRequested();
             var product = await _productService.GetProductByIdAsync(orderItem.ProductId);
             var name = string.IsNullOrWhiteSpace(product?.Name) ? $"Producto {orderItem.ProductId}" : product.Name;
-            result.Add(new DirectFiscalInvoiceItem
+            var lineAmount = Round(orderItem.PriceExclTax - orderItem.DiscountAmountExclTax);
+            var unitPrice = Round(orderItem.UnitPriceExclTax);
+            var itemCode = string.IsNullOrWhiteSpace(product?.Sku) ? orderItem.ProductId.ToString() : product.Sku;
+            result.Add(new
             {
-                LineNumber = lineNumber++,
-                ItemName = Truncate(name, 80),
-                ItemDescription = Truncate(name, 250),
-                QuantityItem = orderItem.Quantity,
-                UnitPriceItem = Round(orderItem.UnitPriceExclTax),
-                ItemAmount = Round(orderItem.PriceExclTax - orderItem.DiscountAmountExclTax)
+                number = lineNumber.ToString("D4"),
+                description = Truncate(name, 500),
+                code = Truncate(itemCode, 20),
+                unit = "und",
+                quantity = orderItem.Quantity,
+                cpbs = new
+                {
+                    code = "8210",
+                    unit = "und"
+                },
+                information = Truncate(orderItem.AttributeDescription, 5000),
+                prices = new
+                {
+                    transfer = unitPrice > 0 ? unitPrice : lineAmount,
+                    discount = Round(orderItem.DiscountAmountExclTax),
+                    insurance = 0
+                },
+                itbms = new
+                {
+                    rate = "01"
+                },
+                isc = new
+                {
+                    rate = 0,
+                    amount = 0
+                }
             });
+            lineNumber++;
         }
 
         return result;
@@ -234,6 +293,22 @@ public sealed class AlanubeDirectInvoiceService
 
         var name = $"{address?.FirstName} {address?.LastName}".Trim();
         return string.IsNullOrWhiteSpace(name) ? "Cliente" : name;
+    }
+
+    private static string GetReceiverAddress(Address address)
+    {
+        var value = address?.Address1;
+        if (!string.IsNullOrWhiteSpace(value))
+            return value;
+
+        value = address?.City;
+        return string.IsNullOrWhiteSpace(value) ? "Panama" : value;
+    }
+
+    private static string GenerateSecurityCode()
+    {
+        var value = RandomNumberGenerator.GetInt32(0, 1_000_000_000);
+        return value.ToString("D9");
     }
 
     private static string ExtractString(IDictionary<string, JsonElement> data, string name)
