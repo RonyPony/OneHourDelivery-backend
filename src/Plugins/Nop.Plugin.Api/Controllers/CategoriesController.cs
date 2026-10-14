@@ -29,6 +29,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -75,7 +76,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         [AllowAnonymous]
-        public IActionResult GetCategories(CategoriesParametersModel parameters)
+        public async Task<IActionResult> GetCategories(CategoriesParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -120,7 +121,7 @@ namespace Nop.Plugin.Api.Controllers
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetCategoriesCount(CategoriesCountParametersModel parameters)
+        public async Task<IActionResult> GetCategoriesCount(CategoriesCountParametersModel parameters)
         {
             var allCategoriesCount = _categoryApiService.GetCategoriesCount(parameters.CreatedAtMin, parameters.CreatedAtMax,
                                                                             parameters.UpdatedAtMin, parameters.UpdatedAtMax,
@@ -148,7 +149,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetCategoryById(int id, string fields = "")
+        public async Task<IActionResult> GetCategoryById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -180,8 +181,8 @@ namespace Nop.Plugin.Api.Controllers
         //[ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [AllowAnonymous]
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        //public IActionResult CreateCategory([ModelBinder(typeof(JsonModelBinder<CategoryDto>))] Delta<CategoryDto> categoryDelta)
-        public IActionResult CreateCategory(CategoryDto categoryDelta)
+        //public async Task<IActionResult> CreateCategory([ModelBinder(typeof(JsonModelBinder<CategoryDto>))] Delta<CategoryDto> categoryDelta)
+        public async Task<IActionResult> CreateCategory(CategoryDto categoryDelta)
         {
 
 
@@ -222,7 +223,7 @@ namespace Nop.Plugin.Api.Controllers
             var seName = _urlRecordService.ValidateSeName(category, categoryDelta.SeName, category.Name, true);
             _urlRecordService.SaveSlug(category, seName, 0);
             
-            CustomerActivityService.InsertActivity("AddNewCategory", LocalizationService.GetResource("ActivityLog.AddNewCategory"), category);
+            await CustomerActivityService.InsertActivityAsync("AddNewCategory", await LocalizationService.GetResourceAsync("ActivityLog.AddNewCategory"), category);
 
             // Preparing the result dto of the new category
             var newCategoryDto = _dtoHelper.PrepareCategoryDTO(category);
@@ -243,7 +244,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateCategory(
+        public async Task<IActionResult> UpdateCategory(
             [ModelBinder(typeof (JsonModelBinder<CategoryDto>))] Delta<CategoryDto> categoryDelta)
         {
             // Here we display the errors if the validation has failed at some point.
@@ -283,8 +284,8 @@ namespace Nop.Plugin.Api.Controllers
 
             _categoryService.UpdateCategory(category);
 
-            CustomerActivityService.InsertActivity("UpdateCategory",
-                LocalizationService.GetResource("ActivityLog.UpdateCategory"), category);
+            await CustomerActivityService.InsertActivityAsync("UpdateCategory",
+                await LocalizationService.GetResourceAsync("ActivityLog.UpdateCategory"), category);
 
             var categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
@@ -304,7 +305,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteCategory(int id)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
             if (id <= 0)
             {
@@ -321,7 +322,7 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.DeleteCategory(categoryToDelete);
             
             //activity log
-            CustomerActivityService.InsertActivity("DeleteCategory", LocalizationService.GetResource("ActivityLog.DeleteCategory"), categoryToDelete);
+            await CustomerActivityService.InsertActivityAsync("DeleteCategory", await LocalizationService.GetResourceAsync("ActivityLog.DeleteCategory"), categoryToDelete);
 
             return new RawJsonActionResult("{}");
         }

@@ -2,7 +2,7 @@
 
 namespace Nop.Plugin.Api.Models
 {
-    public class ClientApiModel : BaseNopModel
+    public record ClientApiModel : BaseNopModel
     {
 
         public int Id { get; set; }

@@ -19,6 +19,7 @@ using Nop.Services.Stores;
 using System.Linq;
 using System.Net;
 using static Nop.Plugin.Api.Infrastructure.Constants;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -57,7 +58,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(NewsLetterSubscriptionsRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetNewsLetterSubscriptions(NewsLetterSubscriptionsParametersModel parameters)
+        public async Task<IActionResult> GetNewsLetterSubscriptions(NewsLetterSubscriptionsParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -96,14 +97,14 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult DeactivateNewsLetterSubscription(string email)
+        public async Task<IActionResult> DeactivateNewsLetterSubscription(string email)
         {
             if (string.IsNullOrEmpty(email))
             {
                 return Error(HttpStatusCode.BadRequest, "The email parameter could not be empty.");
             }
 
-            var existingSubscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(email, _storeContext.CurrentStore.Id);
+            var existingSubscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(email, (await _storeContext.GetCurrentStoreAsync()).Id);
 
             if (existingSubscription == null)
             {

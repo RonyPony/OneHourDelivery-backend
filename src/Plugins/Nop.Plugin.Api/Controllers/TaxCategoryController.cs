@@ -20,6 +20,7 @@ using Nop.Services.Tax;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -69,7 +70,7 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetTaxCategories(TaxCategoriesParametersModel parameters)
+        public async Task<IActionResult> GetTaxCategories(TaxCategoriesParametersModel parameters)
         {
             var allTaxCategories = _taxCategoryService.GetAllTaxCategories();
 
